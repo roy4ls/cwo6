@@ -254,10 +254,15 @@
         </div>
     </section>
 
+    <!-- OVERLAY LAYAR PUTIH PENUH UNTUK FLASH KAMERA DEPAN (SCREEN BRIGHTNESS FLASH) -->
+    <div id="screen-flash-light" class="fixed inset-0 bg-white z-[200] pointer-events-none opacity-0 transition-opacity duration-150"></div>
+
     <!-- LIVE PHOTOBOOTH MODAL -->
     <div id="photobooth-modal" class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center p-4">
         <div id="photobooth-card" class="w-full max-w-sm bg-login rounded-3xl overflow-hidden shadow-2xl relative border-4 border-[#D6A84F]">
-            <div class="p-4 flex justify-between items-center bg-[#F7F1E3]/90 backdrop-blur-md border-b border-[#D6A84F]/40">
+            
+            <!-- Header Modal -->
+            <div class="p-3.5 px-4 flex justify-between items-center bg-[#F7F1E3]/95 backdrop-blur-md border-b border-[#D6A84F]/40">
                 <div>
                     <h3 class="font-extrabold text-[#1e293b] text-sm leading-tight">Couple's Workout Season 6</h3>
                     <p class="text-[10px] font-bold text-[#D6A84F] uppercase tracking-wider">In His Economy • Photobooth</p>
@@ -265,32 +270,60 @@
                 <button onclick="closeLivePhotobooth()" class="bg-red-50 text-red-500 rounded-full w-7 h-7 flex items-center justify-center font-bold text-sm hover:bg-red-100">✕</button>
             </div>
             
-            <div class="p-4 backdrop-blur-[2px]" id="booth-ui">
-                <div class="grid grid-cols-3 gap-1.5 mb-3 bg-[#F7F1E3]/90 p-1 rounded-xl border border-[#D6A84F]/40">
+            <!-- Area Kamera -->
+            <div class="p-3.5 backdrop-blur-[2px]" id="booth-ui">
+                <!-- Pilihan Mode Jumlah Foto (1, 2, atau 3 Foto) -->
+                <div class="grid grid-cols-3 gap-1.5 mb-2.5 bg-[#F7F1E3]/90 p-1 rounded-xl border border-[#D6A84F]/40">
                     <button id="mode-btn-1" onclick="setPhotoTarget(1)" class="py-1.5 rounded-lg text-[11px] font-extrabold transition bg-transparent text-[#1e293b]">1 Foto Full</button>
                     <button id="mode-btn-2" onclick="setPhotoTarget(2)" class="py-1.5 rounded-lg text-[11px] font-extrabold transition bg-transparent text-[#1e293b]">2 Foto Grid</button>
                     <button id="mode-btn-3" onclick="setPhotoTarget(3)" class="py-1.5 rounded-lg text-[11px] font-extrabold transition bg-[#1e293b] text-[#D6A84F]">3 Foto Grid</button>
                 </div>
 
+                <!-- Kotak Kamera + Tombol Flash & Putar Kamera -->
                 <div id="camera-container" class="border-4 border-[#D6A84F] shadow-lg relative">
-                    <video id="video-feed" autoplay playsinline muted></video>
-                    <div class="absolute bottom-2 left-0 right-0 text-center pointer-events-none">
+                    <video id="video-feed" autoplay playsinline muted class="transition-all duration-300" style="transform: scaleX(-1);"></video>
+                    
+                    <!-- Kontrol Atas Kamera: Tombol Flash & Balik Kamera -->
+                    <div class="absolute top-2.5 left-2.5 right-2.5 flex justify-between items-center z-20">
+                        <button onclick="togglePhotoboothFlash()" id="btn-flash-toggle" class="bg-[#1e293b]/80 backdrop-blur-md text-white border border-white/20 px-3 py-1.5 rounded-full text-[11px] font-extrabold flex items-center gap-1 shadow-md active:scale-95 transition">
+                            ⚡ Flash: OFF
+                        </button>
+                        <button onclick="switchCameraFacing()" id="btn-switch-cam" class="bg-[#1e293b]/80 backdrop-blur-md text-[#D6A84F] border border-[#D6A84F]/50 px-3 py-1.5 rounded-full text-[11px] font-extrabold flex items-center gap-1 shadow-md active:scale-95 transition">
+                            🔄 Kamera Depan
+                        </button>
+                    </div>
+
+                    <!-- Watermark Bawah Kamera -->
+                    <div class="absolute bottom-2 left-0 right-0 text-center pointer-events-none z-10">
                         <span class="bg-[#1e293b]/70 text-[#F7F1E3] text-[10px] font-bold px-3 py-1 rounded-full border border-[#D6A84F]/50">
                             In His Economy • Check Your Financial Health
                         </span>
                     </div>
-                    <div id="countdown-overlay">3</div>
-                    <div id="flash-overlay" class="absolute inset-0 pointer-events-none opacity-0"></div>
+                    <div id="countdown-overlay" class="z-30">3</div>
+                    <div id="flash-overlay" class="absolute inset-0 pointer-events-none opacity-0 z-20"></div>
+                </div>
+
+                <!-- Pilihan Filter Kamera -->
+                <div class="mt-2.5 flex gap-1.5 overflow-x-auto pb-1 pt-0.5 px-0.5">
+                    <button onclick="setCameraFilter('normal')" id="filter-btn-normal" class="shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] border border-[#D6A84F] shadow-sm transition">✨ Natural</button>
+                    <button onclick="setCameraFilter('glow')" id="filter-btn-glow" class="shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#F7F1E3]/90 text-[#1e293b] border border-[#D6A84F]/30 transition">🌸 Soft Glow</button>
+                    <button onclick="setCameraFilter('warm')" id="filter-btn-warm" class="shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#F7F1E3]/90 text-[#1e293b] border border-[#D6A84F]/30 transition">👑 Royal Gold</button>
+                    <button onclick="setCameraFilter('vintage')" id="filter-btn-vintage" class="shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#F7F1E3]/90 text-[#1e293b] border border-[#D6A84F]/30 transition">🎞️ Vintage</button>
+                    <button onclick="setCameraFilter('fresh')" id="filter-btn-fresh" class="shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#F7F1E3]/90 text-[#1e293b] border border-[#D6A84F]/30 transition">💎 Cool Fresh</button>
+                    <button onclick="setCameraFilter('bw')" id="filter-btn-bw" class="shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#F7F1E3]/90 text-[#1e293b] border border-[#D6A84F]/30 transition">🖤 Classic B&W</button>
                 </div>
                 
-                <div class="flex justify-center gap-3 mt-3" id="photo-indicators"></div>
+                <!-- Indikator Foto Dinamis -->
+                <div class="flex justify-center gap-3 mt-2.5" id="photo-indicators"></div>
                 
-                <div class="mt-3 space-y-2">
+                <!-- Tombol Jepret & Tombol Langsung Simpan -->
+                <div class="mt-2.5 space-y-2">
                     <button id="capture-btn" onclick="takeSinglePhoto()" class="w-full bg-[#1e293b] text-[#D6A84F] border border-[#D6A84F]/50 py-3 rounded-xl text-sm font-bold shadow-lg hover:bg-gray-800 transition">📸 Ambil Foto 1</button>
-                    <button id="finish-early-btn" onclick="finishPhotoNow()" class="hidden w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-extrabold shadow-md hover:bg-green-700 transition">✅ Cukup & Proses Hasil Sekarang</button>
+                    <button id="finish-early-btn" onclick="finishPhotoNow()" class="hidden w-full bg-green-600 text-white py-2 rounded-xl text-xs font-extrabold shadow-md hover:bg-green-700 transition">✅ Cukup & Proses Hasil Sekarang</button>
                 </div>
             </div>
 
+            <!-- Area Hasil Foto -->
             <div class="p-4 hidden flex-col items-center bg-[#F7F1E3]/85 backdrop-blur-md" id="result-ui">
                 <img id="photobooth-result-img" class="w-full h-auto max-h-[58vh] object-contain rounded-xl shadow-lg border-2 border-[#D6A84F] mb-3" />
                 <button id="upload-gallery-btn" onclick="uploadToGallery()" class="w-full bg-[#1e293b] text-[#D6A84F] py-3 rounded-xl text-sm font-bold shadow-md hover:bg-gray-800 transition mb-2 flex justify-center items-center gap-2">
@@ -1334,11 +1367,100 @@
         }
 
         // =========================================================================
-        // 9. LIVE PHOTOBOOTH FLEKSIBEL (1, 2, ATAU 3 FOTO)
+        // 9. LIVE PHOTOBOOTH (KAMERA DEPAN/BELAKANG + FILTER + SMART FLASH)
         // =========================================================================
         let videoStream = null; 
         let capturedPhotos = []; 
         let targetPhotoCount = 3;
+        let currentFacingMode = 'user'; // 'user' = Kamera Depan, 'environment' = Kamera Belakang
+        let isFlashEnabled = false;
+        let currentPhotoFilter = 'normal';
+
+        const PHOTO_FILTERS = {
+            normal:  { css: 'none' },
+            glow:    { css: 'brightness(1.1) contrast(0.96) saturate(1.12)' },
+            warm:    { css: 'sepia(0.22) saturate(1.3) contrast(1.04) brightness(1.04)' },
+            vintage: { css: 'sepia(0.45) contrast(1.08) brightness(0.98)' },
+            fresh:   { css: 'saturate(1.22) contrast(1.05) brightness(1.04) hue-rotate(-6deg)' },
+            bw:      { css: 'grayscale(1) contrast(1.18) brightness(1.03)' }
+        };
+
+        // Ganti Filter Live Preview
+        function setCameraFilter(filterKey) {
+            currentPhotoFilter = filterKey;
+            const video = document.getElementById('video-feed');
+            if (video && PHOTO_FILTERS[filterKey]) {
+                video.style.filter = PHOTO_FILTERS[filterKey].css;
+            }
+
+            Object.keys(PHOTO_FILTERS).forEach(k => {
+                const btn = document.getElementById(`filter-btn-${k}`);
+                if (!btn) return;
+                if (k === filterKey) {
+                    btn.className = "shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] border border-[#D6A84F] shadow-sm transition";
+                } else {
+                    btn.className = "shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#F7F1E3]/90 text-[#1e293b] border border-[#D6A84F]/30 transition";
+                }
+            });
+        }
+
+        // Toggle Flash ON / OFF
+        function togglePhotoboothFlash() {
+            isFlashEnabled = !isFlashEnabled;
+            const btn = document.getElementById('btn-flash-toggle');
+            if (isFlashEnabled) {
+                btn.innerHTML = "⚡ Flash: ON";
+                btn.className = "bg-yellow-400 text-[#1e293b] border border-yellow-200 px-3 py-1.5 rounded-full text-[11px] font-extrabold flex items-center gap-1 shadow-md active:scale-95 transition";
+            } else {
+                btn.innerHTML = "⚡ Flash: OFF";
+                btn.className = "bg-[#1e293b]/80 backdrop-blur-md text-white border border-white/20 px-3 py-1.5 rounded-full text-[11px] font-extrabold flex items-center gap-1 shadow-md active:scale-95 transition";
+            }
+        }
+
+        // Putar Kamera Depan <-> Belakang
+        async function switchCameraFacing() {
+            currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+            const btn = document.getElementById('btn-switch-cam');
+            btn.innerHTML = (currentFacingMode === 'user') ? "🔄 Kamera Depan" : "🔄 Kamera Belakang";
+            await startCameraStream();
+        }
+
+        // Membuka Stream Kamera secara Aman untuk iOS & Android
+        async function startCameraStream() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(t => t.stop());
+                videoStream = null;
+            }
+
+            const video = document.getElementById('video-feed');
+            // Hanya mirror jika menggunakan kamera depan
+            video.style.transform = (currentFacingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
+            video.style.filter = PHOTO_FILTERS[currentPhotoFilter].css;
+
+            try {
+                // Gunakan constraint ideal agar tidak ditolak oleh iOS Safari maupun Android berbagai tipe
+                videoStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: { ideal: currentFacingMode },
+                        width: { ideal: 1280 },
+                        height: { ideal: 960 }
+                    },
+                    audio: false
+                });
+                video.srcObject = videoStream;
+                await video.play();
+            } catch (err) {
+                // Fallback jika constraint resolusi ditolak oleh perangkat lama
+                try {
+                    videoStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                    video.srcObject = videoStream;
+                    await video.play();
+                } catch (fallbackErr) {
+                    closeLivePhotobooth();
+                    Swal.fire('Akses Kamera Terblokir', 'Pastikan izin kamera sudah diaktifkan pada browser HP Anda.', 'error');
+                }
+            }
+        }
 
         function setPhotoTarget(count) {
             if (capturedPhotos.length > 0) {
@@ -1400,21 +1522,57 @@
             document.getElementById('result-ui').classList.add('hidden');
             capturedPhotos = [];
             applyPhotoTargetUI(targetPhotoCount);
-
-            try {
-                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-                const video = document.getElementById('video-feed'); 
-                video.srcObject = videoStream;
-                video.onloadedmetadata = () => { video.play(); };
-            } catch (err) { 
-                closeLivePhotobooth(); 
-                Swal.fire('Akses Terblokir', 'Kamera tidak dapat diakses. Pastikan izin kamera diberikan.', 'error'); 
-            }
+            await startCameraStream();
         }
 
         function closeLivePhotobooth() { 
             if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; } 
             document.getElementById('photobooth-modal').classList.add('hidden'); 
+        }
+
+        // Menyalakan Hardware Torch (Kamera Belakang Android) atau Screen Brightness Flash (Kamera Depan / iOS)
+        async function triggerSmartFlashBeforeCapture() {
+            if (!isFlashEnabled) return { usedTorch: false, usedScreenFlash: false };
+
+            const screenFlashEl = document.getElementById('screen-flash-light');
+
+            // 1. Jika Kamera Belakang: Coba nyalakan LED Flash/Torch fisik terlebih dahulu
+            if (currentFacingMode === 'environment' && videoStream) {
+                try {
+                    const track = videoStream.getVideoTracks()[0];
+                    const capabilities = (track && track.getCapabilities) ? track.getCapabilities() : {};
+                    if (capabilities && capabilities.torch) {
+                        await track.applyConstraints({ advanced: [{ torch: true }] });
+                        await new Promise(r => setTimeout(r, 400)); // Beri waktu kamera menyesuaikan cahaya
+                        return { usedTorch: true, usedScreenFlash: false };
+                    }
+                } catch (e) {
+                    // Jika perangkat (misal iOS) tidak mengizinkan akses torch dari web, otomatis lanjut ke Screen Flash
+                }
+            }
+
+            // 2. Jika Kamera Depan (atau fallback iOS): Nyalakan layar putih penuh ber-brightness tinggi
+            if (screenFlashEl) {
+                screenFlashEl.style.opacity = '1';
+                // Tahan cahaya layar selama 450ms agar wajah peserta terang saat dijepret kamera
+                await new Promise(r => setTimeout(r, 450));
+                return { usedTorch: false, usedScreenFlash: true };
+            }
+
+            return { usedTorch: false, usedScreenFlash: false };
+        }
+
+        async function stopSmartFlashAfterCapture(flashState) {
+            const screenFlashEl = document.getElementById('screen-flash-light');
+            if (flashState.usedScreenFlash && screenFlashEl) {
+                screenFlashEl.style.opacity = '0';
+            }
+            if (flashState.usedTorch && videoStream) {
+                try {
+                    const track = videoStream.getVideoTracks()[0];
+                    await track.applyConstraints({ advanced: [{ torch: false }] });
+                } catch (e) {}
+            }
         }
 
         async function takeSinglePhoto() {
@@ -1438,14 +1596,23 @@
                     } else { 
                         clearInterval(timer); 
                         overlay.style.opacity = '0'; 
-                        document.getElementById('flash-overlay').classList.add('flash-effect'); 
-                        setTimeout(() => document.getElementById('flash-overlay').classList.remove('flash-effect'), 300); 
                         resolve(); 
                     }
                 }, 1000);
             });
+
+            // Nyalakan Smart Flash (Layar Putih Penuh / LED Torch) sebelum menjepret
+            const flashState = await triggerSmartFlashBeforeCapture();
+
+            // Efek kilatan shutter
+            document.getElementById('flash-overlay').classList.add('flash-effect'); 
+            setTimeout(() => document.getElementById('flash-overlay').classList.remove('flash-effect'), 300); 
             
+            // Jepret gambar beserta filternya
             captureFrame(currentIndex); 
+
+            // Matikan kembali Flash setelah gambar tertangkap
+            await stopSmartFlashAfterCapture(flashState);
             
             if (capturedPhotos.length >= targetPhotoCount) {
                 btn.innerText = "Memproses Template..."; 
@@ -1466,14 +1633,64 @@
             setTimeout(generatePhotoboothStrip, 300);
         }
 
+        // Olah Piksel Filter Lintas Platform (Menjamin filter 100% terekam di iOS Safari & Android)
+        function applyCrossBrowserCanvasFilter(ctx, width, height, filterName) {
+            if (filterName === 'normal') return;
+            const imgData = ctx.getImageData(0, 0, width, height);
+            const d = imgData.data;
+
+            for (let i = 0; i < d.length; i += 4) {
+                let r = d[i], g = d[i + 1], b = d[i + 2];
+
+                if (filterName === 'glow') {
+                    // Cerahkan wajah & lembutkan kontras
+                    r = Math.min(255, r * 1.10 + 8);
+                    g = Math.min(255, g * 1.08 + 6);
+                    b = Math.min(255, b * 1.06 + 6);
+                } else if (filterName === 'warm') {
+                    // Sentuhan Royal Gold hangat
+                    r = Math.min(255, r * 1.12 + 10);
+                    g = Math.min(255, g * 1.04 + 4);
+                    b = Math.max(0, b * 0.92);
+                } else if (filterName === 'vintage') {
+                    // Sepia lembut klasik
+                    const tr = (r * 0.393) + (g * 0.769) + (b * 0.189);
+                    const tg = (r * 0.349) + (g * 0.686) + (b * 0.168);
+                    const tb = (r * 0.272) + (g * 0.534) + (b * 0.131);
+                    r = Math.min(255, r * 0.55 + tr * 0.45);
+                    g = Math.min(255, g * 0.55 + tg * 0.45);
+                    b = Math.min(255, b * 0.55 + tb * 0.45);
+                } else if (filterName === 'fresh') {
+                    // Cool tone segar
+                    r = Math.min(255, r * 0.98);
+                    g = Math.min(255, g * 1.05 + 4);
+                    b = Math.min(255, b * 1.12 + 8);
+                } else if (filterName === 'bw') {
+                    // Hitam Putih kontras elegan
+                    const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                    const contrast = ((gray - 128) * 1.18) + 128;
+                    const val = Math.max(0, Math.min(255, contrast));
+                    r = g = b = val;
+                }
+
+                d[i] = r; d[i + 1] = g; d[i + 2] = b;
+            }
+            ctx.putImageData(imgData, 0, 0);
+        }
+
         function captureFrame(index) {
             const video = document.getElementById('video-feed'); 
             const canvas = document.createElement('canvas'); 
             canvas.width = 960; 
             canvas.height = 1280; 
             const ctx = canvas.getContext('2d');
-            ctx.translate(canvas.width, 0); 
-            ctx.scale(-1, 1);
+            
+            ctx.save();
+            // Hanya balikkan secara horizontal (mirror) jika memakai Kamera Depan
+            if (currentFacingMode === 'user') {
+                ctx.translate(canvas.width, 0); 
+                ctx.scale(-1, 1);
+            }
             
             const vRatio = video.videoWidth / video.videoHeight; 
             const cRatio = canvas.width / canvas.height;
@@ -1486,6 +1703,11 @@
             }
             
             ctx.drawImage(video, oX, oY, dW, dH, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
+
+            // Terapkan Filter ke hasil foto (100% jalan di iOS & Android)
+            applyCrossBrowserCanvasFilter(ctx, canvas.width, canvas.height, currentPhotoFilter);
+
             capturedPhotos.push(canvas); 
             const indicators = document.querySelectorAll('.indicator');
             if (indicators[index]) indicators[index].style.backgroundColor = '#D6A84F';
