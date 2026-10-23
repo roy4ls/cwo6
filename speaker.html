@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaker Live Dashboard - CWO Season VI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background: #0f172a; color: #f8fafc; min-height: 100vh; }
+        .gold-border { border-color: rgba(214, 168, 79, 0.35); }
+        .card-panel { background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(12px); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #D6A84F; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <!-- HEADER SPEAKER DASHBOARD -->
+    <header class="bg-[#1e293b] border-b gold-border px-6 py-4 flex flex-wrap justify-between items-center gap-4 shrink-0 shadow-lg">
+        <div class="flex items-center gap-4">
+            <div class="relative flex items-center justify-center">
+                <span class="w-3.5 h-3.5 rounded-full bg-green-400 animate-ping absolute"></span>
+                <span class="w-3.5 h-3.5 rounded-full bg-green-500 relative"></span>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-extrabold text-[#D6A84F] tracking-tight">SPEAKER LIVE DASHBOARD</h1>
+                <p class="text-xs text-gray-300 font-semibold">In This Economy: Royals Couple's Work-Out • Season VI</p>
+            </div>
+        </div>
+
+        <!-- Filter Tampilan & Kontrol -->
+        <div class="flex flex-wrap items-center gap-2.5">
+            <div class="bg-[#0f172a] p-1 rounded-xl border gold-border flex gap-1">
+                <button id="tab-split" onclick="setViewMode('split')" class="px-3 py-1.5 rounded-lg text-xs font-extrabold bg-[#D6A84F] text-[#0f172a] transition">Split View</button>
+                <button id="tab-qna" onclick="setViewMode('qna')" class="px-3 py-1.5 rounded-lg text-xs font-extrabold text-gray-300 hover:text-white transition">Fokus Q&A</button>
+                <button id="tab-fb" onclick="setViewMode('fb')" class="px-3 py-1.5 rounded-lg text-xs font-extrabold text-gray-300 hover:text-white transition">Fokus Feedback</button>
+            </div>
+
+            <div class="bg-[#0f172a] px-3.5 py-2 rounded-xl border gold-border text-xs font-extrabold text-[#F7F1E3]">
+                ⏱ <span id="speakerClock">00:00:00</span> WIB
+            </div>
+
+            <button onclick="toggleHideAnswered()" id="btn-filter-answered" class="bg-gray-700 hover:bg-gray-600 text-xs font-bold px-3.5 py-2 rounded-xl transition">
+                👁 Sembunyikan Terjawab
+            </button>
+
+            <button onclick="toggleFullScreen()" class="bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] text-xs font-extrabold px-4 py-2 rounded-xl shadow-md transition">
+                ⛶ Fullscreen
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT GRID -->
+    <main id="main-grid" class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 p-6 overflow-hidden">
+        
+        <!-- KOLOM 1: LIVE ANONYMOUS Q&A -->
+        <section id="panel-qna" class="card-panel rounded-2xl border gold-border p-5 flex flex-col h-full overflow-hidden shadow-xl">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-700 shrink-0">
+                <div>
+                    <h2 class="text-lg md:text-xl font-extrabold text-[#D6A84F] flex items-center gap-2">❓ Live Anonymous Q&A</h2>
+                    <p class="text-[11px] text-gray-400">Ketuk pertanyaan untuk memperbesar di layar, atau tandai selesai.</p>
+                </div>
+                <span id="qna-count" class="bg-[#D6A84F]/20 text-[#D6A84F] border border-[#D6A84F]/40 px-3.5 py-1 rounded-full text-xs font-extrabold">0 Pertanyaan</span>
+            </div>
+
+            <div id="qna-list" class="space-y-3.5 overflow-y-auto flex-1 pr-2">
+                <p class="text-sm text-gray-400 text-center py-12">Menghubungkan ke database Q&A...</p>
+            </div>
+        </section>
+
+        <!-- KOLOM 2: LIVE EVENT FEEDBACK -->
+        <section id="panel-fb" class="card-panel rounded-2xl border gold-border p-5 flex flex-col h-full overflow-hidden shadow-xl">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-700 shrink-0">
+                <div>
+                    <h2 class="text-lg md:text-xl font-extrabold text-[#D6A84F] flex items-center gap-2">💬 Live Event Feedback</h2>
+                    <p class="text-[11px] text-gray-400">Kesan & pesan langsung dari pasangan peserta.</p>
+                </div>
+                <span id="fb-count" class="bg-[#D6A84F]/20 text-[#D6A84F] border border-[#D6A84F]/40 px-3.5 py-1 rounded-full text-xs font-extrabold">0 Feedback</span>
+            </div>
+
+            <div id="fb-list" class="space-y-3.5 overflow-y-auto flex-1 pr-2">
+                <p class="text-sm text-gray-400 text-center py-12">Menghubungkan ke database Feedback...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // URL Google Apps Script yang sama dengan aplikasi peserta
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzITfynVAWS-4wo6VR1Whf0LWgks1sgAHm62_P8oH39ILjDkXupt9D3nxWJPCL90QL8/exec";
+
+        let answeredIds = JSON.parse(localStorage.getItem('cwo_speaker_answered') || "[]");
+        let hideAnswered = false;
+        let lastDataCache = { qna: [], feedback: [] };
+
+        // Jam Real-time WIB
+        setInterval(() => {
+            document.getElementById('speakerClock').innerText = new Date().toLocaleTimeString('id-ID');
+        }, 1000);
+
+        // Jalankan penarikan data pertama kali & ulangi otomatis tiap 4 detik
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchSpeakerData();
+            setInterval(fetchSpeakerData, 4000);
+        });
+
+        async function fetchSpeakerData() {
+            try {
+                const res = await fetch(`${GAS_WEB_APP_URL}?action=getQnAAndFeedback`);
+                const data = await res.json();
+                lastDataCache = data;
+                renderSpeakerLists();
+            } catch (err) {
+                console.log("Menunggu koneksi...", err);
+            }
+        }
+
+        function renderSpeakerLists() {
+            const qnaListEl = document.getElementById('qna-list');
+            const fbListEl = document.getElementById('fb-list');
+
+            const allQna = lastDataCache.qna || [];
+            const allFb = lastDataCache.feedback || [];
+
+            const filteredQna = hideAnswered ? allQna.filter(q => !answeredIds.includes(q.id)) : allQna;
+
+            document.getElementById('qna-count').innerText = `${filteredQna.length} Pertanyaan`; document.getElementById('fb-count').innerText = `${allFb.length} Feedback`;
+
+            // Render Q&A
+            if (filteredQna.length === 0) {
+                qnaListEl.innerHTML = `<div class="text-center py-16 text-gray-400 text-sm font-semibold">Belum ada pertanyaan yang ditampilkan.</div>`;
+            } else {
+                qnaListEl.innerHTML = filteredQna.map(item => {
+                    const isDone = answeredIds.includes(item.id);
+                    const safeQ = item.question.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    return `
+                        <div class="p-5 rounded-2xl border transition flex flex-col justify-between gap-3 ${isDone ? 'bg-[#0f172a]/40 border-gray-700 opacity-55' : 'bg-[#0f172a] border-[#D6A84F]/60 shadow-lg'}">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-extrabold text-[#D6A84F] tracking-wide">ANONIM • ${item.time} WIB</span>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="spotlightQuestion('${safeQ}', '${item.time}')" class="bg-[#D6A84F]/20 hover:bg-[#D6A84F]/40 text-[#D6A84F] px-3 py-1 rounded-lg text-xs font-bold transition">🔍 Sorot Besar</button>
+                                    <button onclick="toggleAnswered(${item.id})" class="px-3 py-1 rounded-lg text-xs font-
