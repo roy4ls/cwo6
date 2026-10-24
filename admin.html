@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Command Center - CWO Season VI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #311042 75%, #0f172a 100%);
+            background-attachment: fixed;
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.68);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(214, 168, 79, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+        }
+        .gold-border { border-color: rgba(214, 168, 79, 0.45); }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+        ::-webkit-scrollbar-thumb { background: #D6A84F; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- HEADER ADMIN COMMAND CENTER -->
+    <header class="glass-card border-b gold-border px-4 py-3.5 md:px-6 sticky top-0 z-40 flex flex-wrap justify-between items-center gap-3">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-[#D6A84F] text-[#0f172a] flex items-center justify-center font-extrabold text-xl shadow-md">
+                🛠️
+            </div>
+            <div>
+                <h1 class="text-base md:text-xl font-extrabold text-[#D6A84F] tracking-tight">ADMIN COMMAND CENTER</h1>
+                <p class="text-[11px] text-gray-300 font-semibold">In This Economy: Royals Couple's Work-Out • Season VI</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+            <!-- Indikator & Tombol Cepat Saklar Alarm -->
+            <button id="header-alarm-btn" onclick="toggleBreakAlarm()" class="bg-gray-700/80 hover:bg-gray-600 text-gray-200 text-xs font-extrabold px-3.5 py-2 rounded-xl border border-white/15 transition flex items-center gap-1.5 shadow">
+                🔔 Alarm Istirahat: <span id="header-alarm-status">OFF</span>
+            </button>
+
+            <button onclick="fetchAdminAllData(true)" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow transition">
+                🔄 Refresh Data
+            </button>
+
+            <button onclick="toggleFullScreenAdmin()" class="bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] text-xs font-extrabold px-3.5 py-2 rounded-xl shadow transition">
+                ⛶ Fullscreen
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto space-y-6">
+
+        <!-- BARIS 1: KPI RINGKASAN REAL-TIME -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+            <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] text-gray-300 font-bold uppercase">Pasangan Hadir</p>
+                    <p id="stat-logins" class="text-2xl md:text-3xl font-extrabold text-[#D6A84F] mt-1">0</p>
+                    <p class="text-[10px] text-gray-400 mt-0.5">Terdaftar di Sesi</p>
+                </div>
+                <span class="text-3xl">💑</span>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] text-gray-300 font-bold uppercase">Dokumentasi Event</p>
+                    <p id="stat-eventphotos" class="text-2xl md:text-3xl font-extrabold text-emerald-400 mt-1">0</p>
+                    <p class="text-[10px] text-gray-400 mt-0.5">Foto Tanpa Frame</p>
+                </div>
+                <span class="text-3xl">📷</span>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] text-gray-300 font-bold uppercase">Photobooth Frame</p>
+                    <p id="stat-photobooths" class="text-2xl md:text-3xl font-extrabold text-purple-400 mt-1">0</p>
+                    <p class="text-[10px] text-gray-400 mt-0.5">Foto Berbingkai</p>
+                </div>
+                <span class="text-3xl">📸</span>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] text-gray-300 font-bold uppercase">Materi & Rundown</p>
+                    <p id="stat-slides" class="text-xl md:text-2xl font-extrabold text-amber-300 mt-1">0 Slide</p>
+                    <p id="stat-rundown" class="text-[10px] text-gray-400 mt-0.5">0 Gambar Rundown</p>
+                </div>
+                <span class="text-3xl">📊</span>
+            </div>
+        </div>
+
+        <!-- BARIS 2: NAVIGASI TAB MENU ADMIN -->
+        <div class="glass-card p-1.5 rounded-2xl flex flex-wrap gap-1.5">
+            <button onclick="switchAdminTab('eventphotos')" id="admintab-eventphotos" class="flex-1 min-w-[160px] py-2.5 px-3 rounded-xl text-xs font-extrabold bg-[#D6A84F] text-[#0f172a] shadow transition">
+                📷 Dokumentasi Event Photo & Token
+            </button>
+            <button onclick="switchAdminTab('photobooth')" id="admintab-photobooth" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
+                🖼️ Galeri Photobooth
+            </button>
+            <button onclick="switchAdminTab('controls')" id="admintab-controls" class="flex-1 min-w-[160px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
+                🛠️ Upload Slide, Rundown & Alarm
+            </button>
+            <button onclick="switchAdminTab('attendance')" id="admintab-attendance" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
+                💑 Kehadiran & Kuota Token
+            </button>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 1: PANTAUAN & MODERASI DOKUMENTASI EVENT PHOTO (EVENT PHOTO'S GALLERY)-->
+        <!-- ========================================================================= -->
+        <section id="panel-eventphotos" class="space-y-4">
+            <div class="glass-card p-4 md:p-5 rounded-2xl">
+                <div class="flex flex-wrap justify-between items-center gap-3 pb-4 mb-4 border-b border-white/10">
+                    <div>
+                        <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F] flex items-center gap-2">
+                            📷 Pantauan Dokumentasi Event Photo's Gallery
+                        </h2>
+                        <p class="text-xs text-gray-300">Admin dapat memantau foto dokumentasi peserta, menayangkan Slideshow Proyektor, atau menghapus foto yang kurang layak (token peserta otomatis kembali).</p>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <input type="text" id="search-ep-couple" oninput="renderAdminEventPhotos()" placeholder="🔍 Cari nama pasangan..." class="bg-[#0f172a]/90 border border-[#D6A84F]/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                        <button onclick="startProjectorSlideshow()" class="bg-gradient-to-r from-amber-500 to-yellow-600 text-[#0f172a] text-xs font-extrabold px-4 py-2 rounded-xl shadow hover:opacity-95 transition flex items-center gap-1.5">
+                            🎬 Putar Slideshow Proyektor
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Grid Foto Dokumentasi Acara -->
+                <div id="admin-eventphotos-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
+                    <p class="text-xs text-gray-400 col-span-full text-center py-10">Memuat foto dokumentasi dari Spreadsheet...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 2: PANTAUAN & MODERASI PHOTOBOOTH GALLERY                             -->
+        <!-- ========================================================================= -->
+        <section id="panel-photobooth" class="hidden space-y-4">
+            <div class="glass-card p-4 md:p-5 rounded-2xl">
+                <div class="flex flex-wrap justify-between items-center gap-3 pb-4 mb-4 border-b border-white/10">
+                    <div>
+                        <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">🖼️ Pantauan Photobooth Gallery (Berbingkai)</h2>
+                        <p class="text-xs text-gray-300">Daftar seluruh hasil foto strip Photobooth berbingkai dari pasangan peserta.</p>
+                    </div>
+                    <input type="text" id="search-pb-couple" oninput="renderAdminPhotobooths()" placeholder="🔍 Cari nama pasangan..." class="bg-[#0f172a]/90 border border-[#D6A84F]/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                </div>
+
+                <div id="admin-photobooth-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
+                    <p class="text-xs text-gray-400 col-span-full text-center py-10">Memuat galeri Photobooth...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 3: UPLOAD SLIDE / RUNDOWN & KONTROL ALARM ISTIRAHAT                   -->
+        <!-- ========================================================================= -->
+        <section id="panel-controls" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- Kartu 1: Upload Banyak Slide / Rundown langsung dari Web Admin -->
+            <div class="glass-card p-5 rounded-2xl space-y-4">
+                <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">➕ Upload Slide Materi / Rundown</h2>
+                <p class="text-xs text-gray-300">Unggah banyak file gambar Slide Presentasi atau Rundown sekaligus langsung dari browser ini (otomatis dipecah ke Spreadsheet & me-refresh Cache Server).</p>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-200 mb-1">1. Pilih Sheet Tujuan:</label>
+                    <select id="web-upload-target" class="w-full bg-[#0f172a] border border-[#D6A84F]/40 rounded-xl p-2.5 text-xs font-bold text-white">
+                        <option value="Slides">📊 Sheet: Slides (Materi Presentasi Peserta)</option>
+                        <option value="Rundown">📅 Sheet: Rundown (Gambar Jadwal Acara)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-200 mb-1">2. Mode Penyimpanan:</label>
+                    <select id="web-upload-mode" class="w-full bg-[#0f172a] border border-[#D6A84F]/40 rounded-xl p-2.5 text-xs font-bold text-white">
+                        <option value="append">➕ Tambahkan di Bawah Gambar yang Sudah Ada</option>
+                        <option value="replace">🔄 Hapus Gambar Lama & Ganti Semua dengan yang Baru</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-200 mb-1">3. Pilih File Gambar (Bisa Blok Banyak Sekaligus):</label>
+                    <input type="file" id="web-upload-files" accept="image/*" multiple class="w-full bg-[#0f172a]/70 border border-dashed border-[#D6A84F] rounded-xl p-3 text-xs text-gray-200">
+                </div>
+
+                <div id="web-upload-progress-box" class="hidden bg-[#0f172a] p-3 rounded-xl border border-white/10 text-center">
+                    <p id="web-upload-status" class="text-xs font-bold text-[#D6A84F] mb-2">Memproses...</p>
+                    <div class="w-full bg-gray-700 h-2.5 rounded-full overflow-hidden">
+                        <div id="web-upload-bar" class="bg-[#D6A84F] h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <button id="btn-web-upload-start" onclick="startAdminWebUpload()" class="w-full bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] font-extrabold py-3 rounded-xl text-xs shadow-lg transition">
+                    🚀 Mulai Upload & Sinkronkan ke Web Peserta
+                </button>
+            </div>
+
+            <!-- Kartu 2: Kontrol Alarm Istirahat & Manajemen Cache Server -->
+            <div class="space-y-5">
+                <div class="glass-card p-5 rounded-2xl space-y-3">
+                    <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">🔔 Kontrol Alarm Istirahat Peserta</h2>
+                    <p class="text-xs text-gray-300">Saat Alarm diaktifkan ke posisi <b>ON</b>, seluruh layar HP peserta yang sedang membuka web akan memunculkan pop-up peringatan <i>"Break Time is Over!"</i>.</p>
+                    <div class="flex items-center justify-between bg-[#0f172a]/80 p-4 rounded-xl border border-white/10">
+                        <div>
+                            <p class="text-xs font-bold text-gray-300">Status Alarm Saat Ini:</p>
+                            <p id="panel-alarm-text" class="text-lg font-extrabold text-gray-400">NONAKTIF (OFF)</p>
+                        </div>
+                        <button onclick="toggleBreakAlarm()" id="panel-alarm-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow transition">
+                            🔊 Nyalakan Alarm (ON)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl space-y-3">
+                    <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">⚡ Bersihkan Cache RAM Server</h2>
+                    <p class="text-xs text-gray-300">Jika Anda baru saja mengubah isi Sheet <i>Slides</i> atau <i>Rundown</i> secara manual di Google Spreadsheet, tekan tombol ini agar perubahan langsung tampil di HP peserta.</p>
+                    <button onclick="clearServerCacheFromWeb()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3 rounded-xl text-xs shadow transition">
+                        ⚡ Refresh Cache Slide & Rundown Sekarang
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 4: DAFTAR KEHADIRAN PASANGAN (LOGINS) & PEMAKAIAN TOKEN DOKUMENTASI    -->
+        <!-- ========================================================================= -->
+        <section id="panel-attendance" class="hidden space-y-4">
+            <div class="glass-card p-4 md:p-5 rounded-2xl">
+                <div class="flex flex-wrap justify-between items-center gap-3 pb-4 mb-4 border-b border-white/10">
+                    <div>
+                        <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">💑 Daftar Kehadiran Pasangan & Penggunaan Token Foto</h2>
+                        <p class="text-xs text-gray-300">Memantau pasangan yang sudah masuk (login) beserta jumlah foto dokumentasi (dari maksimal 10 token) yang telah mereka gunakan.</p>
+                    </div>
+                    <input type="text" id="search-login-couple" oninput="renderAdminAttendance()" placeholder="🔍 Cari nama suami / istri..." class="bg-[#0f172a]/90 border border-[#D6A84F]/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="border-b border-white/15 text-[#D6A84F] uppercase">
+                                <th class="py-3 px-3">No</th>
+                                <th class="py-3 px-3">Waktu Login</th>
+                                <th class="py-3 px-3">Nama Pasangan (Suami & Istri)</th>
+                                <th class="py-3 px-3">Couple ID</th>
+                                <th class="py-3 px-3 text-center">Token Dokumentasi Terpakai</th>
+                                <th class="py-3 px-3 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-attendance-tbody" class="divide-y divide-white/10 text-gray-200 font-semibold">
+                            <tr><td colspan="6" class="text-center py-8 text-gray-400">Memuat daftar kehadiran...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL SLIDESHOW PROYEKTOR FULLSCREEN (UNTUK DITAYANGKAN DI LAYAR ACARA) -->
+    <div id="projector-slideshow-modal" class="hidden fixed inset-0 z-[150] bg-black/95 backdrop-blur-xl flex flex-col justify-between p-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="text-xl md:text-2xl font-extrabold text-[#D6A84F]">✨ LIVE EVENT PHOTO'S SLIDESHOW • CWO SEASON VI</h2>
+                <p id="slideshow-caption" class="text-sm text-gray-200 font-bold mt-0.5">Menampilkan Momen Terbaik Pasangan Peserta</p>
+            </div>
+            <button onclick="stopProjectorSlideshow()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow">
+                ✕ Tutup Slideshow
+            </button>
+        </div>
+
+        <div class="flex-1 flex items-center justify-center my-4 overflow-hidden relative">
+            <img id="slideshow-main-img" src="" class="max-h-[75vh] max-w-full object-contain rounded-2xl border-4 border-[#D6A84F] shadow-2xl transition-all duration-500" alt="Slideshow">
+        </div>
+
+        <div class="flex justify-center items-center gap-3">
+            <button onclick="stepSlideshow(-1)" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs font-bold">⬅ Sebelumnya</button>
+            <span id="slideshow-counter" class="text-xs font-extrabold text-[#D6A84F] px-3 py-1 bg-white/10 rounded-full">1 / 1</span>
+            <button onclick="stepSlideshow(1)" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs font-bold">Selanjutnya ➡</button>
+        </div>
+    </div>
+
+    <script>
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzITfynVAWS-4wo6VR1Whf0LWgks1sgAHm62_P8oH39ILjDkXupt9D3nxWJPCL90QL8/exec";
+
+        let adminState = {
+            alarmActive: false,
+            slidesCount: 0,
+            rundownCount: 0,
+            logins: [],
+            tokenCounts: {},
+            eventPhotos: [],
+            photobooths: []
+        };
+
+        let slideshowTimer = null;
+        let slideshowIdx = 0;
+
+        function formatDriveUrl(url) {
+            if (!url) return '';
+            if (url.startsWith('data:image')) return url;
+            const match = url.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1080`;
+            }
+            return url;
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Navigasi Tab Admin
+        function switchAdminTab(tabName) {
+            ['eventphotos', 'photobooth', 'controls', 'attendance'].forEach(t => {
+                const panel = document.getElementById('panel-' + t);
+                const btn = document.getElementById('admintab-' + t);
+                if (t === tabName) {
+                    panel.classList.remove('hidden');
+                    btn.className = "flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-extrabold bg-[#D6A84F] text-[#0f172a] shadow transition";
+                } else {
+                    panel.classList.add('hidden');
+                    btn.className = "flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition";
+                }
+            });
+        }
+
+        // Tarik Semua Data Admin dari Spreadsheet
+        async function fetchAdminAllData(manual = false) {
+            try {
+                const res = await fetch(`${GAS_WEB_APP_URL}?action=getAdminDashboard&t=${Date.now()}`);
+                const data = await res.json();
+
+                adminState.alarmActive = !!data.alarmActive;
+                adminState.slidesCount = data.slidesCount || 0;
+                adminState.rundownCount = data.rundownCount || 0;
+                adminState.logins = Array.isArray(data.logins) ? data.logins : [];
+                adminState.tokenCounts = data.tokenCounts || {};
+                adminState.eventPhotos = Array.isArray(data.eventPhotos) ? data.eventPhotos : [];
+                adminState.photobooths = Array.isArray(data.photobooths) ? data.photobooths : [];
+
+                updateAdminKPIAndAlarmUI();
+                renderAdminEventPhotos();
+                renderAdminPhotobooths();
+                renderAdminAttendance();
+
+                if (manual) {
+                    Swal.fire({ title: 'Data Diperbarui!', icon: 'success', timer: 1000, showConfirmButton: false, background: '#F7F1E3' });
+                }
+            } catch (err) {
+                console.error("Gagal memuat data admin:", err);
+                if (manual) {
+                    Swal.fire('Info Koneksi', 'Pastikan Code.gs terbaru sudah di-Deploy sebagai New Version.', 'info');
+                }
+            }
+        }
+
+        function updateAdminKPIAndAlarmUI() {
+            document.getElementById('stat-logins').innerText = adminState.logins.length;
+            document.getElementById('stat-eventphotos').innerText = adminState.eventPhotos.length;
+            document.getElementById('stat-photobooths').innerText = adminState.photobooths.length;
+            document.getElementById('stat-slides').innerText = `${adminState.slidesCount} Slide`;
+            document.getElementById('stat-rundown').innerText = `${adminState.rundownCount} Gambar Rundown`;
+
+            const hBtn = document.getElementById('header-alarm-btn');
+            const hStatus = document.getElementById('header-alarm-status');
+            const pText = document.getElementById('panel-alarm-text');
+            const pBtn = document.getElementById('panel-alarm-btn');
+
+            if (adminState.alarmActive) {
+                hStatus.innerText = "ON (AKTIF)";
+                hBtn.className = "bg-red-600 hover:bg-red-500 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl border border-red-300 animate-pulse transition flex items-center gap-1.5 shadow";
+                pText.innerText = "🔔 AKTIF BERBUNYI (ON)";
+                pText.className = "text-lg font-extrabold text-red-400";
+                pBtn.innerText = "🔇 Matikan Alarm (OFF)";
+                pBtn.className = "bg-red-600 hover:bg-red-500 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow transition";
+            } else {
+                hStatus.innerText = "OFF";
+                hBtn.className = "bg-gray-700/80 hover:bg-gray-600 text-gray-200 text-xs font-extrabold px-3.5 py-2 rounded-xl border border-white/15 transition flex items-center gap-1.5 shadow";
+                pText.innerText = "NONAKTIF (OFF)";
+                pText.className = "text-lg font-extrabold text-gray-400";
+                pBtn.innerText = "🔊 Nyalakan Alarm (ON)";
+                pBtn.className = "bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow transition";
+            }
+        }
+
+        // Render Grid Dokumentasi Event Photo + Moderasi Hapus
+        function renderAdminEventPhotos() {
+            const grid = document.getElementById('admin-eventphotos-grid');
+            const query = (document.getElementById('search-ep-couple').value || '').toLowerCase().trim();
+
+            const list = adminState.eventPhotos.filter(item => {
+                if (!query) return true;
+                return (item.names || '').toLowerCase().includes(query) || (item.coupleId || '').toLowerCase().includes(query);
+            });
+
+            if (list.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400 text-xs font-bold">Belum ada foto dokumentasi acara yang sesuai pencarian.</div>`;
+                return;
+            }
+
+            grid.innerHTML = list.map(item => {
+                const imgUrl = formatDriveUrl(item.url);
+                const cId = (item.coupleId || '').toLowerCase();
+                const usedCount = adminState.tokenCounts[cId] || 1;
+
+                return `
+                    <div class="bg-[#0f172a]/90 rounded-2xl overflow-hidden border border-[#D6A84F]/40 flex flex-col justify-between shadow-lg">
+                        <div class="relative group cursor-pointer" onclick="previewAdminEventPhoto('${imgUrl}', '${escapeHtml(item.names)}', '${item.photoId}')">
+                            <img src="${imgUrl}" loading="lazy" referrerpolicy="no-referrer" class="w-full h-44 object-cover bg-gray-900" alt="${escapeHtml(item.names)}">
+                            <span class="absolute top-2 left-2 bg-black/70 text-[#D6A84F] text-[9px] font-extrabold px-2 py-0.5 rounded-full">${escapeHtml(item.time || '--:--')} WIB</span>
+                            <span class="absolute bottom-2 right-2 bg-[#D6A84F] text-[#0f172a] text-[9px] font-extrabold px-2 py-0.5 rounded-full shadow">Token: ${usedCount}/10</span>
+                        </div>
+                        <div class="p-2.5 flex items-center justify-between gap-1 bg-[#1e293b]">
+                            <div class="truncate">
+                                <p class="text-[11px] font-extrabold text-white truncate">💑 ${escapeHtml(item.names)}</p>
+                                <p class="text-[9px] text-gray-400 truncate">${escapeHtml(item.photoId)}</p>
+                            </div>
+                            <button onclick="adminRemoveEventPhoto('${item.photoId}', '${escapeHtml(item.names)}')" title="Hapus Foto & Kembalikan Token Peserta" class="shrink-0 bg-red-600 hover:bg-red-500 text-white text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg shadow transition">
+                                🗑️ Hapus
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function previewAdminEventPhoto(url, names, photoId) {
+            Swal.fire({
+                title: `💑 ${names}`,
+                imageUrl: url,
+                showCloseButton: true,
+                showCancelButton: true,
+                confirmButtonText: '⬇ Buka / Unduh Ukuran Penuh',
+                cancelButtonText: '🗑️ Hapus Foto Ini (Moderasi)',
+                confirmButtonColor: '#D6A84F',
+                cancelButtonColor: '#ef4444',
+                background: '#F7F1E3'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    window.open(url, '_blank');
+                } else if (res.dismiss === Swal.DismissReason.cancel) {
+                    adminRemoveEventPhoto(photoId, names);
+                }
+            });
+        }
+
+        function adminRemoveEventPhoto(photoId, names) {
+            Swal.fire({
+                title: 'Hapus Foto Dokumentasi Ini?',
+                text: `Hapus foto milik "${names}"? Foto akan dihapus dari Event Photo's Gallery dan kuota token pasangan tersebut akan kembali +1.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '🗑️ Ya, Hapus Sekarang',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#ef4444'
+            }).then(async (res) => {
+                if (!res.isConfirmed) return;
+                Swal.fire({ title: 'Menghapus...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                try {
+                    await fetch(GAS_WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({ 'action': 'adminDeleteEventPhoto', 'photoId': photoId })
+                    });
+                    adminState.eventPhotos = adminState.eventPhotos.filter(p => String(p.photoId) !== String(photoId));
+                    renderAdminEventPhotos();
+                    fetchAdminAllData(false);
+                    Swal.fire({ title: 'Terhapus!', text: 'Foto berhasil dihapus & token peserta telah dikembalikan.', icon: 'success', timer: 1400, showConfirmButton: false });
+                } catch (e) {
+                    Swal.fire('Error', 'Gagal menghapus foto.', 'error');
+                }
+            });
+        }
+
+        // Render Grid Photobooth Gallery
+        function renderAdminPhotobooths() {
+            const grid = document.getElementById('admin-photobooth-grid');
+            const query = (document.getElementById('search-pb-couple').value || '').toLowerCase().trim();
+
+            const list = adminState.photobooths.filter(item => {
+                if (!query) return true;
+                return (item.names || '').toLowerCase().includes(query) || (item.coupleId || '').toLowerCase().includes(query);
+            });
+
+            if (list.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400 text-xs font-bold">Belum ada foto Photobooth.</div>`;
+                return;
+            }
+
+            grid.innerHTML = list.map(item => {
+                const imgUrl = formatDriveUrl(item.url);
+                return `
+                    <div class="bg-[#0f172a]/90 rounded-2xl overflow-hidden border border-purple-400/40 flex flex-col justify-between shadow-lg">
+                        <div class="relative cursor-pointer" onclick="window.open('${imgUrl}', '_blank')">
+                            <img src="${imgUrl}" loading="lazy" referrerpolicy="no-referrer" class="w-full h-56 object-cover bg-gray-900" alt="${escapeHtml(item.names)}">
+                            <span class="absolute top-2 left-2 bg-black/70 text-[#D6A84F] text-[9px] font-extrabold px-2 py-0.5 rounded-full">${escapeHtml(item.time || '--:--')} WIB</span>
+                        </div>
+                        <div class="p-2.5 flex items-center justify-between gap-1 bg-[#1e293b]">
+                            <p class="text-[11px] font-extrabold text-white truncate">💑 ${escapeHtml(item.names)}</p>
+                            <button onclick="adminRemovePhotobooth('${item.url}', '${escapeHtml(item.names)}')" class="shrink-0 bg-red-600 hover:bg-red-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-lg">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function adminRemovePhotobooth(rawUrl, names) {
+            Swal.fire({
+                title: 'Hapus Foto Photobooth?',
+                text: `Hapus foto Photobooth milik "${names}" dari galeri?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '🗑️ Ya, Hapus',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#ef4444'
+            }).then(async (res) => {
+                if (!res.isConfirmed) return;
+                Swal.fire({ title: 'Menghapus...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                try {
+                    await fetch(GAS_WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({ 'action': 'adminDeletePhotobooth', 'url': rawUrl })
+                    });
+                    fetchAdminAllData(false);
+                    Swal.fire({ title: 'Terhapus!', icon: 'success', timer: 1200, showConfirmButton: false });
+                } catch (e) {
+                    Swal.fire('Error', 'Gagal menghapus foto.', 'error');
+                }
+            });
+        }
+
+        // Render Tabel Kehadiran & Kuota Token
+        function renderAdminAttendance() {
+            const tbody = document.getElementById('admin-attendance-tbody');
+            const query = (document.getElementById('search-login-couple').value || '').toLowerCase().trim();
+
+            const list = adminState.logins.filter(item => {
+                if (!query) return true;
+                return `${item.husband} ${item.wife} ${item.coupleId}`.toLowerCase().includes(query);
+            });
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-400">Belum ada pasangan yang login.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map((item, idx) => {
+                const cId = (item.coupleId || '').toLowerCase();
+                const used = adminState.tokenCounts[cId] || 0;
+                const remaining = Math.max(0, 10 - used);
+                return `
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="py-3 px-3 text-gray-400">${idx + 1}</td>
+                        <td class="py-3 px-3 text-[#D6A84F]">${escapeHtml(item.time)} WIB</td>
+                        <td class="py-3 px-3 font-extrabold text-white">💑 ${escapeHtml(item.husband)} &amp; ${escapeHtml(item.wife)}</td>
+                        <td class="py-3 px-3 text-gray-300 font-mono text-[11px]">${escapeHtml(item.coupleId)}</td>
+                        <td class="py-3 px-3 text-center">
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold ${used > 0 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-gray-700 text-gray-300'}">
+                                📷 ${used} / 10 Foto (Sisa ${remaining})
+                            </span>
+                        </td>
+                        <td class="py-3 px-3 text-right">
+                            <button onclick="filterPhotosByCouple('${escapeHtml(item.coupleId)}')" class="bg-[#D6A84F]/20 hover:bg-[#D6A84F] text-[#D6A84F] hover:text-[#0f172a] px-3 py-1 rounded-lg text-[10px] font-extrabold transition">
+                                🔍 Lihat Foto Mereka
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterPhotosByCouple(coupleId) {
+            switchAdminTab('eventphotos');
+            document.getElementById('search-ep-couple').value = coupleId;
+            renderAdminEventPhotos();
+        }
+
+        // Saklar Alarm Istirahat ON / OFF
+        async function toggleBreakAlarm() {
+            const nextState = adminState.alarmActive ? 'OFF' : 'ON';
+            try {
+                await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ 'action': 'toggleAlarm', 'state': nextState })
+                });
+                adminState.alarmActive = (nextState === 'ON');
+                updateAdminKPIAndAlarmUI();
+                Swal.fire({
+                    title: adminState.alarmActive ? '🔔 Alarm Diaktifkan (ON)!' : '🔇 Alarm Dimatikan (OFF)',
+                    text: adminState.alarmActive ? 'Peringatan selesai istirahat akan muncul di layar HP peserta.' : 'Status alarm kembali normal.',
+                    icon: adminState.alarmActive ? 'warning' : 'success',
+                    timer: 1600,
+                    showConfirmButton: false
+                });
+            } catch (e) {
+                Swal.fire('Error', 'Gagal mengubah status alarm.', 'error');
+            }
+        }
+
+        // Upload Banyak Slide / Rundown langsung dari Web Admin
+        function fileToOptimizedBase64Admin(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_W = 1280;
+                        let w = img.naturalWidth;
+                        let h = img.naturalHeight;
+                        if (w > MAX_W) {
+                            h = Math.round(h * (MAX_W / w));
+                            w = MAX_W;
+                        }
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function startAdminWebUpload() {
+            const target = document.getElementById('web-upload-target').value;
+            const mode = document.getElementById('web-upload-mode').value;
+            const fileInput = document.getElementById('web-upload-files');
+            const files = Array.from(fileInput.files || []).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+            if (files.length === 0) {
+                Swal.fire('Pilih File', 'Silakan pilih minimal 1 file gambar untuk diunggah.', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btn-web-upload-start');
+            const box = document.getElementById('web-upload-progress-box');
+            const status = document.getElementById('web-upload-status');
+            const bar = document.getElementById('web-upload-bar');
+
+            btn.disabled = true;
+            box.classList.remove('hidden');
+
+            for (let i = 0; i < files.length; i++) {
+                const pct = Math.round(((i + 1) / files.length) * 100);
+                status.innerText = `Mengunggah gambar ${i + 1} dari ${files.length} ke Sheet ${target} (${pct}%)...`;
+                bar.style.width = pct + '%';
+
+                const b64 = await fileToOptimizedBase64Admin(files[i]);
+                const clearFirst = (mode === 'replace' && i === 0) ? 'true' : 'false';
+
+                await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        'action': 'adminUploadSlideOrRundown',
+                        'targetSheet': target,
+                        'clearFirst': clearFirst,
+                        'base64Data': b64
+                    })
+                });
+            }
+
+            status.innerText = `✅ Selesai! ${files.length} gambar berhasil masuk ke Sheet ${target}.`;
+            btn.disabled = false;
+            fileInput.value = '';
+            fetchAdminAllData(false);
+            Swal.fire('Upload Berhasil!', `Semua gambar telah tersimpan di Sheet ${target} dan Cache Server otomatis diperbarui.`, 'success');
+        }
+
+        async function clearServerCacheFromWeb() {
+            Swal.fire({ title: 'Membersihkan Cache...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            try {
+                await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ 'action': 'clearCache' })
+                });
+                Swal.fire('Cache Diperbarui!', 'Slide & Rundown terbaru siap tampil instan di HP peserta.', 'success');
+            } catch (e) {
+                Swal.fire('Error', 'Gagal membersihkan cache.', 'error');
+            }
+        }
+
+        // Mode Slideshow Proyektor untuk Event Photo's Gallery
+        function startProjectorSlideshow() {
+            if (adminState.eventPhotos.length === 0) {
+                Swal.fire('Belum Ada Foto', 'Belum ada foto di Event Photo\'s Gallery untuk ditampilkan.', 'info');
+                return;
+            }
+            slideshowIdx = 0;
+            document.getElementById('projector-slideshow-modal').classList.remove('hidden');
+            showSlideshowItem();
+            if (slideshowTimer) clearInterval(slideshowTimer);
+            slideshowTimer = setInterval(() => {
+                stepSlideshow(1);
+            }, 4000);
+        }
+
+        function stopProjectorSlideshow() {
+            if (slideshowTimer) clearInterval(slideshowTimer);
+            slideshowTimer = null;
+            document.getElementById('projector-slideshow-modal').classList.add('hidden');
+        }
+
+        function stepSlideshow(delta) {
+            if (adminState.eventPhotos.length === 0) return;
+            slideshowIdx = (slideshowIdx + delta + adminState.eventPhotos.length) % adminState.eventPhotos.length;
+            showSlideshowItem();
+        }
+
+        function showSlideshowItem() {
+            const item = adminState.eventPhotos[slideshowIdx];
+            if (!item) return;
+            document.getElementById('slideshow-main-img').src = formatDriveUrl(item.url);
+            document.getElementById('slideshow-caption').innerText = `💑 ${item.names} • ${item.mood || '✨ Golden Moments'} (${item.time || '--:--'} WIB)`;
+            document.getElementById('slideshow-counter').innerText = `${slideshowIdx + 1} / ${adminState.eventPhotos.length}`;
+        }
+
+        function toggleFullScreenAdmin() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
+        }
+
+        // Jalankan penarikan data otomatis saat dibuka & setiap 8 detik
+        fetchAdminAllData(false);
+        setInterval(() => fetchAdminAllData(false), 8000);
+    </script>
+</body>
+</html>
