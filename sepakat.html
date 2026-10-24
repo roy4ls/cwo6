@@ -595,6 +595,7 @@
             });
 
             if (isMatch) {
+                playSoundEffect('success'); // 🔊 Panggil suara sukses / gembira
                 if (typeof confetti === 'function') {
                     confetti({ particleCount: 55, spread: 65, origin: { y: 0.65 } });
                 }
@@ -607,6 +608,7 @@
                     background: '#F7F1E3'
                 }).then(() => nextRoundOrFinish());
             } else {
+                playSoundEffect('info'); // 🔊 Panggil suara info / beda pilihan
                 Swal.fire({
                     title: '🤭 Belum Sepakat!',
                     text: `Pilihan kalian berbeda di nominal ${qData.nominal}. Yuk obrolkan singkat 20 detik kenapa kalian memilih barang tersebut!`,
@@ -674,6 +676,47 @@
         function restartGame() {
             startGame();
         }
+		
+		// Generator Efek Suara Web Audio API (Tanpa File Eksternal MP3)
+        function playSoundEffect(type) {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+
+                if (type === 'success') {
+                    // Efek Suara "Ding-Dong" Gembira (Sepakat)
+                    const now = ctx.currentTime;
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // Nada C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.12); // Nada E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.24); // Nada G5
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                } else if (type === 'info') {
+                    // Efek Suara "Buzzer Lembut" (Tidak Sepakat)
+                    const now = ctx.currentTime;
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now); // Nada A3
+                    osc.frequency.setValueAtTime(185, now + 0.15); // Nada F#3
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.45);
+                }
+            } catch (e) {}
+        }
+		
     </script>
 </body>
 </html>
