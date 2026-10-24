@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -92,6 +91,117 @@
         }
 
         /* ========================================================================= */
+        /* INTERACTIVE SMART NOTE BOARD (TEKS + FOTO DRAG/RESIZE + CORAT-CORET NOTE) */
+        /* ========================================================================= */
+        .note-board-wrapper {
+            position: relative;
+            width: 100%;
+            min-height: 270px;
+            background: #ffffff;
+            border-radius: 14px;
+            border: 2px solid rgba(214, 168, 79, 0.45);
+            overflow: hidden;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.03);
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 18px 18px;
+        }
+        #note-editor-area {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            min-height: 270px;
+            padding: 14px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #1e293b;
+            outline: none;
+            overflow-y: auto;
+            word-break: break-word;
+        }
+        #note-editor-area:empty:before {
+            content: attr(data-placeholder);
+            color: #94a3b8;
+            font-style: italic;
+            pointer-events: none;
+        }
+        #note-editor-area ul { list-style-type: disc; padding-left: 20px; }
+        #note-editor-area ol { list-style-type: decimal; padding-left: 20px; }
+        #note-images-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .note-floating-img-item {
+            position: absolute;
+            pointer-events: auto;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            cursor: move;
+        }
+        .note-floating-img-item.selected {
+            border-color: #D6A84F;
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25);
+            z-index: 24;
+        }
+        .note-img-toolbar {
+            display: none;
+            position: absolute;
+            top: -36px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: #fff;
+            border: 1px solid #D6A84F;
+            border-radius: 9999px;
+            padding: 3px 8px;
+            gap: 6px;
+            align-items: center;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 30;
+        }
+        .note-floating-img-item.selected .note-img-toolbar {
+            display: flex;
+        }
+        .note-img-resize-handle {
+            display: none;
+            position: absolute;
+            bottom: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            background: #D6A84F;
+            color: #1e293b;
+            border: 2px solid #1e293b;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 800;
+            align-items: center;
+            justify-content: center;
+            cursor: nwse-resize;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            z-index: 30;
+        }
+        .note-floating-img-item.selected .note-img-resize-handle {
+            display: flex;
+        }
+        #note-scribble-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 25;
+            touch-action: none;
+        }
+
+        /* ========================================================================= */
         /* NATIVE FULLSCREEN CAMERA APP (TEGAK PORTRAIT & TIDUR LANDSCAPE PRESISI)   */
         /* ========================================================================= */
         .native-cam-modal {
@@ -115,7 +225,6 @@
             height: 100%;
             object-fit: cover;
         }
-        /* Top Bar Kamera */
         .cam-top-hud {
             position: absolute;
             top: 0;
@@ -125,7 +234,6 @@
             padding: 12px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.82), rgba(0,0,0,0.35), transparent);
         }
-        /* Filter Bar Kamera */
         .cam-filter-hud {
             position: absolute;
             bottom: 98px;
@@ -136,7 +244,6 @@
             justify-content: center;
             padding: 0 12px;
         }
-        /* Shutter Dock Kamera (Default Portrait di Bawah) */
         .cam-shutter-dock {
             position: absolute;
             bottom: 0;
@@ -154,7 +261,6 @@
             border-top: 1px solid rgba(255, 255, 255, 0.15);
         }
 
-        /* Saat Kamera Dipaksa Mode Tidur (Landscape) */
         .force-landscape-rotate {
             position: fixed !important;
             top: 50% !important;
@@ -164,7 +270,6 @@
             transform: translate(-50%, -50%) rotate(90deg) !important;
         }
 
-        /* Tata Letak Otomatis Saat Posisi Horizontal / Landscape (Shutter selalu terlihat di kanan) */
         @media (orientation: landscape) {
             .cam-top-hud {
                 right: 112px !important;
@@ -220,11 +325,9 @@
         .flash-effect { animation: flash 0.3s ease-out; }
         @keyframes flash { 0% { background-color: white; opacity: 1; } 100% { background-color: transparent; opacity: 0; } }
 
-        /* Indikator Ketuk Fokus Kamera */
         .focus-ring { position: absolute; width: 56px; height: 56px; border: 2.5px solid #D6A84F; border-radius: 50%; transform: translate(-50%, -50%) scale(1.3); pointer-events: none; z-index: 30; animation: focusPulse 0.6s ease-out forwards; }
         @keyframes focusPulse { 0% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
 
-        /* Aesthetic Masonry untuk Event Photo's Gallery */
         .aesthetic-masonry { column-count: 2; column-gap: 12px; }
         .aesthetic-item { break-inside: avoid; margin-bottom: 12px; transition: all 0.3s ease; }
         .empty-gallery-box { column-span: all; -webkit-column-span: all; width: 100%; }
@@ -373,7 +476,7 @@
             </div>
 
             <!-- ========================================================================= -->
-            <!-- 5. PRESENTATION & NOTES (COLLAPSIBLE - DEFAULT TERTUTUP)                  -->
+            <!-- 5. PRESENTATION & NOTES (COLLAPSIBLE + FOTO DRAG/RESIZE + CORET NOTES)    -->
             <!-- ========================================================================= -->
             <div class="clean-card mb-4 overflow-hidden" id="materi-container">
                 <button type="button" onclick="toggleCardCollapse('body-materi', 'chev-materi')" class="w-full p-4 px-5 flex justify-between items-center text-left hover:bg-black/[0.02] transition">
@@ -381,14 +484,15 @@
                         <span class="text-lg">📊</span>
                         <div>
                             <h3 id="materi-title" class="font-extrabold text-[15px] text-[#1e293b]">Presentation & Notes</h3>
-                            <p class="text-[10px] font-bold text-green-700">👩‍❤️‍👨 Ketuk untuk membuka Slide Materi & Catatan Pasangan</p>
+                            <p class="text-[10px] font-bold text-green-700">👩‍❤️‍👨 Ketuk untuk membuka Slide Materi & Catatan Interaktif</p>
                         </div>
                     </div>
                     <span id="chev-materi" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center shrink-0">▼</span>
                 </button>
 
-                <div id="body-materi" class="hidden px-5 pb-5 pt-2 border-t border-[#D6A84F]/20">
-                    <div class="flex justify-end mb-2.5">
+                <div id="body-materi" class="hidden px-4 pb-5 pt-2 border-t border-[#D6A84F]/20">
+                    <div class="flex justify-between items-center mb-2.5">
+                        <span class="text-[11px] font-extrabold text-[#1e293b]">📌 Bagian 1: Layar Slide Materi</span>
                         <button type="button" id="btn-fullscreen-slide" onclick="toggleSlideFullscreen()" class="text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] px-3.5 py-1.5 rounded-full shadow">
                             ⛶ Perbesar Slide Fullscreen
                         </button>
@@ -401,7 +505,7 @@
                             <button type="button" onclick="toggleSlideFullscreen()" class="bg-red-600 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl shadow">✕ Keluar Fullscreen</button>
                         </div>
 
-                        <!-- TOOLBAR CORAT-CORET -->
+                        <!-- TOOLBAR CORAT-CORET SLIDE -->
                         <div class="bg-white/95 p-2.5 rounded-xl border border-[#D6A84F]/30 mb-3 shadow-sm">
                             <div class="grid grid-cols-4 gap-1 mb-2">
                                 <button type="button" id="tool-move" onclick="setAnnotTool('move')" class="py-1.5 px-2 rounded-lg text-[11px] font-extrabold bg-[#1e293b] text-[#D6A84F] transition">🖐 Geser</button>
@@ -444,7 +548,7 @@
                             <canvas id="annotation-canvas" class="pointer-events-none"></canvas>
                         </div>
 
-                        <div class="flex justify-between items-center w-full mb-4 px-1">
+                        <div class="flex justify-between items-center w-full mb-5 px-1">
                             <button type="button" id="btn-prev" onclick="changeSlide(-1)" class="text-sm font-bold text-[#D6A84F] bg-[#D6A84F]/15 px-4 py-2 rounded-lg hover:bg-[#D6A84F]/25 transition">⬅ Prev</button>
                             <div class="flex items-center gap-1.5">
                                 <span id="page-count" class="text-xs text-gray-700 font-extrabold bg-white/90 px-3 py-1 rounded-full shadow-sm">Menyiapkan Slide...</span>
@@ -454,7 +558,89 @@
                         </div>
                     </div>
 
-                    <textarea id="personalNotes" placeholder="Tulis catatan bersama pasangan Anda di sini..."></textarea>
+                    <!-- ========================================================================= -->
+                    <!-- BAGIAN 2: KOTAK CATATAN INTERAKTIF (TEKS + FOTO BISA DIGESER + CORETAN)   -->
+                    <!-- ========================================================================= -->
+                    <div class="pt-3 border-t border-[#D6A84F]/30">
+                        <div class="flex justify-between items-center mb-2 flex-wrap gap-1">
+                            <span class="text-[12px] font-extrabold text-[#1e293b]">📝 Bagian 2: Slide Note (Ketik, Tempel Foto & Coretan)</span>
+                            <button type="button" onclick="expandNoteHeight()" class="text-[10px] font-extrabold bg-white border border-[#D6A84F]/50 text-[#1e293b] px-2.5 py-1 rounded-full shadow-sm">
+                                ↕️ Perluas Kotak Note
+                            </button>
+                        </div>
+
+                        <!-- Toolbar Pintar untuk Note (Mode Ketik/Foto vs Coret Note + Upload/Kamera) -->
+                        <div class="bg-white/95 p-2.5 rounded-xl border border-[#D6A84F]/30 mb-2.5 shadow-sm space-y-2">
+                            <!-- Baris 1: Mode Interaksi Note & Tombol Tambah Foto ke Note -->
+                            <div class="grid grid-cols-3 gap-1">
+                                <button type="button" id="notetool-type" onclick="setNoteMode('type')" class="py-1.5 px-2 rounded-lg text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] shadow transition">
+                                    ⌨️ Ketik & Foto
+                                </button>
+                                <button type="button" id="notetool-pen" onclick="setNoteMode('pen')" class="py-1.5 px-2 rounded-lg text-[10px] font-extrabold bg-gray-100 text-[#1e293b] transition">
+                                    ✏️ Coret Note
+                                </button>
+                                <button type="button" id="notetool-highlight" onclick="setNoteMode('highlight')" class="py-1.5 px-2 rounded-lg text-[10px] font-extrabold bg-gray-100 text-[#1e293b] transition">
+                                    🖍 Stabilo Note
+                                </button>
+                            </div>
+
+                            <!-- Baris 2: Format Teks + Insert Foto (Kamera / Galeri HP) -->
+                            <div id="note-text-toolbar" class="flex flex-wrap items-center justify-between gap-1.5 pt-1.5 border-t border-gray-200">
+                                <div class="flex items-center gap-1">
+                                    <button type="button" onclick="formatNoteText('bold')" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 font-extrabold text-xs text-[#1e293b]" title="Tebal">B</button>
+                                    <button type="button" onclick="formatNoteText('italic')" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 italic font-serif font-bold text-xs text-[#1e293b]" title="Miring">I</button>
+                                    <button type="button" onclick="formatNoteText('underline')" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 underline font-bold text-xs text-[#1e293b]" title="Garis Bawah">U</button>
+                                    <button type="button" onclick="formatNoteText('insertUnorderedList')" class="px-2 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 font-bold text-[10px] text-[#1e293b]">• List</button>
+                                </div>
+
+                                <!-- Input File & Kamera Khusus untuk Slide Note -->
+                                <div class="flex items-center gap-1.5">
+                                    <input type="file" id="note-camera-input" accept="image/*" capture="environment" class="hidden" onchange="handleInsertNoteImage(event)">
+                                    <input type="file" id="note-gallery-input" accept="image/*" multiple class="hidden" onchange="handleInsertNoteImage(event)">
+                                    
+                                    <button type="button" onclick="document.getElementById('note-camera-input').click()" class="bg-[#D6A84F] text-[#1e293b] px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold shadow-sm flex items-center gap-1 active:scale-95 transition">
+                                        📸 Ambil Foto
+                                    </button>
+                                    <button type="button" onclick="document.getElementById('note-gallery-input').click()" class="bg-[#1e293b] text-[#D6A84F] px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold shadow-sm flex items-center gap-1 active:scale-95 transition">
+                                        📂 Upload Foto
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Baris 3: Pengaturan Warna & Undo Coretan Note -->
+                            <div class="flex flex-wrap justify-between items-center gap-2 pt-1.5 border-t border-gray-200 px-0.5">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[9px] font-bold text-gray-500">Warna Coretan:</span>
+                                    <button type="button" onclick="setNotePenColor('#1e293b')" id="notecolor-#1e293b" class="w-4 h-4 rounded-full bg-[#1e293b] border-2 border-[#D6A84F] scale-110 transition"></button>
+                                    <button type="button" onclick="setNotePenColor('#ef4444')" id="notecolor-#ef4444" class="w-4 h-4 rounded-full bg-red-500 border border-gray-300 transition"></button>
+                                    <button type="button" onclick="setNotePenColor('#2563eb')" id="notecolor-#2563eb" class="w-4 h-4 rounded-full bg-blue-600 border border-gray-300 transition"></button>
+                                    <button type="button" onclick="setNotePenColor('#16a34a')" id="notecolor-#16a34a" class="w-4 h-4 rounded-full bg-green-600 border border-gray-300 transition"></button>
+                                    <button type="button" onclick="setNotePenColor('#eab308')" id="notecolor-#eab308" class="w-4 h-4 rounded-full bg-yellow-400 border border-gray-300 transition"></button>
+                                </div>
+
+                                <div class="flex items-center gap-1">
+                                    <button type="button" onclick="undoNoteStroke()" class="text-[10px] font-bold bg-gray-200 hover:bg-gray-300 text-gray-700 px-2 py-0.5 rounded-md">↩️ Undo Coretan</button>
+                                    <button type="button" onclick="clearNoteStrokes()" class="text-[10px] font-bold bg-red-100 hover:bg-red-200 text-red-600 px-2 py-0.5 rounded-md">🗑️ Hapus Coretan</button>
+                                </div>
+                            </div>
+
+                            <p id="note-mode-hint" class="text-[10px] text-center text-gray-500 font-medium">
+                                💡 Ketik catatan, atau ketuk foto di dalam Note untuk menggeser letak, mengubah ukuran (+/-), atau menghapusnya.
+                            </p>
+                        </div>
+
+                        <!-- KANVAS PAPAN CATATAN INTERAKTIF (TEKS + LAYER FOTO + LAYER CORETAN) -->
+                        <div class="note-board-wrapper" id="note-board-stage" onclick="deselectNoteImages(event)">
+                            <!-- Layer 1: Editor Teks Kaya -->
+                            <div id="note-editor-area" contenteditable="true" data-placeholder="Tulis catatan bersama pasangan Anda di sini, sisipkan foto, atau corat-coret..." oninput="triggerAutoSaveNotes()"></div>
+                            
+                            <!-- Layer 2: Foto yang Bisa Digeser, Diperbesar/Kecilkan & Dihapus -->
+                            <div id="note-images-layer"></div>
+
+                            <!-- Layer 3: Kanvas Coretan & Stabilo di Atas Note -->
+                            <canvas id="note-scribble-canvas" class="pointer-events-none"></canvas>
+                        </div>
+                    </div>
                     
                     <div class="flex justify-between items-center mt-3 mb-4">
                         <span id="saveStatus" class="text-xs font-bold text-green-700 opacity-0 transition">Tersinkron ke Pasangan ✔</span>
@@ -510,12 +696,10 @@
                 </button>
 
                 <div id="body-persembahan" class="hidden px-5 pb-5 pt-2 border-t border-[#D6A84F]/20">
-                    <!-- SILAKAN UBAH TULISAN MANUAL ANDA DI BAWAH INI -->
                     <p class="text-xs text-gray-600 font-medium leading-relaxed mb-4">
                         Bagi pasangan yang rindu memberikan Persembahan dan Taburan kasih dalam sesi <b>Royals Couple's Work-Out Season VI</b>, Anda dapat memindai kode QR di bawah ini atau melalui transfer rekening BCA:
                     </p>
 
-                    <!-- WADAH GAMBAR QR CODE -->
                     <div class="bg-white p-4 rounded-2xl border-2 border-[#D6A84F]/40 shadow-sm flex flex-col items-center justify-center mb-4">
                         <img id="qrPersembahanImg" src="" alt="QR Code Persembahan" onclick="previewQrPersembahan()" class="w-52 h-52 object-contain rounded-xl cursor-pointer hover:scale-[1.02] transition hidden">
                         <div id="qrPersembahanPlaceholder" class="w-48 h-48 rounded-xl border-2 border-dashed border-[#D6A84F]/50 flex flex-col items-center justify-center text-center p-4 bg-[#F7F1E3]/40">
@@ -526,7 +710,6 @@
                         <span class="text-[10px] text-gray-500 font-semibold mt-2">💡 Ketuk gambar QR untuk memperbesar / menyimpan</span>
                     </div>
 
-                    <!-- KOTAK INFORMASI NOMOR REKENING BCA -->
                     <div class="bg-gradient-to-r from-[#1e293b] to-[#0f172a] text-white p-4 rounded-2xl border border-[#D6A84F]/60 shadow-md">
                         <div class="flex justify-between items-center mb-1">
                             <span class="text-[11px] font-extrabold text-[#D6A84F] tracking-wider uppercase">🏦 TRANSFER BANK BCA</span>
@@ -586,7 +769,6 @@
                 </button>
 
                 <div id="body-epgallery" class="hidden px-5 pb-5 pt-2 border-t border-[#D6A84F]/20">
-                    <!-- Baris Filter & Tombol Fullscreen Rapi -->
                     <div class="flex flex-wrap items-center justify-between gap-2 py-2 mb-3">
                         <div class="flex flex-wrap items-center gap-1.5">
                             <button type="button" onclick="filterEventPhotos('ALL')" id="ep-tab-ALL" class="px-3 py-1.5 rounded-full text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] shadow-sm">✨ Semua</button>
@@ -663,7 +845,6 @@
             <p class="text-[9px] text-center text-gray-400 mt-2">💡 Ketuk 1x: Buka Menu • Tekan Lama: Geser Posisi</p>
         </div>
 
-        <!-- Tombol Bulat Orb -->
         <div id="draggable-orb-container">
             <button type="button" id="floating-orb-btn" class="orb-btn" title="Ketuk 1x untuk buka menu, Tekan lama untuk geser posisi">
                 <span id="orb-icon" class="text-xl leading-none pointer-events-none">🧭</span>
@@ -680,14 +861,12 @@
     <!-- ========================================================================= -->
     <div id="photobooth-modal" class="hidden native-cam-modal">
         <div id="booth-ui" class="relative w-full h-full">
-            <!-- Stream Video Penuh Satu Layar -->
             <div id="camera-container" onclick="triggerTapToFocus(event, 'camera-container', videoStream)" class="native-cam-stage cursor-pointer">
                 <video id="video-feed" autoplay playsinline muted class="native-cam-video" style="transform: scaleX(-1);"></video>
                 <div id="countdown-overlay">3</div>
                 <div id="flash-overlay" class="absolute inset-0 pointer-events-none opacity-0 z-20"></div>
             </div>
 
-            <!-- HUD Kontrol Atas Photobooth -->
             <div class="cam-top-hud flex flex-col gap-2">
                 <div class="flex justify-between items-center gap-2">
                     <div class="flex items-center gap-1.5 flex-wrap">
@@ -704,7 +883,6 @@
                     <button type="button" onclick="closeLivePhotobooth()" class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-extrabold text-sm shadow-lg shrink-0">✕</button>
                 </div>
 
-                <!-- Pilihan Jumlah Grid Foto (1, 2, 3) & Saklar Timer ON/OFF (0s, 3s, 5s) -->
                 <div class="flex items-center justify-between gap-2 flex-wrap">
                     <div class="flex gap-1 bg-black/50 p-1 rounded-full border border-white/15">
                         <button type="button" id="mode-btn-1" onclick="setPhotoTarget(1)" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-white">1 Foto</button>
@@ -712,7 +890,6 @@
                         <button type="button" id="mode-btn-3" onclick="setPhotoTarget(3)" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b] shadow">3 Foto</button>
                     </div>
 
-                    <!-- Saklar Timer Photobooth (OFF / 3s / 5s) -->
                     <div class="flex items-center gap-1 bg-black/50 p-1 rounded-full border border-white/15">
                         <span class="text-[9px] font-bold text-gray-300 pl-1.5">⏱️ Timer:</span>
                         <button type="button" onclick="setPhotoboothTimer(0)" id="pbtimer-0" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold text-white">OFF (0s)</button>
@@ -722,7 +899,6 @@
                 </div>
             </div>
 
-            <!-- Baris Filter Kamera Photobooth -->
             <div class="cam-filter-hud">
                 <div class="flex gap-1.5 overflow-x-auto max-w-full pb-1 px-1">
                     <button type="button" onclick="setCameraFilter('normal')" id="filter-btn-normal" class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b]">✨ Natural</button>
@@ -734,7 +910,6 @@
                 </div>
             </div>
 
-            <!-- Dock Tombol Shutter Photobooth + Thumbnail Hapus Foto Satuan -->
             <div class="cam-shutter-dock">
                 <div class="flex flex-col items-center gap-1 shrink-0">
                     <input type="file" id="photobooth-file-input" accept="image/*" multiple class="hidden" onchange="handlePhotoboothDeviceUpload(event)">
@@ -746,19 +921,16 @@
                     </button>
                 </div>
 
-                <!-- Tombol Bulat Shutter Utama -->
                 <button type="button" id="capture-btn" onclick="takeSinglePhoto()" class="w-16 h-16 rounded-full bg-white border-4 border-[#D6A84F] shadow-[0_0_20px_rgba(214,168,79,0.8)] flex items-center justify-center text-xs font-extrabold text-[#1e293b] active:scale-90 transition shrink-0">
                     📸 1/3
                 </button>
 
-                <!-- Strip Thumbnail Jepretan (Ketuk 🗑️ untuk hapus 1 foto tanpa mengulang semua) -->
                 <div id="pb-captured-strip" class="flex gap-1.5 overflow-x-auto max-w-[105px] py-1 items-center justify-center shrink-0">
                     <span class="text-[9px] text-gray-300 italic text-center">0/3 Foto</span>
                 </div>
             </div>
         </div>
 
-        <!-- Area Hasil Foto Photobooth -->
         <div class="p-5 hidden flex-col items-center justify-center w-full h-full bg-[#0f172a]/95 overflow-y-auto z-30" id="result-ui">
             <div class="w-full max-w-sm bg-[#F7F1E3] p-4 rounded-3xl border-2 border-[#D6A84F] flex flex-col items-center">
                 <div class="w-full flex justify-between items-center mb-2">
@@ -777,7 +949,6 @@
                     📲 Share ke IG / WhatsApp
                 </button>
 
-                <!-- Tombol Edit Salah Satu Foto vs Hapus Semua -->
                 <div class="grid grid-cols-2 gap-2 w-full mt-1">
                     <button type="button" onclick="editCapturedPhotoboothShots()" class="bg-amber-500/20 text-[#1e293b] border border-[#D6A84F] py-2 px-2 rounded-xl text-[10px] font-extrabold">
                         ✏️ Hapus/Ganti 1 Foto
@@ -796,14 +967,12 @@
     <!-- ========================================================================= -->
     <div id="docphoto-modal" class="hidden native-cam-modal">
         <div class="relative w-full h-full">
-            <!-- Layar Kamera Penuh -->
             <div id="doc-camera-container" onclick="triggerTapToFocus(event, 'doc-camera-container', docVideoStream)" class="native-cam-stage cursor-pointer">
                 <video id="doc-video-feed" autoplay playsinline muted class="native-cam-video"></video>
                 <div id="doc-countdown-overlay">3</div>
                 <div id="doc-flash-overlay" class="absolute inset-0 pointer-events-none opacity-0 z-20"></div>
             </div>
 
-            <!-- HUD Atas Kamera Dokumentasi -->
             <div class="cam-top-hud flex flex-col gap-2">
                 <div class="flex justify-between items-center gap-2">
                     <div class="flex items-center gap-1.5 flex-wrap">
@@ -823,7 +992,6 @@
                     </div>
                 </div>
 
-                <!-- Baris Timer & Info Orientasi Otomatis -->
                 <div class="flex justify-between items-center gap-2 flex-wrap px-1">
                     <div class="flex items-center gap-1 bg-black/50 p-1 rounded-full border border-white/15">
                         <span class="text-[9px] font-bold text-gray-300 pl-1.5">⏱️ Timer:</span>
@@ -837,7 +1005,6 @@
                 </div>
             </div>
 
-            <!-- Baris Efek Filter Kamera Dokumentasi -->
             <div class="cam-filter-hud">
                 <div class="flex gap-1.5 overflow-x-auto max-w-full pb-1">
                     <button type="button" onclick="setDocFilter('normal')" id="docfilter-normal" class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b]">✨ Natural</button>
@@ -849,19 +1016,16 @@
                 </div>
             </div>
 
-            <!-- Dock Tombol Shutter -->
             <div class="cam-shutter-dock">
                 <input type="file" id="docphoto-file-input" accept="image/*" multiple class="hidden" onchange="handleDocPhotoDeviceUpload(event)">
                 <button type="button" id="btn-doc-upload-device" onclick="document.getElementById('docphoto-file-input').click()" class="bg-white/15 backdrop-blur-md text-white border border-white/30 px-2.5 py-2 rounded-2xl text-[10px] font-extrabold shrink-0">
                     📂 Upload HP
                 </button>
 
-                <!-- Tombol Jepret Bulat Kamera HP -->
                 <button type="button" id="btn-doc-capture" onclick="captureDocumentationPhoto()" class="w-16 h-16 rounded-full bg-white border-4 border-[#D6A84F] shadow-[0_0_20px_rgba(214,168,79,0.85)] flex items-center justify-center text-2xl active:scale-90 transition shrink-0">
                     📸
                 </button>
 
-                <!-- Thumbnail Strip Koleksi Jepretan -->
                 <div id="my-doc-photos-strip" class="flex gap-1 overflow-x-auto max-w-[92px] py-1 items-center shrink-0">
                     <span class="text-[9px] text-gray-300 italic">0 Foto</span>
                 </div>
@@ -925,6 +1089,13 @@
         let currentStroke = null;
         let isSlideFullscreen = false;
 
+        // State Kotak Catatan Interaktif (Teks + Foto Drag/Resize + Coretan Note)
+        let noteMode = 'type'; // 'type' | 'pen' | 'highlight'
+        let notePenColor = '#1e293b';
+        let isDrawingNote = false;
+        let currentNoteStroke = null;
+        let selectedNoteImgId = null;
+
         // State Dokumentasi Event Photo & Orientasi Kamera Otomatis
         const MAX_DOC_TOKENS = 10;
         let allEventPhotosList = [];
@@ -937,10 +1108,9 @@
         let docFilterKey = 'normal';
         let docOrientation = 'portrait';
         let pbOrientation = 'portrait';
-        let pbTimerSeconds = 3; // Default 3 detik, bisa dimatikan (0s)
+        let pbTimerSeconds = 3;
         let isForcedLandscapeRotate = false;
 
-        // Fungsi Buka-Tutup (Collapse / Accordion) Kotak Menu
         function toggleCardCollapse(bodyId, chevId, autoLoadPb = false) {
             const bodyEl = document.getElementById(bodyId);
             const chevEl = document.getElementById(chevId);
@@ -953,8 +1123,9 @@
                 if (autoLoadPb) loadGallery();
                 if (bodyId === 'body-materi') {
                     setTimeout(() => {
-                        initTinyMCE();
                         resizeAnnotationCanvas();
+                        resizeNoteScribbleCanvas();
+                        loadCurrentSlideNoteWorkspace();
                     }, 120);
                 }
             } else {
@@ -981,8 +1152,9 @@
                     if (chevEl) chevEl.classList.add('open');
                     if (target[0] === 'body-materi') {
                         setTimeout(() => {
-                            initTinyMCE();
                             resizeAnnotationCanvas();
+                            resizeNoteScribbleCanvas();
+                            loadCurrentSlideNoteWorkspace();
                         }, 120);
                     }
                 }
@@ -1081,7 +1253,7 @@
 
             orbBtn.addEventListener('touchstart', onStart, { passive: true });
             window.addEventListener('touchmove', onMove, { passive: false });
-            orbBtn.addEventListener('touchend', onEnd);
+            window.addEventListener('touchend', onEnd);
         }
 
         function toggleOrbMenu() {
@@ -1190,7 +1362,11 @@
             }
         }
 
-        window.addEventListener('resize', checkDeviceCameraOrientation);
+        window.addEventListener('resize', () => {
+            checkDeviceCameraOrientation();
+            resizeAnnotationCanvas();
+            resizeNoteScribbleCanvas();
+        });
         window.addEventListener('orientationchange', () => setTimeout(checkDeviceCameraOrientation, 200));
 
         async function toggleCameraRotateView(modalId) {
@@ -1343,6 +1519,7 @@
 
             initExitProtection();
             initAnnotationCanvasEvents();
+            initNoteScribbleCanvasEvents();
             initSlideTouchSwipe();
             initDraggableOrb();
             preloadSlidesAndRundown();
@@ -1448,6 +1625,13 @@
             return `${husband}_${wife}`;
         }
 
+        function ensureSlideNotesStructure() {
+            if (!slideNotes || typeof slideNotes !== 'object') slideNotes = {};
+            if (!slideNotes._strokes) slideNotes._strokes = {};
+            if (!slideNotes._noteStrokes) slideNotes._noteStrokes = {};
+            if (!slideNotes._noteImages) slideNotes._noteImages = {};
+        }
+
         async function login(isAutoLogin = false) { 
             const husband = document.getElementById('husbandName').value.trim();
             const wife = document.getElementById('wifeName').value.trim();
@@ -1468,7 +1652,7 @@
             if (localNotes) {
                 try { slideNotes = JSON.parse(localNotes); } catch (e) { slideNotes = {}; }
             }
-            if (!slideNotes._strokes) slideNotes._strokes = {};
+            ensureSlideNotesStructure();
 
             try {
                 myDocPhotosList = JSON.parse(localStorage.getItem(`docphotos_${coupleId}`) || "[]");
@@ -1485,7 +1669,7 @@
                     document.getElementById('clockDisplay').innerText = new Date().toLocaleTimeString('id-ID'); 
                 }, 1000);
             }
-            setTimeout(initTinyMCE, 80);
+            loadCurrentSlideNoteWorkspace();
             setTimeout(loadGallery, 250);
             setTimeout(loadEventPhotosGallery, 400);
             startAdminAlarmPolling();
@@ -1518,7 +1702,7 @@
         }
 
         async function pullPartnerNotesFromCloud(forceApply = false) {
-            if (isDrawingAnnot) return;
+            if (isDrawingAnnot || isDrawingNote) return;
             const coupleId = getCoupleId();
             try {
                 const userRes = await fetch(`${GAS_WEB_APP_URL}?action=getUserData&couple=${coupleId}&t=${Date.now()}`);
@@ -1527,10 +1711,11 @@
                     const parsedDbNotes = JSON.parse(dbData.notes);
                     const cloudUpdatedAt = parsedDbNotes._updatedAt || 0;
                     const localUpdatedAt = slideNotes._updatedAt || 0;
+                    ensureSlideNotesStructure();
 
                     let hasNewUpdateFromPartner = false;
                     Object.keys(parsedDbNotes).forEach(key => {
-                        if (key === '_strokes' || key === '_updatedAt') return;
+                        if (key.startsWith('_')) return;
                         const cloudVal = (parsedDbNotes[key] || "").trim();
                         const localVal = (slideNotes[key] || "").trim();
                         if (cloudVal && (cloudUpdatedAt > localUpdatedAt || !localVal || forceApply)) {
@@ -1541,8 +1726,8 @@
                         }
                     });
 
+                    // Sinkronkan coretan di Slide
                     if (parsedDbNotes._strokes) {
-                        if (!slideNotes._strokes) slideNotes._strokes = {};
                         Object.keys(parsedDbNotes._strokes).forEach(sIdx => {
                             const cloudStrokes = parsedDbNotes._strokes[sIdx] || [];
                             const localStrokes = slideNotes._strokes[sIdx] || [];
@@ -1553,17 +1738,43 @@
                         });
                     }
 
+                    // Sinkronkan coretan di Note
+                    if (parsedDbNotes._noteStrokes) {
+                        Object.keys(parsedDbNotes._noteStrokes).forEach(sIdx => {
+                            const cloudNStrokes = parsedDbNotes._noteStrokes[sIdx] || [];
+                            const localNStrokes = slideNotes._noteStrokes[sIdx] || [];
+                            if (cloudNStrokes.length > localNStrokes.length || (cloudUpdatedAt > localUpdatedAt && cloudNStrokes.length > 0)) {
+                                slideNotes._noteStrokes[sIdx] = cloudNStrokes;
+                                if (Number(sIdx) === currentSlideIndex) renderCurrentNoteStrokes();
+                            }
+                        });
+                    }
+
+                    // Sinkronkan Foto di dalam Note
+                    if (parsedDbNotes._noteImages) {
+                        Object.keys(parsedDbNotes._noteImages).forEach(sIdx => {
+                            const cloudImgs = parsedDbNotes._noteImages[sIdx] || [];
+                            const localImgs = slideNotes._noteImages[sIdx] || [];
+                            if (cloudImgs.length !== localImgs.length && cloudUpdatedAt > localUpdatedAt) {
+                                slideNotes._noteImages[sIdx] = cloudImgs;
+                                if (Number(sIdx) === currentSlideIndex) renderNoteFloatingImages();
+                            }
+                        });
+                    }
+
                     if (cloudUpdatedAt > localUpdatedAt) {
                         slideNotes._updatedAt = cloudUpdatedAt;
                     }
                     localStorage.setItem(`notes_${coupleId}`, JSON.stringify(slideNotes));
 
                     if (hasNewUpdateFromPartner || forceApply) {
-                        const editor = tinymce.get('personalNotes') || tinymce.activeEditor;
-                        if (editor && (forceApply || document.activeElement !== editor.getBody())) {
-                            editor.setContent(slideNotes[currentSlideIndex] || "");
+                        const editorEl = document.getElementById('note-editor-area');
+                        if (editorEl && (forceApply || document.activeElement !== editorEl)) {
+                            editorEl.innerHTML = slideNotes[currentSlideIndex] || "";
                         }
                         renderCurrentSlideAnnotations();
+                        renderCurrentNoteStrokes();
+                        renderNoteFloatingImages();
                     }
                 }
                 if (dbData.myPhotos && dbData.myPhotos.length > 0 && !localStorage.getItem(`photobooth_${coupleId}`)) {
@@ -1573,7 +1784,7 @@
         }
 
         // =========================================================================
-        // 5. MESIN SLIDE ANTI-HITAM + CORAT-CORET + FULLSCREEN SLIDE
+        // 5. MESIN SLIDE ANTI-HITAM + CORAT-CORET SLIDE
         // =========================================================================
         function renderRundownSection() {
             const container = document.getElementById('rundown-images-container');
@@ -1630,6 +1841,7 @@
             if (nextIdx < 0 || nextIdx >= slidesListData.length) return;
 
             currentSlideIndex = nextIdx;
+            selectedNoteImgId = null;
             const slideImgEl = document.getElementById('active-slide-img');
             slideImgEl.style.opacity = '0.35';
             slideImgEl.style.transform = delta > 0 ? 'translateX(12px)' : 'translateX(-12px)';
@@ -1638,8 +1850,7 @@
                 renderSlidesSection();
                 slideImgEl.style.opacity = '1';
                 slideImgEl.style.transform = 'translateX(0)';
-                const editor = tinymce.get('personalNotes') || tinymce.activeEditor;
-                if (editor) editor.setContent(slideNotes[currentSlideIndex] || "");
+                loadCurrentSlideNoteWorkspace();
                 renderCurrentSlideAnnotations();
             }, 120);
         }
@@ -1693,7 +1904,7 @@
         }
 
         function getSlideStrokes(index) {
-            if (!slideNotes._strokes) slideNotes._strokes = {};
+            ensureSlideNotesStructure();
             if (!slideNotes._strokes[index]) slideNotes._strokes[index] = [];
             return slideNotes._strokes[index];
         }
@@ -1907,7 +2118,7 @@
             const strokes = getSlideStrokes(currentSlideIndex);
             if (strokes.length === 0) return;
             Swal.fire({
-                title: 'Bersihkan Coretan?',
+                title: 'Bersihkan Coretan Slide?',
                 text: `Hapus semua coretan/stabilo pada Slide ${currentSlideIndex + 1}?`,
                 icon: 'warning',
                 showCancelButton: true,
@@ -1923,55 +2134,416 @@
             });
         }
 
-        function triggerAutoSaveNotes() {
-            clearTimeout(saveTimeout);
-            saveCurrentNoteLocally();
-            document.getElementById('saveStatus').style.opacity = '1';
-            saveTimeout = setTimeout(() => {
-                saveNotesToDatabase(false);
-                setTimeout(() => { document.getElementById('saveStatus').style.opacity = '0'; }, 1800);
-            }, 1800);
+        // =========================================================================
+        // 6. PAPAN CATATAN INTERAKTIF (TEKS + FOTO DRAG/RESIZE + CORETAN NOTE)
+        // =========================================================================
+        function getNoteStrokes(index) {
+            ensureSlideNotesStructure();
+            if (!slideNotes._noteStrokes[index]) slideNotes._noteStrokes[index] = [];
+            return slideNotes._noteStrokes[index];
         }
 
-        // =========================================================================
-        // 6. TINYMCE & MESIN CETAK PDF DIRECT CANVAS
-        // =========================================================================
-        function initTinyMCE() {
-            if (tinymce.get('personalNotes')) {
-                tinymce.get('personalNotes').setContent(slideNotes[currentSlideIndex] || "");
-                return;
+        function getNoteImages(index) {
+            ensureSlideNotesStructure();
+            if (!slideNotes._noteImages[index]) slideNotes._noteImages[index] = [];
+            return slideNotes._noteImages[index];
+        }
+
+        function loadCurrentSlideNoteWorkspace() {
+            ensureSlideNotesStructure();
+            const editorEl = document.getElementById('note-editor-area');
+            if (editorEl) {
+                editorEl.innerHTML = slideNotes[currentSlideIndex] || "";
             }
-            tinymce.init({
-                selector: '#personalNotes', 
-                height: 220, 
-                menubar: false, 
-                plugins: 'lists link image code', 
-                toolbar: 'undo redo | bold italic underline | bullist numlist | image', 
-                paste_data_images: true,
-                setup: function (editor) {
-                    editor.on('init', function () { 
-                        editor.setContent(slideNotes[currentSlideIndex] || ""); 
-                    });
-                    editor.on('input change keyup', function () {
-                        triggerAutoSaveNotes();
-                    });
+            renderNoteFloatingImages();
+            setTimeout(resizeNoteScribbleCanvas, 60);
+        }
+
+        function expandNoteHeight() {
+            const board = document.getElementById('note-board-stage');
+            const editor = document.getElementById('note-editor-area');
+            if (!board || !editor) return;
+            const currentH = board.clientHeight || 270;
+            const nextH = currentH >= 480 ? 270 : currentH + 110;
+            board.style.minHeight = nextH + 'px';
+            editor.style.minHeight = nextH + 'px';
+            setTimeout(resizeNoteScribbleCanvas, 80);
+        }
+
+        function formatNoteText(cmd) {
+            if (noteMode !== 'type') setNoteMode('type');
+            const editorEl = document.getElementById('note-editor-area');
+            if (editorEl) editorEl.focus();
+            document.execCommand(cmd, false, null);
+            triggerAutoSaveNotes();
+        }
+
+        function setNoteMode(mode) {
+            noteMode = mode;
+            const scribbleCanvas = document.getElementById('note-scribble-canvas');
+            const hint = document.getElementById('note-mode-hint');
+
+            ['type', 'pen', 'highlight'].forEach(m => {
+                const btn = document.getElementById(`notetool-${m}`);
+                if (!btn) return;
+                if (m === mode) {
+                    btn.className = "py-1.5 px-2 rounded-lg text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] shadow transition";
+                } else {
+                    btn.className = "py-1.5 px-2 rounded-lg text-[10px] font-extrabold bg-gray-100 text-[#1e293b] transition";
+                }
+            });
+
+            if (mode === 'type') {
+                scribbleCanvas.classList.add('pointer-events-none');
+                scribbleCanvas.style.cursor = 'default';
+                hint.innerText = "💡 Mode Ketik & Foto aktif: Ketik catatan, atau ketuk foto di dalam Note untuk geser letak, ubah ukuran (+/-), atau hapus.";
+            } else {
+                deselectNoteImages();
+                scribbleCanvas.classList.remove('pointer-events-none');
+                scribbleCanvas.style.cursor = 'crosshair';
+                hint.innerText = mode === 'pen'
+                    ? "✏️ Mode Coret Note aktif: Goreskan jari/mouse langsung di atas area Note."
+                    : "🖍 Mode Stabilo Note aktif: Tandai bagian penting di atas catatan/foto Note.";
+            }
+        }
+
+        function setNotePenColor(color) {
+            notePenColor = color;
+            ['#1e293b', '#ef4444', '#2563eb', '#16a34a', '#eab308'].forEach(c => {
+                const btn = document.getElementById(`notecolor-${c}`);
+                if (btn) {
+                    btn.style.transform = (c === color) ? 'scale(1.25)' : 'scale(1)';
+                    btn.style.borderColor = (c === color) ? '#D6A84F' : '#d1d5db';
+                    btn.style.borderWidth = (c === color) ? '2px' : '1px';
                 }
             });
         }
 
+        function resizeNoteScribbleCanvas() {
+            const stage = document.getElementById('note-board-stage');
+            const canvas = document.getElementById('note-scribble-canvas');
+            if (!stage || !canvas) return;
+            canvas.width = stage.clientWidth || 380;
+            canvas.height = stage.clientHeight || 270;
+            renderCurrentNoteStrokes();
+        }
+
+        function initNoteScribbleCanvasEvents() {
+            const canvas = document.getElementById('note-scribble-canvas');
+            if (!canvas) return;
+
+            const getNormPos = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)),
+                    y: Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
+                };
+            };
+
+            const startDraw = (e) => {
+                if (noteMode === 'type') return;
+                if (e.cancelable) e.preventDefault();
+                const pos = getNormPos(e);
+                isDrawingNote = true;
+                currentNoteStroke = {
+                    type: noteMode,
+                    color: notePenColor,
+                    size: 3,
+                    points: [pos]
+                };
+                getNoteStrokes(currentSlideIndex).push(currentNoteStroke);
+                renderCurrentNoteStrokes();
+            };
+
+            const moveDraw = (e) => {
+                if (!isDrawingNote || !currentNoteStroke) return;
+                if (e.cancelable) e.preventDefault();
+                const pos = getNormPos(e);
+                currentNoteStroke.points.push(pos);
+                renderCurrentNoteStrokes();
+            };
+
+            const endDraw = () => {
+                if (!isDrawingNote) return;
+                isDrawingNote = false;
+                currentNoteStroke = null;
+                triggerAutoSaveNotes();
+            };
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', moveDraw);
+            window.addEventListener('mouseup', endDraw);
+
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('touchmove', moveDraw, { passive: false });
+            canvas.addEventListener('touchend', endDraw);
+        }
+
+        function renderCurrentNoteStrokes() {
+            const canvas = document.getElementById('note-scribble-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const strokes = getNoteStrokes(currentSlideIndex);
+            drawStrokesOnContext(ctx, canvas.width, canvas.height, strokes);
+        }
+
+        function undoNoteStroke() {
+            const strokes = getNoteStrokes(currentSlideIndex);
+            if (strokes.length > 0) {
+                strokes.pop();
+                renderCurrentNoteStrokes();
+                triggerAutoSaveNotes();
+            }
+        }
+
+        function clearNoteStrokes() {
+            const strokes = getNoteStrokes(currentSlideIndex);
+            if (strokes.length === 0) return;
+            Swal.fire({
+                title: 'Hapus Coretan di Note?',
+                text: 'Hapus semua goresan coretan/stabilo pada kotak Note slide ini?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus Coretan',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#ef4444'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    slideNotes._noteStrokes[currentSlideIndex] = [];
+                    renderCurrentNoteStrokes();
+                    triggerAutoSaveNotes();
+                }
+            });
+        }
+
+        // Fungsi Insert Foto ke Dalam Note (Kompresi Ringan + Bisa Digeser & Diubah Ukurannya)
+        function compressNoteImageFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const maxDim = 650;
+                        let w = img.naturalWidth;
+                        let h = img.naturalHeight;
+                        if (w > maxDim || h > maxDim) {
+                            if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+                            else { w = Math.round(w * (maxDim / h)); h = maxDim; }
+                        }
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        resolve({
+                            dataUrl: canvas.toDataURL('image/jpeg', 0.78),
+                            aspectRatio: w / h
+                        });
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handleInsertNoteImage(event) {
+            const files = Array.from(event.target.files || []);
+            event.target.value = '';
+            if (files.length === 0) return;
+
+            setNoteMode('type');
+            const imgsArr = getNoteImages(currentSlideIndex);
+
+            for (let i = 0; i < files.length; i++) {
+                try {
+                    const compressed = await compressNoteImageFile(files[i]);
+                    const newId = 'nimg_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+                    // Ukuran default 42% dari lebar kotak note, posisi sedikit bertingkat
+                    const offsetIdx = imgsArr.length % 4;
+                    imgsArr.push({
+                        id: newId,
+                        src: compressed.dataUrl,
+                        x: 0.08 + (offsetIdx * 0.06), // Posisi X relatif (0 - 1)
+                        y: 0.12 + (offsetIdx * 0.08), // Posisi Y relatif (0 - 1)
+                        w: 0.44,                      // Lebar relatif terhadap kotak note (0.15 - 0.92)
+                        ratio: compressed.aspectRatio || 1
+                    });
+                    selectedNoteImgId = newId;
+                } catch (e) {}
+            }
+
+            renderNoteFloatingImages();
+            triggerAutoSaveNotes();
+        }
+
+        function deselectNoteImages(e) {
+            if (e && e.target && e.target.closest('.note-floating-img-item')) return;
+            if (selectedNoteImgId !== null) {
+                selectedNoteImgId = null;
+                renderNoteFloatingImages();
+            }
+        }
+
+        function selectNoteImage(id, event) {
+            if (event) event.stopPropagation();
+            if (noteMode !== 'type') setNoteMode('type');
+            if (selectedNoteImgId !== id) {
+                selectedNoteImgId = id;
+                renderNoteFloatingImages();
+            }
+        }
+
+        function scaleSelectedNoteImage(id, deltaW, event) {
+            if (event) event.stopPropagation();
+            const imgs = getNoteImages(currentSlideIndex);
+            const target = imgs.find(im => im.id === id);
+            if (!target) return;
+            target.w = Math.max(0.18, Math.min(0.92, (target.w || 0.44) + deltaW));
+            if (target.x + target.w > 0.98) target.x = Math.max(0.02, 0.98 - target.w);
+            renderNoteFloatingImages();
+            triggerAutoSaveNotes();
+        }
+
+        function removeNoteImage(id, event) {
+            if (event) event.stopPropagation();
+            ensureSlideNotesStructure();
+            slideNotes._noteImages[currentSlideIndex] = getNoteImages(currentSlideIndex).filter(im => im.id !== id);
+            selectedNoteImgId = null;
+            renderNoteFloatingImages();
+            triggerAutoSaveNotes();
+        }
+
+        function renderNoteFloatingImages() {
+            const layer = document.getElementById('note-images-layer');
+            const stage = document.getElementById('note-board-stage');
+            if (!layer || !stage) return;
+
+            const imgs = getNoteImages(currentSlideIndex);
+            layer.innerHTML = '';
+
+            imgs.forEach(item => {
+                const isSelected = (item.id === selectedNoteImgId);
+                const wrapper = document.createElement('div');
+                wrapper.className = `note-floating-img-item ${isSelected ? 'selected' : ''}`;
+                wrapper.style.left = (item.x * 100) + '%';
+                wrapper.style.top = (item.y * 100) + '%';
+                wrapper.style.width = (item.w * 100) + '%';
+
+                wrapper.innerHTML = `
+                    <div class="note-img-toolbar" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                        <button type="button" onclick="scaleSelectedNoteImage('${item.id}', -0.08, event)" class="px-1.5 py-0.5 bg-white/15 hover:bg-white/30 rounded text-[10px] font-extrabold" title="Perkecil">➖ Kecil</button>
+                        <button type="button" onclick="scaleSelectedNoteImage('${item.id}', 0.08, event)" class="px-1.5 py-0.5 bg-white/15 hover:bg-white/30 rounded text-[10px] font-extrabold" title="Perbesar">➕ Besar</button>
+                        <button type="button" onclick="removeNoteImage('${item.id}', event)" class="px-1.5 py-0.5 bg-red-600 hover:bg-red-500 rounded text-[10px] font-extrabold" title="Hapus Foto">🗑️</button>
+                    </div>
+                    <img src="${item.src}" class="w-full h-auto block rounded-lg pointer-events-none select-none shadow-sm">
+                    <div class="note-img-resize-handle" data-resize-id="${item.id}" title="Tarik untuk ubah ukuran">↘</div>
+                `;
+
+                // Event Drag (Geser Posisi) & Resize (Tarik Sudut)
+                attachNoteImageDragAndResize(wrapper, item, stage);
+                layer.appendChild(wrapper);
+            });
+        }
+
+        function attachNoteImageDragAndResize(el, itemObj, stageEl) {
+            let mode = null; // 'drag' | 'resize'
+            let startX = 0, startY = 0;
+            let origX = 0, origY = 0, origW = 0;
+
+            const onDown = (e) => {
+                if (noteMode !== 'type') return;
+                if (e.target.closest('.note-img-toolbar')) return;
+
+                e.stopPropagation();
+                const isResizeHandle = e.target.closest('.note-img-resize-handle');
+                mode = isResizeHandle ? 'resize' : 'drag';
+
+                if (selectedNoteImgId !== itemObj.id) {
+                    selectedNoteImgId = itemObj.id;
+                    document.querySelectorAll('.note-floating-img-item').forEach(node => node.classList.remove('selected'));
+                    el.classList.add('selected');
+                }
+
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                startX = clientX;
+                startY = clientY;
+                origX = itemObj.x;
+                origY = itemObj.y;
+                origW = itemObj.w;
+
+                window.addEventListener('mousemove', onMove, { passive: false });
+                window.addEventListener('mouseup', onUp);
+                window.addEventListener('touchmove', onMove, { passive: false });
+                window.addEventListener('touchend', onUp);
+            };
+
+            const onMove = (e) => {
+                if (!mode) return;
+                if (e.cancelable) e.preventDefault();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const stageW = stageEl.clientWidth || 360;
+                const stageH = stageEl.clientHeight || 270;
+
+                const dxNorm = (clientX - startX) / stageW;
+                const dyNorm = (clientY - startY) / stageH;
+
+                if (mode === 'drag') {
+                    itemObj.x = Math.max(0.01, Math.min(0.98 - itemObj.w, origX + dxNorm));
+                    itemObj.y = Math.max(0.02, Math.min(0.88, origY + dyNorm));
+                    el.style.left = (itemObj.x * 100) + '%';
+                    el.style.top = (itemObj.y * 100) + '%';
+                } else if (mode === 'resize') {
+                    itemObj.w = Math.max(0.18, Math.min(0.95 - itemObj.x, origW + dxNorm));
+                    el.style.width = (itemObj.w * 100) + '%';
+                }
+            };
+
+            const onUp = () => {
+                if (!mode) return;
+                mode = null;
+                window.removeEventListener('mousemove', onMove);
+                window.removeEventListener('mouseup', onUp);
+                window.removeEventListener('touchmove', onMove);
+                window.removeEventListener('touchend', onUp);
+                triggerAutoSaveNotes();
+            };
+
+            el.addEventListener('mousedown', onDown);
+            el.addEventListener('touchstart', onDown, { passive: false });
+        }
+
         function saveCurrentNoteLocally() {
-            const editor = tinymce.get('personalNotes') || tinymce.activeEditor;
-            if (editor) {
-                slideNotes[currentSlideIndex] = editor.getContent();
+            ensureSlideNotesStructure();
+            const editorEl = document.getElementById('note-editor-area');
+            if (editorEl) {
+                slideNotes[currentSlideIndex] = editorEl.innerHTML;
             }
             slideNotes._updatedAt = Date.now();
             localStorage.setItem(`notes_${getCoupleId()}`, JSON.stringify(slideNotes));
         }
 
+        function triggerAutoSaveNotes() {
+            clearTimeout(saveTimeout);
+            saveCurrentNoteLocally();
+            const statusEl = document.getElementById('saveStatus');
+            if (statusEl) statusEl.style.opacity = '1';
+            saveTimeout = setTimeout(() => {
+                saveNotesToDatabase(false);
+                setTimeout(() => { if (statusEl) statusEl.style.opacity = '0'; }, 1800);
+            }, 1800);
+        }
+
         function saveNotesToDatabase(showPopup = true) {
             saveCurrentNoteLocally();
             if (showPopup) {
-                Swal.fire({ title: 'Menyinkronkan...', text: 'Menyimpan catatan & membagikan ke perangkat pasangan Anda.', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+                Swal.fire({ title: 'Menyinkronkan...', text: 'Menyimpan catatan, foto note & membagikan ke HP pasangan Anda.', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
             }
 
             fetch(GAS_WEB_APP_URL, {
@@ -1981,13 +2553,16 @@
                 body: new URLSearchParams({ 'action': 'saveNotes', 'couple': getCoupleId(), 'notes': JSON.stringify(slideNotes) })
             }).then(() => {
                 if (showPopup) {
-                    Swal.fire({ title: 'Tersinkron!', text: 'Catatan & coretan siap dibaca di kedua HP pasangan.', icon: 'success', timer: 1500, showConfirmButton: false });
+                    Swal.fire({ title: 'Tersinkron!', text: 'Catatan, foto & coretan siap dibaca di kedua HP pasangan.', icon: 'success', timer: 1500, showConfirmButton: false });
                 }
             }).catch(() => { 
                 if (showPopup) Swal.fire('Error', 'Gagal terhubung ke database.', 'error'); 
             });
         }
 
+        // =========================================================================
+        // MESIN CETAK PDF (MATERI + CORETAN SLIDE + TEKS, FOTO & CORETAN NOTE)
+        // =========================================================================
         function loadImageSafe(srcUrl) {
             return new Promise((resolve) => {
                 if (!srcUrl) { resolve(null); return; }
@@ -2030,7 +2605,7 @@
                 return;
             }
 
-            Swal.fire({ title: 'Mencetak PDF Materi & Coretan...', text: 'Menyusun halaman PDF beresolusi tinggi...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'Mencetak PDF Materi & Notes...', text: 'Menyusun slide, foto catatan, dan coretan beresolusi tinggi...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             try {
                 const { jsPDF } = window.jspdf;
@@ -2100,6 +2675,7 @@
                     ctx.lineWidth = 4;
                     ctx.strokeRect(slideBoxX, slideBoxY, slideBoxW, slideBoxH);
 
+                    // Kotak Catatan Bawah (Teks + Foto Note + Coretan Note)
                     const noteBoxX = 80;
                     const noteBoxY = 900;
                     const noteBoxW = 1080;
@@ -2116,9 +2692,15 @@
                     ctx.font = '800 26px Montserrat, sans-serif';
                     ctx.fillText(`📝 Catatan Bersama Slide ${index + 1}:`, noteBoxX + 35, noteBoxY + 50);
 
+                    const innerNoteX = noteBoxX + 35;
+                    const innerNoteY = noteBoxY + 75;
+                    const innerNoteW = noteBoxW - 70;
+                    const innerNoteH = noteBoxH - 95;
+
                     const rawHtml = slideNotes[index] || "";
                     const plainNote = rawHtml
                         .replace(/<br\s*\/?>/gi, '\n')
+                        .replace(/<\/div>/gi, '\n')
                         .replace(/<\/p>/gi, '\n')
                         .replace(/<\/li>/gi, '\n')
                         .replace(/<li>/gi, '• ')
@@ -2126,16 +2708,48 @@
                         .replace(/&nbsp;/g, ' ')
                         .trim();
 
+                    const noteImages = getNoteImages(index);
+                    const noteStrokes = getNoteStrokes(index);
+                    const hasVisualNote = noteImages.length > 0 || noteStrokes.length > 0;
+
                     ctx.fillStyle = plainNote ? '#1e293b' : '#64748b';
                     ctx.font = plainNote ? '600 22px Montserrat, sans-serif' : 'italic 22px Montserrat, sans-serif';
-                    const textToPrint = plainNote || "Tidak ada catatan tertulis tambahan di kotak bawah pada slide ini.";
-                    const wrappedLines = wrapTextLines(ctx, textToPrint, noteBoxW - 70);
+                    const textToPrint = plainNote || (hasVisualNote ? "" : "Tidak ada catatan tertulis tambahan pada slide ini.");
+                    if (textToPrint) {
+                        const wrappedLines = wrapTextLines(ctx, textToPrint, innerNoteW);
+                        let lineY = innerNoteY + 25;
+                        for (let l = 0; l < wrappedLines.length; l++) {
+                            if (lineY > noteBoxY + noteBoxH - 30) break;
+                            ctx.fillText(wrappedLines[l], innerNoteX, lineY);
+                            lineY += 34;
+                        }
+                    }
 
-                    let lineY = noteBoxY + 95;
-                    for (let l = 0; l < wrappedLines.length; l++) {
-                        if (lineY > noteBoxY + noteBoxH - 30) break;
-                        ctx.fillText(wrappedLines[l], noteBoxX + 35, lineY);
-                        lineY += 34;
+                    // Gambar Foto-Foto yang Ditempel di Note sesuai Posisi & Ukurannya
+                    for (let im = 0; im < noteImages.length; im++) {
+                        const nImgObj = noteImages[im];
+                        const loadedNImg = await loadImageSafe(nImgObj.src);
+                        if (loadedNImg) {
+                            const drawW = (nImgObj.w || 0.44) * innerNoteW;
+                            const ratio = loadedNImg.naturalWidth / loadedNImg.naturalHeight;
+                            const drawH = drawW / ratio;
+                            const drawX = innerNoteX + ((nImgObj.x || 0.08) * innerNoteW);
+                            const drawY = innerNoteY + ((nImgObj.y || 0.12) * innerNoteH);
+                            ctx.save();
+                            ctx.drawImage(loadedNImg, drawX, drawY, drawW, drawH);
+                            ctx.strokeStyle = '#D6A84F';
+                            ctx.lineWidth = 3;
+                            ctx.strokeRect(drawX, drawY, drawW, drawH);
+                            ctx.restore();
+                        }
+                    }
+
+                    // Gambar Coretan / Stabilo yang Ada di Atas Note
+                    if (noteStrokes && noteStrokes.length > 0) {
+                        ctx.save();
+                        ctx.translate(innerNoteX, innerNoteY);
+                        drawStrokesOnContext(ctx, innerNoteW, innerNoteH, noteStrokes);
+                        ctx.restore();
                     }
 
                     const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.92);
@@ -2292,7 +2906,7 @@
 
                 const coupleId = getCoupleId();
                 try {
-                    const response = await fetch(GAS_WEB_APP_URL, {
+                    await fetch(GAS_WEB_APP_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                         body: new URLSearchParams({
@@ -3123,7 +3737,6 @@
             bw:      { css: 'grayscale(1) contrast(1.18) brightness(1.03)' }
         };
 
-        // Fungsi Saklar Timer Photobooth (OFF 0s / 3s / 5s)
         function setPhotoboothTimer(sec) {
             pbTimerSeconds = sec;
             [0, 3, 5].forEach(s => {
@@ -3135,7 +3748,6 @@
             });
         }
 
-        // Render Strip Thumbnail Foto yang Sudah Diambil + Tombol 🗑️ Hapus per Foto
         function renderPhotoboothCapturedStrip() {
             const strip = document.getElementById('pb-captured-strip');
             const captureBtn = document.getElementById('capture-btn');
@@ -3186,14 +3798,12 @@
             }
         }
 
-        // Hapus 1 Foto Tertentu Tanpa Harus Mengulang Foto Lainnya yang Sudah Bagus
         function deleteSingleCapturedPhotoboothShot(idx) {
             if (idx < 0 || idx >= capturedPhotos.length) return;
             capturedPhotos.splice(idx, 1);
             renderPhotoboothCapturedStrip();
         }
 
-        // Kembali ke Kamera dari Layar Hasil untuk Menghapus/Mengganti Salah Satu Foto Saja
         async function editCapturedPhotoboothShots() {
             localStorage.removeItem('photobooth_result');
             localStorage.removeItem(`photobooth_${getCoupleId()}`);
@@ -3403,7 +4013,6 @@
             btn.disabled = true; 
             earlyBtn.classList.add('hidden');
             
-            // Hitung mundur hanya jika pbTimerSeconds > 0 (Jika OFF / 0s langsung jepret instan)
             if (pbTimerSeconds > 0) {
                 const overlay = document.getElementById('countdown-overlay'); 
                 let count = pbTimerSeconds; 
