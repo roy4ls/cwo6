@@ -547,7 +547,7 @@
             </div>
 
             <!-- ========================================================================= -->
-            <!-- 8. PHOTOBOOTH GALLERY (COLLAPSIBLE - DEFAULT TERTUTUP)                    -->
+            <!-- 8. PHOTOBOOTH GALLERY (DILENGKAPI FITUR HAPUS FOTO SENDIRI)               -->
             <!-- ========================================================================= -->
             <div id="section-photobooth-gallery" class="clean-card mb-4 border-2 border-[#D6A84F]/25 overflow-hidden">
                 <button type="button" onclick="toggleCardCollapse('body-pbgallery', 'chev-pbgallery', true)" class="w-full p-4 px-5 flex justify-between items-center text-left hover:bg-black/[0.02] transition">
@@ -586,7 +586,7 @@
                 </button>
 
                 <div id="body-epgallery" class="hidden px-5 pb-5 pt-2 border-t border-[#D6A84F]/20">
-                    <!-- Baris Filter & Tombol Fullscreen Rapi (Tidak Tumpang Tindih) -->
+                    <!-- Baris Filter & Tombol Fullscreen Rapi -->
                     <div class="flex flex-wrap items-center justify-between gap-2 py-2 mb-3">
                         <div class="flex flex-wrap items-center gap-1.5">
                             <button type="button" onclick="filterEventPhotos('ALL')" id="ep-tab-ALL" class="px-3 py-1.5 rounded-full text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] shadow-sm">✨ Semua</button>
@@ -598,7 +598,6 @@
                         </button>
                     </div>
 
-                    <!-- Wadah Galeri (Otomatis 1 Kolom Saat Kosong, 2 Kolom Masonry Saat Ada Foto) -->
                     <div id="event-photos-masonry" class="max-h-[520px] overflow-y-auto p-1">
                         <div class="empty-gallery-box text-center py-8 px-4 bg-white/60 rounded-2xl border border-dashed border-[#D6A84F]/40 text-xs text-gray-500 font-semibold">
                             Memuat koleksi Event Photo's Gallery...
@@ -677,7 +676,7 @@
     <div id="screen-flash-light" class="fixed inset-0 bg-white z-[200] pointer-events-none opacity-0 transition-opacity duration-150"></div>
 
     <!-- ========================================================================= -->
-    <!-- MODAL 1: LIVE PHOTOBOOTH FULLSCREEN (TOMBOL SHUTTER SELALU TAMPIL)        -->
+    <!-- MODAL 1: LIVE PHOTOBOOTH FULLSCREEN (TIMER ON/OFF + HAPUS FOTO SATUAN)    -->
     <!-- ========================================================================= -->
     <div id="photobooth-modal" class="hidden native-cam-modal">
         <div id="booth-ui" class="relative w-full h-full">
@@ -688,7 +687,7 @@
                 <div id="flash-overlay" class="absolute inset-0 pointer-events-none opacity-0 z-20"></div>
             </div>
 
-            <!-- HUD Kontrol Atas -->
+            <!-- HUD Kontrol Atas Photobooth -->
             <div class="cam-top-hud flex flex-col gap-2">
                 <div class="flex justify-between items-center gap-2">
                     <div class="flex items-center gap-1.5 flex-wrap">
@@ -705,18 +704,25 @@
                     <button type="button" onclick="closeLivePhotobooth()" class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-extrabold text-sm shadow-lg shrink-0">✕</button>
                 </div>
 
-                <!-- Pilihan Jumlah Grid Foto & Indikator -->
+                <!-- Pilihan Jumlah Grid Foto (1, 2, 3) & Saklar Timer ON/OFF (0s, 3s, 5s) -->
                 <div class="flex items-center justify-between gap-2 flex-wrap">
-                    <div class="flex gap-1.5">
-                        <button type="button" id="mode-btn-1" onclick="setPhotoTarget(1)" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20">1 Foto</button>
-                        <button type="button" id="mode-btn-2" onclick="setPhotoTarget(2)" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20">2 Foto</button>
-                        <button type="button" id="mode-btn-3" onclick="setPhotoTarget(3)" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b] shadow">3 Foto</button>
+                    <div class="flex gap-1 bg-black/50 p-1 rounded-full border border-white/15">
+                        <button type="button" id="mode-btn-1" onclick="setPhotoTarget(1)" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-white">1 Foto</button>
+                        <button type="button" id="mode-btn-2" onclick="setPhotoTarget(2)" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-white">2 Foto</button>
+                        <button type="button" id="mode-btn-3" onclick="setPhotoTarget(3)" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b] shadow">3 Foto</button>
                     </div>
-                    <div class="flex items-center gap-2 bg-black/50 px-2.5 py-1 rounded-full" id="photo-indicators"></div>
+
+                    <!-- Saklar Timer Photobooth (OFF / 3s / 5s) -->
+                    <div class="flex items-center gap-1 bg-black/50 p-1 rounded-full border border-white/15">
+                        <span class="text-[9px] font-bold text-gray-300 pl-1.5">⏱️ Timer:</span>
+                        <button type="button" onclick="setPhotoboothTimer(0)" id="pbtimer-0" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold text-white">OFF (0s)</button>
+                        <button type="button" onclick="setPhotoboothTimer(3)" id="pbtimer-3" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b]">3s</button>
+                        <button type="button" onclick="setPhotoboothTimer(5)" id="pbtimer-5" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold text-white">5s</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Baris Filter Kamera -->
+            <!-- Baris Filter Kamera Photobooth -->
             <div class="cam-filter-hud">
                 <div class="flex gap-1.5 overflow-x-auto max-w-full pb-1 px-1">
                     <button type="button" onclick="setCameraFilter('normal')" id="filter-btn-normal" class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b]">✨ Natural</button>
@@ -728,21 +734,27 @@
                 </div>
             </div>
 
-            <!-- Dock Tombol Shutter (Otomatis di Bawah saat Tegak, Otomatis di Kanan saat Tidur/Horizontal) -->
+            <!-- Dock Tombol Shutter Photobooth + Thumbnail Hapus Foto Satuan -->
             <div class="cam-shutter-dock">
-                <input type="file" id="photobooth-file-input" accept="image/*" multiple class="hidden" onchange="handlePhotoboothDeviceUpload(event)">
-                <button type="button" onclick="document.getElementById('photobooth-file-input').click()" class="bg-white/15 backdrop-blur-md text-white border border-white/30 px-3 py-2 rounded-2xl text-[10px] font-extrabold shrink-0">
-                    📂 Galeri HP
-                </button>
+                <div class="flex flex-col items-center gap-1 shrink-0">
+                    <input type="file" id="photobooth-file-input" accept="image/*" multiple class="hidden" onchange="handlePhotoboothDeviceUpload(event)">
+                    <button type="button" onclick="document.getElementById('photobooth-file-input').click()" class="bg-white/15 backdrop-blur-md text-white border border-white/30 px-2.5 py-2 rounded-2xl text-[10px] font-extrabold">
+                        📂 Galeri HP
+                    </button>
+                    <button type="button" id="finish-early-btn" onclick="finishPhotoNow()" class="hidden bg-emerald-600 text-white px-2.5 py-1 rounded-xl text-[9px] font-extrabold shadow">
+                        ✅ Proses Hasil
+                    </button>
+                </div>
 
-                <!-- Tombol Bulat Shutter Utama (Selalu Terlihat Jelas) -->
+                <!-- Tombol Bulat Shutter Utama -->
                 <button type="button" id="capture-btn" onclick="takeSinglePhoto()" class="w-16 h-16 rounded-full bg-white border-4 border-[#D6A84F] shadow-[0_0_20px_rgba(214,168,79,0.8)] flex items-center justify-center text-xs font-extrabold text-[#1e293b] active:scale-90 transition shrink-0">
                     📸 1/3
                 </button>
 
-                <button type="button" id="finish-early-btn" onclick="finishPhotoNow()" class="hidden bg-emerald-600 text-white px-3 py-2 rounded-2xl text-[10px] font-extrabold shadow shrink-0">
-                    ✅ Selesai
-                </button>
+                <!-- Strip Thumbnail Jepretan (Ketuk 🗑️ untuk hapus 1 foto tanpa mengulang semua) -->
+                <div id="pb-captured-strip" class="flex gap-1.5 overflow-x-auto max-w-[105px] py-1 items-center justify-center shrink-0">
+                    <span class="text-[9px] text-gray-300 italic text-center">0/3 Foto</span>
+                </div>
             </div>
         </div>
 
@@ -753,7 +765,7 @@
                     <span class="text-xs font-extrabold text-[#1e293b]">✨ Hasil Photobooth Anda</span>
                     <button type="button" onclick="closeLivePhotobooth()" class="bg-red-100 text-red-600 rounded-full w-7 h-7 font-extrabold text-xs">✕</button>
                 </div>
-                <img id="photobooth-result-img" class="w-full h-auto max-h-[52vh] object-contain rounded-xl shadow-lg border-2 border-[#D6A84F] mb-3" />
+                <img id="photobooth-result-img" class="w-full h-auto max-h-[48vh] object-contain rounded-xl shadow-lg border-2 border-[#D6A84F] mb-3" />
                 
                 <button type="button" onclick="downloadPhotoboothToDevice()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-extrabold shadow-md mb-2">
                     💾 Simpan Foto ke Galeri HP / Device
@@ -764,7 +776,16 @@
                 <button type="button" onclick="shareResultNative()" class="w-full bg-[#D6A84F] text-white py-2.5 rounded-xl text-xs font-extrabold shadow-md mb-2">
                     📲 Share ke IG / WhatsApp
                 </button>
-                <button type="button" onclick="retakePhotos()" class="w-full bg-white text-gray-700 border border-gray-300 py-2 rounded-xl text-xs font-bold">📸 Ambil / Pilih Ulang Foto</button>
+
+                <!-- Tombol Edit Salah Satu Foto vs Hapus Semua -->
+                <div class="grid grid-cols-2 gap-2 w-full mt-1">
+                    <button type="button" onclick="editCapturedPhotoboothShots()" class="bg-amber-500/20 text-[#1e293b] border border-[#D6A84F] py-2 px-2 rounded-xl text-[10px] font-extrabold">
+                        ✏️ Hapus/Ganti 1 Foto
+                    </button>
+                    <button type="button" onclick="retakePhotos()" class="bg-red-50 text-red-600 border border-red-200 py-2 px-2 rounded-xl text-[10px] font-extrabold">
+                        🗑️ Hapus & Ulang Baru
+                    </button>
+                </div>
             </div>
         </div>
         <canvas id="photobooth-canvas" class="hidden"></canvas>
@@ -804,8 +825,9 @@
 
                 <!-- Baris Timer & Info Orientasi Otomatis -->
                 <div class="flex justify-between items-center gap-2 flex-wrap px-1">
-                    <div class="flex gap-1 bg-black/50 p-1 rounded-full border border-white/15">
-                        <button type="button" onclick="setDocTimer(0)" id="doctimer-0" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b]">0s</button>
+                    <div class="flex items-center gap-1 bg-black/50 p-1 rounded-full border border-white/15">
+                        <span class="text-[9px] font-bold text-gray-300 pl-1.5">⏱️ Timer:</span>
+                        <button type="button" onclick="setDocTimer(0)" id="doctimer-0" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b]">OFF (0s)</button>
                         <button type="button" onclick="setDocTimer(3)" id="doctimer-3" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-white">3s</button>
                         <button type="button" onclick="setDocTimer(5)" id="doctimer-5" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-white">5s</button>
                     </div>
@@ -827,14 +849,14 @@
                 </div>
             </div>
 
-            <!-- Dock Tombol Shutter (Otomatis Berpindah ke Sisi Kanan secara Vertikal saat Posisi Horizontal/Tidur) -->
+            <!-- Dock Tombol Shutter -->
             <div class="cam-shutter-dock">
                 <input type="file" id="docphoto-file-input" accept="image/*" multiple class="hidden" onchange="handleDocPhotoDeviceUpload(event)">
                 <button type="button" id="btn-doc-upload-device" onclick="document.getElementById('docphoto-file-input').click()" class="bg-white/15 backdrop-blur-md text-white border border-white/30 px-2.5 py-2 rounded-2xl text-[10px] font-extrabold shrink-0">
                     📂 Upload HP
                 </button>
 
-                <!-- Tombol Jepret Bulat Kamera HP (Selalu Tampil di Tengah Bawah / Tengah Kanan) -->
+                <!-- Tombol Jepret Bulat Kamera HP -->
                 <button type="button" id="btn-doc-capture" onclick="captureDocumentationPhoto()" class="w-16 h-16 rounded-full bg-white border-4 border-[#D6A84F] shadow-[0_0_20px_rgba(214,168,79,0.85)] flex items-center justify-center text-2xl active:scale-90 transition shrink-0">
                     📸
                 </button>
@@ -915,6 +937,7 @@
         let docFilterKey = 'normal';
         let docOrientation = 'portrait';
         let pbOrientation = 'portrait';
+        let pbTimerSeconds = 3; // Default 3 detik, bisa dimatikan (0s)
         let isForcedLandscapeRotate = false;
 
         // Fungsi Buka-Tutup (Collapse / Accordion) Kotak Menu
@@ -1016,7 +1039,6 @@
                 const dx = clientX - startX;
                 const dy = clientY - startY;
 
-                // Jika belum mencapai waktu tekan lama tapi jari bergeser jauh, batalkan timer
                 if (!isDragMode && (Math.abs(dx) > 12 || Math.abs(dy) > 12)) {
                     clearTimeout(longPressTimer);
                     isDragMode = true;
@@ -1047,7 +1069,6 @@
                         localStorage.setItem('cwo_orb_pos', JSON.stringify({ left: rect.left, top: rect.top }));
                     } catch (err) {}
                 } else {
-                    // Klik 1x Cepat -> Langsung Buka / Tutup Menu Orb
                     if (e && e.cancelable) e.preventDefault();
                     toggleOrbMenu();
                 }
@@ -2180,7 +2201,7 @@
         }
 
         // =========================================================================
-        // 7. RUNDOWN PREVIEW & PHOTOBOOTH GALLERY
+        // 7. RUNDOWN PREVIEW & PHOTOBOOTH GALLERY (DENGAN HAPUS FOTO SENDIRI)
         // =========================================================================
         function previewRundownImage(idx = 0) {
             const src = rundownListData[idx];
@@ -2234,18 +2255,76 @@
             });
         }
 
-        function previewGalleryPhoto(url, names) {
+        function previewGalleryPhoto(displayUrl, names, isMine, rawUrl) {
             Swal.fire({
-                title: names,
-                imageUrl: url,
+                title: `👩‍❤️‍👨 ${names}`,
+                imageUrl: displayUrl,
                 imageAlt: names,
                 showCloseButton: true,
-                showConfirmButton: true,
+                showCancelButton: isMine,
                 confirmButtonText: '💾 Simpan / Buka Foto',
+                cancelButtonText: '🗑️ Hapus Foto Kami',
                 confirmButtonColor: '#D6A84F',
+                cancelButtonColor: '#ef4444',
                 background: '#F7F1E3'
             }).then((result) => {
-                if (result.isConfirmed) window.open(url, '_blank');
+                if (result.isConfirmed) {
+                    window.open(displayUrl, '_blank');
+                } else if (result.dismiss === Swal.DismissReason.cancel && isMine) {
+                    deleteMyPhotoboothFromGallery(rawUrl || displayUrl);
+                }
+            });
+        }
+
+        function deleteMyPhotoboothFromGallery(rawUrl) {
+            Swal.fire({
+                title: 'Hapus Foto Photobooth Ini?',
+                text: 'Foto Photobooth milik pasangan Anda akan dihapus dari Photobooth Gallery.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '🗑️ Ya, Hapus Foto Saya',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#D6A84F'
+            }).then(async (res) => {
+                if (!res.isConfirmed) return;
+                Swal.fire({ title: 'Menghapus Foto...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                const coupleId = getCoupleId();
+                try {
+                    const response = await fetch(GAS_WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            'action': 'deleteMyPhotobooth',
+                            'coupleId': coupleId,
+                            'url': rawUrl
+                        })
+                    }).then(r => r.json());
+
+                    localStorage.removeItem('photobooth_result');
+                    localStorage.removeItem(`photobooth_${coupleId}`);
+
+                    await loadGallery();
+                    Swal.fire({
+                        title: 'Terhapus!',
+                        text: 'Foto Photobooth Anda telah dihapus dari galeri.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } catch (e) {
+                    localStorage.removeItem('photobooth_result');
+                    localStorage.removeItem(`photobooth_${coupleId}`);
+                    await loadGallery();
+                    Swal.fire({
+                        title: 'Diproses!',
+                        text: 'Pastikan potongan kode deleteMyPhotobooth sudah dipasang di Code.gs Anda.',
+                        icon: 'info',
+                        timer: 1800,
+                        showConfirmButton: false
+                    });
+                }
             });
         }
 
@@ -2265,15 +2344,21 @@
                 
                 const myCoupleId = getCoupleId();
                 data.forEach(item => {
+                    const rawUrl = String(item.url || '').replace(/'/g, "\\'");
                     const displayUrl = formatDriveUrl(item.url);
                     const safeNames = (item.names || 'Peserta').replace(/'/g, "\\'");
-                    const isMine = item.coupleId && item.coupleId.toLowerCase() === myCoupleId;
+                    const isMine = !!(item.coupleId && item.coupleId.toLowerCase() === myCoupleId);
                     
                     container.innerHTML += `
-                        <div onclick="previewGalleryPhoto('${displayUrl}', '${safeNames}')" class="cursor-pointer rounded-xl overflow-hidden shadow-sm border-2 ${isMine ? 'border-[#D6A84F]' : 'border-[#D6A84F]/30'} bg-white hover:shadow-md transition flex flex-col relative">
-                            ${isMine ? '<span class="absolute top-1.5 right-1.5 bg-[#D6A84F] text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full shadow">Foto Anda</span>' : ''}
-                            <img src="${displayUrl}" loading="lazy" referrerpolicy="no-referrer" class="w-full h-auto object-cover aspect-[9/16] bg-gray-100" alt="${item.names}">
-                            <div class="p-2 text-center text-[10px] font-extrabold text-[#1e293b] uppercase tracking-wider bg-[#F7F1E3]/60">${item.names}</div>
+                        <div onclick="previewGalleryPhoto('${displayUrl}', '${safeNames}', ${isMine}, '${rawUrl}')" class="cursor-pointer rounded-xl overflow-hidden shadow-sm border-2 ${isMine ? 'border-[#D6A84F]' : 'border-[#D6A84F]/30'} bg-white hover:shadow-md transition flex flex-col relative">
+                            ${isMine ? `
+                                <span class="absolute top-1.5 left-1.5 bg-[#D6A84F] text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full shadow z-10">Foto Anda</span>
+                                <button type="button" onclick="event.stopPropagation(); deleteMyPhotoboothFromGallery('${rawUrl}')" class="absolute top-1.5 right-1.5 bg-red-600 hover:bg-red-700 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full shadow z-10 flex items-center gap-0.5">
+                                    🗑️ Hapus
+                                </button>
+                            ` : ''}
+                            <img src="${displayUrl}" loading="lazy" referrerpolicy="no-referrer" class="w-full h-auto object-cover aspect-[9/16] bg-gray-100" alt="${safeNames}">
+                            <div class="p-2 text-center text-[10px] font-extrabold text-[#1e293b] uppercase tracking-wider bg-[#F7F1E3]/60 truncate">👩‍❤️‍👨 ${item.names}</div>
                         </div>
                     `;
                 });
@@ -2836,7 +2921,6 @@
             renderAestheticEventGallery();
         }
 
-        // Render Event Photo's Gallery (Teks Kosong Utuh di Tengah, Masonry Aktif Saat Ada Foto)
         function renderAestheticEventGallery() {
             const container = document.getElementById('event-photos-masonry');
             const fsGrid = document.getElementById('aesthetic-fullscreen-grid');
@@ -3021,7 +3105,7 @@
         }
 
         // =========================================================================
-        // 11. LIVE PHOTOBOOTH FULLSCREEN NATIVE
+        // 11. LIVE PHOTOBOOTH FULLSCREEN (TIMER ON/OFF & HAPUS JEPRETAN SATUAN)
         // =========================================================================
         let videoStream = null; 
         let capturedPhotos = []; 
@@ -3038,6 +3122,87 @@
             fresh:   { css: 'saturate(1.22) contrast(1.05) brightness(1.04) hue-rotate(-6deg)' },
             bw:      { css: 'grayscale(1) contrast(1.18) brightness(1.03)' }
         };
+
+        // Fungsi Saklar Timer Photobooth (OFF 0s / 3s / 5s)
+        function setPhotoboothTimer(sec) {
+            pbTimerSeconds = sec;
+            [0, 3, 5].forEach(s => {
+                const btn = document.getElementById(`pbtimer-${s}`);
+                if (!btn) return;
+                btn.className = (s === sec)
+                    ? "px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b]"
+                    : "px-2 py-0.5 rounded-full text-[10px] font-extrabold text-white";
+            });
+        }
+
+        // Render Strip Thumbnail Foto yang Sudah Diambil + Tombol 🗑️ Hapus per Foto
+        function renderPhotoboothCapturedStrip() {
+            const strip = document.getElementById('pb-captured-strip');
+            const captureBtn = document.getElementById('capture-btn');
+            const earlyBtn = document.getElementById('finish-early-btn');
+            if (!strip) return;
+
+            if (capturedPhotos.length === 0) {
+                strip.innerHTML = `<span class="text-[9px] text-gray-300 italic text-center">0/${targetPhotoCount} Foto</span>`;
+                if (captureBtn) {
+                    captureBtn.innerText = `📸 1/${targetPhotoCount}`;
+                    captureBtn.disabled = false;
+                }
+                if (earlyBtn) earlyBtn.classList.add('hidden');
+                return;
+            }
+
+            strip.innerHTML = capturedPhotos.map((canvasEl, idx) => {
+                const thumbUrl = canvasEl.toDataURL('image/jpeg', 0.6);
+                return `
+                    <div class="relative shrink-0 w-11 h-11 rounded-xl overflow-hidden border-2 border-[#D6A84F] bg-black shadow">
+                        <img src="${thumbUrl}" class="w-full h-full object-cover">
+                        <span class="absolute bottom-0 left-0 bg-black/70 text-[#D6A84F] text-[8px] font-extrabold px-1 rounded-tr">#${idx + 1}</span>
+                        <button type="button" onclick="deleteSingleCapturedPhotoboothShot(${idx})" title="Hapus Foto #${idx + 1}" class="absolute top-0 right-0 bg-red-600 text-white rounded-bl-lg w-4 h-4 text-[8px] font-bold flex items-center justify-center shadow">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            if (capturedPhotos.length >= targetPhotoCount) {
+                if (captureBtn) {
+                    captureBtn.innerText = `✅ Penuh`;
+                    captureBtn.disabled = true;
+                }
+                if (earlyBtn) {
+                    earlyBtn.innerText = `✅ Proses ${capturedPhotos.length} Foto`;
+                    earlyBtn.classList.remove('hidden');
+                }
+            } else {
+                if (captureBtn) {
+                    captureBtn.innerText = `📸 ${capturedPhotos.length + 1}/${targetPhotoCount}`;
+                    captureBtn.disabled = false;
+                }
+                if (earlyBtn) {
+                    earlyBtn.innerText = `✅ Proses ${capturedPhotos.length} Foto`;
+                    earlyBtn.classList.remove('hidden');
+                }
+            }
+        }
+
+        // Hapus 1 Foto Tertentu Tanpa Harus Mengulang Foto Lainnya yang Sudah Bagus
+        function deleteSingleCapturedPhotoboothShot(idx) {
+            if (idx < 0 || idx >= capturedPhotos.length) return;
+            capturedPhotos.splice(idx, 1);
+            renderPhotoboothCapturedStrip();
+        }
+
+        // Kembali ke Kamera dari Layar Hasil untuk Menghapus/Mengganti Salah Satu Foto Saja
+        async function editCapturedPhotoboothShots() {
+            localStorage.removeItem('photobooth_result');
+            localStorage.removeItem(`photobooth_${getCoupleId()}`);
+            document.getElementById('result-ui').classList.add('hidden');
+            document.getElementById('result-ui').classList.remove('flex');
+            document.getElementById('booth-ui').classList.remove('hidden');
+            renderPhotoboothCapturedStrip();
+            await startCameraStream();
+        }
 
         function setCameraFilter(filterKey) {
             currentPhotoFilter = filterKey;
@@ -3095,18 +3260,18 @@
         }
 
         function setPhotoTarget(count) {
-            if (capturedPhotos.length > 0) {
+            if (capturedPhotos.length > count) {
                 Swal.fire({
-                    title: 'Ganti Mode Frame?',
-                    text: 'Mengganti jumlah foto akan mengulang jepretan saat ini.',
+                    title: 'Kurangi Jumlah Slot Foto?',
+                    text: `Anda sudah mengambil ${capturedPhotos.length} foto. Mengubah ke mode ${count} foto akan menyesuaikan jumlah foto.`,
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Ya, Ganti Mode',
+                    confirmButtonText: 'Ya, Sesuaikan',
                     cancelButtonText: 'Batal',
                     confirmButtonColor: '#D6A84F'
                 }).then((res) => {
                     if (res.isConfirmed) {
-                        capturedPhotos = [];
+                        capturedPhotos = capturedPhotos.slice(0, count);
                         applyPhotoTargetUI(count);
                     }
                 });
@@ -3120,23 +3285,14 @@
             [1, 2, 3].forEach(num => {
                 const btn = document.getElementById(`mode-btn-${num}`);
                 if (num === count) {
-                    btn.className = "px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b] shadow";
+                    btn.className = "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b] shadow";
                 } else {
-                    btn.className = "px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20";
+                    btn.className = "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-white";
                 }
             });
 
             checkDeviceCameraOrientation();
-
-            const indContainer = document.getElementById('photo-indicators');
-            indContainer.innerHTML = '';
-            for (let i = 0; i < count; i++) {
-                indContainer.innerHTML += `<div class="w-3 h-3 rounded-full border-2 border-[#D6A84F] bg-white/40 indicator shadow-sm"></div>`;
-            }
-
-            document.getElementById('capture-btn').innerText = `📸 1/${targetPhotoCount}`;
-            document.getElementById('capture-btn').disabled = false;
-            document.getElementById('finish-early-btn').classList.add('hidden');
+            renderPhotoboothCapturedStrip();
         }
 
         async function handlePhotoboothDeviceUpload(event) {
@@ -3145,7 +3301,6 @@
             if (files.length === 0) return;
 
             const btn = document.getElementById('capture-btn');
-            const earlyBtn = document.getElementById('finish-early-btn');
             btn.disabled = true;
             btn.innerText = "⏳";
 
@@ -3153,20 +3308,14 @@
                 if (capturedPhotos.length >= targetPhotoCount) break;
                 try {
                     const canvas = await fileToHighResCanvas(files[i], pbOrientation, currentPhotoFilter);
-                    const idx = capturedPhotos.length;
                     capturedPhotos.push(canvas);
-                    const indicators = document.querySelectorAll('.indicator');
-                    if (indicators[idx]) indicators[idx].style.backgroundColor = '#D6A84F';
                 } catch (e) {}
             }
 
+            renderPhotoboothCapturedStrip();
+
             if (capturedPhotos.length >= targetPhotoCount) {
-                earlyBtn.classList.add('hidden');
                 setTimeout(generatePhotoboothStrip, 350);
-            } else {
-                btn.innerText = `📸 ${capturedPhotos.length + 1}/${targetPhotoCount}`;
-                btn.disabled = false;
-                earlyBtn.classList.remove('hidden');
             }
         }
 
@@ -3247,46 +3396,47 @@
         }
 
         async function takeSinglePhoto() {
+            if (capturedPhotos.length >= targetPhotoCount) return;
+
             const btn = document.getElementById('capture-btn'); 
             const earlyBtn = document.getElementById('finish-early-btn');
             btn.disabled = true; 
             earlyBtn.classList.add('hidden');
             
-            const currentIndex = capturedPhotos.length;
-            const overlay = document.getElementById('countdown-overlay'); 
-            let count = 3; 
-            overlay.style.opacity = '1'; 
-            overlay.innerText = count;
-            
-            await new Promise(resolve => {
-                const timer = setInterval(() => {
-                    count--; 
-                    if (count > 0) {
-                        overlay.innerText = count; 
-                    } else { 
-                        clearInterval(timer); 
-                        overlay.style.opacity = '0'; 
-                        resolve(); 
-                    }
-                }, 1000);
-            });
+            // Hitung mundur hanya jika pbTimerSeconds > 0 (Jika OFF / 0s langsung jepret instan)
+            if (pbTimerSeconds > 0) {
+                const overlay = document.getElementById('countdown-overlay'); 
+                let count = pbTimerSeconds; 
+                overlay.style.opacity = '1'; 
+                overlay.innerText = count;
+                
+                await new Promise(resolve => {
+                    const timer = setInterval(() => {
+                        count--; 
+                        if (count > 0) {
+                            overlay.innerText = count; 
+                        } else { 
+                            clearInterval(timer); 
+                            overlay.style.opacity = '0'; 
+                            resolve(); 
+                        }
+                    }, 1000);
+                });
+            }
 
             const flashState = await triggerSmartFlashBeforeCapture();
 
             document.getElementById('flash-overlay').classList.add('flash-effect'); 
             setTimeout(() => document.getElementById('flash-overlay').classList.remove('flash-effect'), 300); 
             
-            captureFrame(currentIndex); 
+            captureFrame(); 
 
             await stopSmartFlashAfterCapture(flashState);
+            renderPhotoboothCapturedStrip();
             
             if (capturedPhotos.length >= targetPhotoCount) {
                 btn.innerText = "⏳"; 
                 setTimeout(generatePhotoboothStrip, 350); 
-            } else {
-                btn.innerText = `📸 ${capturedPhotos.length + 1}/${targetPhotoCount}`;
-                btn.disabled = false;
-                earlyBtn.classList.remove('hidden');
             }
         }
 
@@ -3336,7 +3486,7 @@
             ctx.putImageData(imgData, 0, 0);
         }
 
-        function captureFrame(index) {
+        function captureFrame() {
             checkDeviceCameraOrientation();
             const video = document.getElementById('video-feed'); 
             const canvas = document.createElement('canvas'); 
@@ -3379,10 +3529,7 @@
             ctx.restore();
 
             applyCrossBrowserCanvasFilter(ctx, canvas.width, canvas.height, currentPhotoFilter);
-
             capturedPhotos.push(canvas); 
-            const indicators = document.querySelectorAll('.indicator');
-            if (indicators[index]) indicators[index].style.backgroundColor = '#D6A84F';
         }
 
         function generatePhotoboothStrip() {
