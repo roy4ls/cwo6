@@ -17,7 +17,7 @@
         .clean-card { background: #F7F1E3; border-radius: 16px; border: 1px solid rgba(214, 168, 79, 0.22); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); scroll-margin-top: 70px; }
         .floating-clock { position: fixed; top: 12px; right: 12px; z-index: 45; background: rgba(247, 241, 227, 0.95); backdrop-filter: blur(8px); }
         
-        /* Draggable Floating Orb (Tidak menghalangi klik layar) */
+        /* Floating Orb (1x Klik Buka Menu, Tekan Lama untuk Geser) */
         #draggable-orb-container {
             position: fixed;
             bottom: 24px;
@@ -27,6 +27,7 @@
             height: 56px;
             touch-action: none;
             user-select: none;
+            -webkit-user-select: none;
         }
         .orb-btn {
             width: 56px;
@@ -40,9 +41,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            cursor: grab;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .orb-btn:active { cursor: grabbing; transform: scale(0.95); }
+        .orb-btn.dragging-active {
+            transform: scale(1.15);
+            box-shadow: 0 0 0 6px rgba(214, 168, 79, 0.45), 0 12px 30px rgba(0, 0, 0, 0.6);
+            cursor: grabbing;
+        }
 
         #orb-popup-menu {
             position: fixed;
@@ -86,16 +92,13 @@
         }
 
         /* ========================================================================= */
-        /* NATIVE FULLSCREEN CAMERA APP (OTOMATIS POTRET TEGAK & LANDSCAPE TIDUR)   */
+        /* NATIVE FULLSCREEN CAMERA APP (TEGAK PORTRAIT & TIDUR LANDSCAPE PRESISI)   */
         /* ========================================================================= */
         .native-cam-modal {
             position: fixed;
             inset: 0;
             z-index: 120;
             background: #000;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
             overflow: hidden;
         }
         .native-cam-stage {
@@ -111,9 +114,47 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.25s ease;
         }
-        /* Saat kamera dipaksa mode tidur (Landscape) walaupun HP belum diputar */
+        /* Top Bar Kamera */
+        .cam-top-hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 25;
+            padding: 12px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.82), rgba(0,0,0,0.35), transparent);
+        }
+        /* Filter Bar Kamera */
+        .cam-filter-hud {
+            position: absolute;
+            bottom: 98px;
+            left: 0;
+            right: 0;
+            z-index: 25;
+            display: flex;
+            justify-content: center;
+            padding: 0 12px;
+        }
+        /* Shutter Dock Kamera (Default Portrait di Bawah) */
+        .cam-shutter-dock {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 92px;
+            z-index: 25;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* Saat Kamera Dipaksa Mode Tidur (Landscape) */
         .force-landscape-rotate {
             position: fixed !important;
             top: 50% !important;
@@ -122,30 +163,57 @@
             height: 100dvw !important;
             transform: translate(-50%, -50%) rotate(90deg) !important;
         }
-        /* Responsif otomatis saat HP dimiringkan (Landscape) */
+
+        /* Tata Letak Otomatis Saat Posisi Horizontal / Landscape (Shutter selalu terlihat di kanan) */
         @media (orientation: landscape) {
-            .cam-hud-layout {
-                flex-direction: row !important;
+            .cam-top-hud {
+                right: 112px !important;
+                padding: 10px 14px !important;
             }
-            .cam-bottom-dock {
-                width: 125px !important;
+            .cam-filter-hud {
+                bottom: 10px !important;
+                left: 12px !important;
+                right: 120px !important;
+                justify-content: flex-start !important;
+            }
+            .cam-shutter-dock {
+                top: 0 !important;
+                bottom: 0 !important;
+                right: 0 !important;
+                left: auto !important;
+                width: 108px !important;
                 height: 100% !important;
                 flex-direction: column !important;
-                justify-content: center !important;
+                justify-content: space-evenly !important;
+                align-items: center !important;
+                padding: 12px 6px !important;
                 border-top: none !important;
-                border-left: 1px solid rgba(255,255,255,0.15) !important;
+                border-left: 1px solid rgba(214, 168, 79, 0.35) !important;
             }
         }
-        .force-landscape-rotate .cam-hud-layout {
-            flex-direction: row !important;
+        .force-landscape-rotate .cam-top-hud {
+            right: 112px !important;
+            padding: 10px 14px !important;
         }
-        .force-landscape-rotate .cam-bottom-dock {
-            width: 125px !important;
+        .force-landscape-rotate .cam-filter-hud {
+            bottom: 10px !important;
+            left: 12px !important;
+            right: 120px !important;
+            justify-content: flex-start !important;
+        }
+        .force-landscape-rotate .cam-shutter-dock {
+            top: 0 !important;
+            bottom: 0 !important;
+            right: 0 !important;
+            left: auto !important;
+            width: 108px !important;
             height: 100% !important;
             flex-direction: column !important;
-            justify-content: center !important;
+            justify-content: space-evenly !important;
+            align-items: center !important;
+            padding: 12px 6px !important;
             border-top: none !important;
-            border-left: 1px solid rgba(255,255,255,0.15) !important;
+            border-left: 1px solid rgba(214, 168, 79, 0.35) !important;
         }
 
         #countdown-overlay, #doc-countdown-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 90px; font-weight: 800; color: white; text-shadow: 0 4px 16px rgba(0,0,0,0.7); pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 30; }
@@ -159,13 +227,14 @@
         /* Aesthetic Masonry untuk Event Photo's Gallery */
         .aesthetic-masonry { column-count: 2; column-gap: 12px; }
         .aesthetic-item { break-inside: avoid; margin-bottom: 12px; transition: all 0.3s ease; }
+        .empty-gallery-box { column-span: all; -webkit-column-span: all; width: 100%; }
         .tilt-left { transform: rotate(-1deg); }
         .tilt-right { transform: rotate(1deg); }
 
         .collapse-chevron { transition: transform 0.3s ease; }
         .collapse-chevron.open { transform: rotate(180deg); }
 
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #D6A84F; border-radius: 10px; }
     </style>
@@ -287,7 +356,7 @@
                             <p class="text-[10px] text-gray-500 font-semibold">Ketuk untuk melihat jadwal & mengunduh PDF</p>
                         </div>
                     </div>
-                    <span id="chev-rundown" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center">▼</span>
+                    <span id="chev-rundown" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center shrink-0">▼</span>
                 </button>
                 
                 <div id="body-rundown" class="hidden px-5 pb-5 pt-2 border-t border-[#D6A84F]/20">
@@ -304,26 +373,27 @@
             </div>
 
             <!-- ========================================================================= -->
-            <!-- 5. PRESENTATION & NOTES (COLLAPSIBLE - DEFAULT TERBUKA)                   -->
+            <!-- 5. PRESENTATION & NOTES (COLLAPSIBLE - DEFAULT TERTUTUP)                  -->
             <!-- ========================================================================= -->
-            <div class="clean-card mb-4 overflow-hidden border-2 border-[#D6A84F]/35" id="materi-container">
-                <div onclick="toggleCardCollapse('body-materi', 'chev-materi')" class="w-full p-4 px-5 flex justify-between items-center cursor-pointer hover:bg-black/[0.02] transition">
+            <div class="clean-card mb-4 overflow-hidden" id="materi-container">
+                <button type="button" onclick="toggleCardCollapse('body-materi', 'chev-materi')" class="w-full p-4 px-5 flex justify-between items-center text-left hover:bg-black/[0.02] transition">
                     <div class="flex items-center gap-2.5">
                         <span class="text-lg">📊</span>
                         <div>
-                            <h3 id="materi-title" class="font-extrabold text-[16px] text-[#1e293b]">Presentation & Notes</h3>
-                            <span id="couple-sync-badge" class="text-[10px] font-bold text-green-700">💑 Sinkron Pasangan Aktif</span>
+                            <h3 id="materi-title" class="font-extrabold text-[15px] text-[#1e293b]">Presentation & Notes</h3>
+                            <p class="text-[10px] font-bold text-green-700">💑 Ketuk untuk membuka Slide Materi & Catatan Pasangan</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button type="button" id="btn-fullscreen-slide" onclick="event.stopPropagation(); toggleSlideFullscreen()" class="text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] px-3 py-1.5 rounded-full shadow">
-                            ⛶ Perbesar Slide
-                        </button>
-                        <span id="chev-materi" class="collapse-chevron open text-xs font-extrabold bg-[#D6A84F] text-[#1e293b] w-7 h-7 rounded-full flex items-center justify-center">▼</span>
-                    </div>
-                </div>
+                    <span id="chev-materi" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center shrink-0">▼</span>
+                </button>
 
-                <div id="body-materi" class="px-5 pb-5 pt-2 border-t border-[#D6A84F]/20">
+                <div id="body-materi" class="hidden px-5 pb-5 pt-2 border-t border-[#D6A84F]/20">
+                    <div class="flex justify-end mb-2.5">
+                        <button type="button" id="btn-fullscreen-slide" onclick="toggleSlideFullscreen()" class="text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] px-3.5 py-1.5 rounded-full shadow">
+                            ⛶ Perbesar Slide Fullscreen
+                        </button>
+                    </div>
+
                     <!-- WADAH AREA SLIDE + TOOLBAR -->
                     <div id="slide-interactive-box" class="flex flex-col">
                         <div id="fullscreen-top-bar" class="hidden justify-between items-center mb-3 pb-2 border-b border-gray-700">
@@ -408,7 +478,7 @@
                             <p class="text-[10px] text-gray-500 font-semibold">Tanya pembicara secara anonim & beri kesan pesan</p>
                         </div>
                     </div>
-                    <span id="chev-qna" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center">▼</span>
+                    <span id="chev-qna" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center shrink-0">▼</span>
                 </button>
 
                 <div id="body-qna" class="hidden px-5 pb-5 pt-2 border-t border-[#D6A84F]/20">
@@ -436,7 +506,7 @@
                             <p class="text-[10px] text-gray-500 font-semibold">Ketuk untuk membuka QR Code & Nomor Rekening BCA</p>
                         </div>
                     </div>
-                    <span id="chev-persembahan" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center">▼</span>
+                    <span id="chev-persembahan" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center shrink-0">▼</span>
                 </button>
 
                 <div id="body-persembahan" class="hidden px-5 pb-5 pt-2 border-t border-[#D6A84F]/20">
@@ -488,7 +558,7 @@
                             <p class="text-[10px] text-gray-500 font-semibold">Ketuk untuk melihat foto berbingkai pasangan peserta</p>
                         </div>
                     </div>
-                    <span id="chev-pbgallery" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center">▼</span>
+                    <span id="chev-pbgallery" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center shrink-0">▼</span>
                 </button>
 
                 <div id="body-pbgallery" class="hidden px-5 pb-5 pt-2 border-t border-[#D6A84F]/20">
@@ -501,7 +571,7 @@
             </div>
 
             <!-- ========================================================================= -->
-            <!-- 9. EVENT PHOTO'S GALLERY ALBUM (COLLAPSIBLE - DEFAULT TERTUTUP)           -->
+            <!-- 9. EVENT PHOTO'S GALLERY ALBUM (COLLAPSIBLE - RAPI TANPA TUMPANG TINDIH)  -->
             <!-- ========================================================================= -->
             <div id="section-event-gallery" class="clean-card mb-6 border-2 border-[#D6A84F]/30 overflow-hidden">
                 <button type="button" onclick="toggleCardCollapse('body-epgallery', 'chev-epgallery')" class="w-full p-4 px-5 flex justify-between items-center text-left hover:bg-black/[0.02] transition">
@@ -512,27 +582,31 @@
                             <p class="text-[10px] text-gray-500 font-semibold">Ketuk untuk membuka album dokumentasi momen acara</p>
                         </div>
                     </div>
-                    <span id="chev-epgallery" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center">▼</span>
+                    <span id="chev-epgallery" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center shrink-0">▼</span>
                 </button>
 
                 <div id="body-epgallery" class="hidden px-5 pb-5 pt-2 border-t border-[#D6A84F]/20">
-                    <div class="flex items-center justify-between gap-1.5 overflow-x-auto py-2 mb-3">
-                        <div class="flex items-center gap-1.5">
-                            <button type="button" onclick="filterEventPhotos('ALL')" id="ep-tab-ALL" class="shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] shadow-sm">✨ Semua</button>
-                            <button type="button" onclick="filterEventPhotos('MINE')" id="ep-tab-MINE" class="shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-white text-[#1e293b] border border-[#D6A84F]/30">💑 Foto Kami</button>
-                            <button type="button" onclick="shuffleAndRenderEventPhotos()" class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#D6A84F]/20 text-[#1e293b] border border-[#D6A84F]/40">🎲 Acak</button>
+                    <!-- Baris Filter & Tombol Fullscreen Rapi (Tidak Tumpang Tindih) -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 py-2 mb-3">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button type="button" onclick="filterEventPhotos('ALL')" id="ep-tab-ALL" class="px-3 py-1.5 rounded-full text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] shadow-sm">✨ Semua</button>
+                            <button type="button" onclick="filterEventPhotos('MINE')" id="ep-tab-MINE" class="px-3 py-1.5 rounded-full text-[10px] font-extrabold bg-white text-[#1e293b] border border-[#D6A84F]/30">💑 Foto Kami</button>
+                            <button type="button" onclick="shuffleAndRenderEventPhotos()" class="px-3 py-1.5 rounded-full text-[10px] font-extrabold bg-[#D6A84F]/20 text-[#1e293b] border border-[#D6A84F]/40">🎲 Acak Estetik</button>
                         </div>
-                        <button type="button" onclick="openAestheticFullscreenModal()" class="shrink-0 bg-[#1e293b] text-[#D6A84F] text-[10px] font-extrabold px-3 py-1 rounded-full shadow">
+                        <button type="button" onclick="openAestheticFullscreenModal()" class="bg-[#1e293b] text-[#D6A84F] text-[10px] font-extrabold px-3.5 py-1.5 rounded-full shadow">
                             ⛶ Fullscreen
                         </button>
                     </div>
 
-                    <div id="event-photos-masonry" class="aesthetic-masonry max-h-[520px] overflow-y-auto p-1">
-                        <p class="text-xs text-gray-500 text-center col-span-2 py-8">Memuat koleksi Event Photo's Gallery...</p>
+                    <!-- Wadah Galeri (Otomatis 1 Kolom Saat Kosong, 2 Kolom Masonry Saat Ada Foto) -->
+                    <div id="event-photos-masonry" class="max-h-[520px] overflow-y-auto p-1">
+                        <div class="empty-gallery-box text-center py-8 px-4 bg-white/60 rounded-2xl border border-dashed border-[#D6A84F]/40 text-xs text-gray-500 font-semibold">
+                            Memuat koleksi Event Photo's Gallery...
+                        </div>
                     </div>
 
-                    <button type="button" onclick="openDocPhotoModal()" class="w-full mt-3 bg-gradient-to-r from-[#1e293b] to-[#334155] text-[#D6A84F] py-3 rounded-xl text-xs font-extrabold shadow-md hover:opacity-95 transition flex items-center justify-center gap-2">
-                        📷 Ambil / Unggah Foto Dokumentasi (<span id="doc-token-StatusBtn">10 Token Tersedia</span>)
+                    <button type="button" onclick="openDocPhotoModal()" class="w-full mt-3 bg-gradient-to-r from-[#1e293b] to-[#334155] text-[#D6A84F] py-3 px-4 rounded-xl text-xs font-extrabold shadow-md hover:opacity-95 transition text-center leading-relaxed">
+                        📷 Ambil / Unggah Foto Dokumentasi (<span id="doc-token-StatusBtn">Sisa 10 dari 10 Token</span>)
                     </button>
                 </div>
             </div>
@@ -546,11 +620,10 @@
         </div>
 
         <!-- ========================================================================= -->
-        <!-- DRAGGABLE FLOATING ORB MENU (BISA DIGESER KE MANA SAJA & BEBAS STUCK)     -->
+        <!-- FLOATING ORB MENU (KLIK 1X BUKA MENU, TEKAN LAMA GESER POSISI)            -->
         <!-- ========================================================================= -->
         <div id="orb-backdrop" onclick="closeOrbMenu()" class="hidden fixed inset-0 z-[84] bg-black/25 backdrop-blur-[1px]"></div>
 
-        <!-- Pop-up Daftar Menu Cepat (Benar-benar hidden saat tertutup agar tidak menghalangi layar) -->
         <div id="orb-popup-menu" class="hidden">
             <div class="flex justify-between items-center pb-2 mb-2 border-b border-white/15">
                 <span class="text-[11px] font-extrabold text-[#D6A84F] tracking-wider uppercase">🧭 Navigasi Cepat</span>
@@ -588,12 +661,12 @@
                     <span>✨</span> <span>Event Photo's Gallery</span>
                 </button>
             </div>
-            <p class="text-[9px] text-center text-gray-400 mt-2">💡 Tombol bulat Menu dapat ditahan & digeser</p>
+            <p class="text-[9px] text-center text-gray-400 mt-2">💡 Ketuk 1x: Buka Menu • Tekan Lama: Geser Posisi</p>
         </div>
 
-        <!-- Tombol Bulat Orb yang Bisa Digeser (Draggable) -->
+        <!-- Tombol Bulat Orb -->
         <div id="draggable-orb-container">
-            <button type="button" id="floating-orb-btn" class="orb-btn" title="Tahan untuk geser posisi, Ketuk untuk buka menu">
+            <button type="button" id="floating-orb-btn" class="orb-btn" title="Ketuk 1x untuk buka menu, Tekan lama untuk geser posisi">
                 <span id="orb-icon" class="text-xl leading-none pointer-events-none">🧭</span>
                 <span class="text-[8px] font-extrabold tracking-tighter mt-0.5 uppercase pointer-events-none">Menu</span>
             </button>
@@ -604,11 +677,10 @@
     <div id="screen-flash-light" class="fixed inset-0 bg-white z-[200] pointer-events-none opacity-0 transition-opacity duration-150"></div>
 
     <!-- ========================================================================= -->
-    <!-- MODAL 1: LIVE PHOTOBOOTH FULLSCREEN NATIVE (OTOMATIS ROTASI TEGAK/TIDUR)  -->
+    <!-- MODAL 1: LIVE PHOTOBOOTH FULLSCREEN (TOMBOL SHUTTER SELALU TAMPIL)        -->
     <!-- ========================================================================= -->
     <div id="photobooth-modal" class="hidden native-cam-modal">
-        <!-- Layar Kamera Fullscreen -->
-        <div id="booth-ui" class="relative w-full h-full flex flex-col justify-between cam-hud-layout">
+        <div id="booth-ui" class="relative w-full h-full">
             <!-- Stream Video Penuh Satu Layar -->
             <div id="camera-container" onclick="triggerTapToFocus(event, 'camera-container', videoStream)" class="native-cam-stage cursor-pointer">
                 <video id="video-feed" autoplay playsinline muted class="native-cam-video" style="transform: scaleX(-1);"></video>
@@ -616,8 +688,8 @@
                 <div id="flash-overlay" class="absolute inset-0 pointer-events-none opacity-0 z-20"></div>
             </div>
 
-            <!-- HUD Kontrol Atas Melayang -->
-            <div class="relative z-20 p-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent flex flex-col gap-2">
+            <!-- HUD Kontrol Atas -->
+            <div class="cam-top-hud flex flex-col gap-2">
                 <div class="flex justify-between items-center gap-2">
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <button type="button" onclick="togglePhotoboothFlash()" id="btn-flash-toggle" class="bg-black/60 backdrop-blur-md text-white border border-white/25 px-3 py-1.5 rounded-full text-[11px] font-extrabold">
@@ -626,24 +698,26 @@
                         <button type="button" onclick="switchCameraFacing()" id="btn-switch-cam" class="bg-black/60 backdrop-blur-md text-[#D6A84F] border border-[#D6A84F]/50 px-3 py-1.5 rounded-full text-[11px] font-extrabold">
                             🔄 Balik Kamera
                         </button>
-                        <button type="button" onclick="toggleCameraRotateView('photobooth-modal', 'pb')" id="btn-pb-rotate-view" class="bg-[#D6A84F] text-[#1e293b] px-3 py-1.5 rounded-full text-[11px] font-extrabold shadow">
-                            📱 Posisi: Tegak (Auto)
+                        <button type="button" onclick="toggleCameraRotateView('photobooth-modal')" id="btn-pb-rotate-view" class="bg-[#D6A84F] text-[#1e293b] px-3 py-1.5 rounded-full text-[11px] font-extrabold shadow">
+                            📱 Posisi: Tegak
                         </button>
                     </div>
                     <button type="button" onclick="closeLivePhotobooth()" class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-extrabold text-sm shadow-lg shrink-0">✕</button>
                 </div>
 
-                <!-- Pilihan Jumlah Grid Foto (1, 2, 3) -->
-                <div class="flex justify-center gap-1.5">
-                    <button type="button" id="mode-btn-1" onclick="setPhotoTarget(1)" class="px-3 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20">1 Foto Full</button>
-                    <button type="button" id="mode-btn-2" onclick="setPhotoTarget(2)" class="px-3 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20">2 Foto Grid</button>
-                    <button type="button" id="mode-btn-3" onclick="setPhotoTarget(3)" class="px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b] shadow">3 Foto Grid</button>
+                <!-- Pilihan Jumlah Grid Foto & Indikator -->
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <div class="flex gap-1.5">
+                        <button type="button" id="mode-btn-1" onclick="setPhotoTarget(1)" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20">1 Foto</button>
+                        <button type="button" id="mode-btn-2" onclick="setPhotoTarget(2)" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20">2 Foto</button>
+                        <button type="button" id="mode-btn-3" onclick="setPhotoTarget(3)" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b] shadow">3 Foto</button>
+                    </div>
+                    <div class="flex items-center gap-2 bg-black/50 px-2.5 py-1 rounded-full" id="photo-indicators"></div>
                 </div>
             </div>
 
-            <!-- HUD Kontrol Bawah / Samping (Saat HP Tidur otomatis pindah ke samping) -->
-            <div class="cam-bottom-dock relative z-20 p-3 bg-gradient-to-t from-black/85 via-black/50 to-transparent flex flex-col items-center gap-2.5">
-                <!-- Filter Kamera -->
+            <!-- Baris Filter Kamera -->
+            <div class="cam-filter-hud">
                 <div class="flex gap-1.5 overflow-x-auto max-w-full pb-1 px-1">
                     <button type="button" onclick="setCameraFilter('normal')" id="filter-btn-normal" class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b]">✨ Natural</button>
                     <button type="button" onclick="setCameraFilter('glow')" id="filter-btn-glow" class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20">🌸 Glow</button>
@@ -652,25 +726,23 @@
                     <button type="button" onclick="setCameraFilter('fresh')" id="filter-btn-fresh" class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20">💎 Fresh</button>
                     <button type="button" onclick="setCameraFilter('bw')" id="filter-btn-bw" class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20">🖤 B&W</button>
                 </div>
+            </div>
 
-                <div class="flex justify-center gap-2.5" id="photo-indicators"></div>
+            <!-- Dock Tombol Shutter (Otomatis di Bawah saat Tegak, Otomatis di Kanan saat Tidur/Horizontal) -->
+            <div class="cam-shutter-dock">
+                <input type="file" id="photobooth-file-input" accept="image/*" multiple class="hidden" onchange="handlePhotoboothDeviceUpload(event)">
+                <button type="button" onclick="document.getElementById('photobooth-file-input').click()" class="bg-white/15 backdrop-blur-md text-white border border-white/30 px-3 py-2 rounded-2xl text-[10px] font-extrabold shrink-0">
+                    📂 Galeri HP
+                </button>
 
-                <!-- Baris Tombol Shutter Kamera HP & Upload dari Galeri -->
-                <div class="flex items-center justify-center gap-4 w-full">
-                    <input type="file" id="photobooth-file-input" accept="image/*" multiple class="hidden" onchange="handlePhotoboothDeviceUpload(event)">
-                    <button type="button" onclick="document.getElementById('photobooth-file-input').click()" class="bg-white/15 backdrop-blur-md text-white border border-white/30 px-3 py-2 rounded-2xl text-[10px] font-extrabold flex items-center gap-1">
-                        📂 Galeri HP
-                    </button>
+                <!-- Tombol Bulat Shutter Utama (Selalu Terlihat Jelas) -->
+                <button type="button" id="capture-btn" onclick="takeSinglePhoto()" class="w-16 h-16 rounded-full bg-white border-4 border-[#D6A84F] shadow-[0_0_20px_rgba(214,168,79,0.8)] flex items-center justify-center text-xs font-extrabold text-[#1e293b] active:scale-90 transition shrink-0">
+                    📸 1/3
+                </button>
 
-                    <!-- Tombol Bulat Shutter seperti Kamera HP Asli -->
-                    <button type="button" id="capture-btn" onclick="takeSinglePhoto()" class="w-16 h-16 rounded-full bg-white border-4 border-[#D6A84F] shadow-xl flex items-center justify-center text-xs font-extrabold text-[#1e293b] active:scale-90 transition shrink-0">
-                        📸 1/3
-                    </button>
-
-                    <button type="button" id="finish-early-btn" onclick="finishPhotoNow()" class="hidden bg-emerald-600 text-white px-3 py-2 rounded-2xl text-[10px] font-extrabold shadow">
-                        ✅ Selesai
-                    </button>
-                </div>
+                <button type="button" id="finish-early-btn" onclick="finishPhotoNow()" class="hidden bg-emerald-600 text-white px-3 py-2 rounded-2xl text-[10px] font-extrabold shadow shrink-0">
+                    ✅ Selesai
+                </button>
             </div>
         </div>
 
@@ -699,10 +771,10 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- MODAL 2: DOKUMENTASI EVENT PHOTO FULLSCREEN NATIVE (TEGAK & TIDUR 16:9)   -->
+    <!-- MODAL 2: DOKUMENTASI EVENT PHOTO FULLSCREEN (SHUTTER SELALU TAMPIL)       -->
     <!-- ========================================================================= -->
     <div id="docphoto-modal" class="hidden native-cam-modal">
-        <div class="relative w-full h-full flex flex-col justify-between cam-hud-layout">
+        <div class="relative w-full h-full">
             <!-- Layar Kamera Penuh -->
             <div id="doc-camera-container" onclick="triggerTapToFocus(event, 'doc-camera-container', docVideoStream)" class="native-cam-stage cursor-pointer">
                 <video id="doc-video-feed" autoplay playsinline muted class="native-cam-video"></video>
@@ -711,7 +783,7 @@
             </div>
 
             <!-- HUD Atas Kamera Dokumentasi -->
-            <div class="relative z-20 p-3 bg-gradient-to-b from-black/85 via-black/40 to-transparent flex flex-col gap-2">
+            <div class="cam-top-hud flex flex-col gap-2">
                 <div class="flex justify-between items-center gap-2">
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <button type="button" onclick="toggleDocFlash()" id="btn-doc-flash" class="bg-black/60 backdrop-blur-md text-white border border-white/25 px-3 py-1.5 rounded-full text-[11px] font-extrabold">
@@ -720,8 +792,8 @@
                         <button type="button" onclick="switchDocCameraFacing()" id="btn-doc-switch-cam" class="bg-black/60 backdrop-blur-md text-[#D6A84F] border border-[#D6A84F]/50 px-3 py-1.5 rounded-full text-[11px] font-extrabold">
                             🔄 Balik Kamera
                         </button>
-                        <button type="button" onclick="toggleCameraRotateView('docphoto-modal', 'doc')" id="btn-doc-rotate-view" class="bg-[#D6A84F] text-[#1e293b] px-3 py-1.5 rounded-full text-[11px] font-extrabold shadow">
-                            🔄 Putar Layar Tidur (16:9)
+                        <button type="button" onclick="toggleCameraRotateView('docphoto-modal')" id="btn-doc-rotate-view" class="bg-[#D6A84F] text-[#1e293b] px-3 py-1.5 rounded-full text-[11px] font-extrabold shadow">
+                            🔄 Putar Tidur (16:9)
                         </button>
                     </div>
                     <div class="flex items-center gap-1.5 shrink-0">
@@ -731,7 +803,7 @@
                 </div>
 
                 <!-- Baris Timer & Info Orientasi Otomatis -->
-                <div class="flex justify-between items-center px-1">
+                <div class="flex justify-between items-center gap-2 flex-wrap px-1">
                     <div class="flex gap-1 bg-black/50 p-1 rounded-full border border-white/15">
                         <button type="button" onclick="setDocTimer(0)" id="doctimer-0" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b]">0s</button>
                         <button type="button" onclick="setDocTimer(3)" id="doctimer-3" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-white">3s</button>
@@ -743,9 +815,8 @@
                 </div>
             </div>
 
-            <!-- HUD Bawah / Samping (Saat HP Dimiringkan otomatis ke samping seperti Kamera HP Asli) -->
-            <div class="cam-bottom-dock relative z-20 p-3 bg-gradient-to-t from-black/90 via-black/60 to-transparent flex flex-col items-center gap-2">
-                <!-- Pilihan Efek Filter -->
+            <!-- Baris Efek Filter Kamera Dokumentasi -->
+            <div class="cam-filter-hud">
                 <div class="flex gap-1.5 overflow-x-auto max-w-full pb-1">
                     <button type="button" onclick="setDocFilter('normal')" id="docfilter-normal" class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b]">✨ Natural</button>
                     <button type="button" onclick="setDocFilter('glow')" id="docfilter-glow" class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20">🌸 Glow</button>
@@ -754,23 +825,23 @@
                     <button type="button" onclick="setDocFilter('fresh')" id="docfilter-fresh" class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20">💎 Fresh</button>
                     <button type="button" onclick="setDocFilter('bw')" id="docfilter-bw" class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20">🖤 B&W</button>
                 </div>
+            </div>
 
-                <!-- Baris Shutter Bulat, Upload Galeri HP & Strip Koleksi Foto -->
-                <div class="flex items-center justify-between w-full max-w-md gap-3 px-2">
-                    <input type="file" id="docphoto-file-input" accept="image/*" multiple class="hidden" onchange="handleDocPhotoDeviceUpload(event)">
-                    <button type="button" id="btn-doc-upload-device" onclick="document.getElementById('docphoto-file-input').click()" class="bg-white/15 backdrop-blur-md text-white border border-white/30 px-3 py-2.5 rounded-2xl text-[10px] font-extrabold shrink-0">
-                        📂 Upload HP
-                    </button>
+            <!-- Dock Tombol Shutter (Otomatis Berpindah ke Sisi Kanan secara Vertikal saat Posisi Horizontal/Tidur) -->
+            <div class="cam-shutter-dock">
+                <input type="file" id="docphoto-file-input" accept="image/*" multiple class="hidden" onchange="handleDocPhotoDeviceUpload(event)">
+                <button type="button" id="btn-doc-upload-device" onclick="document.getElementById('docphoto-file-input').click()" class="bg-white/15 backdrop-blur-md text-white border border-white/30 px-2.5 py-2 rounded-2xl text-[10px] font-extrabold shrink-0">
+                    📂 Upload HP
+                </button>
 
-                    <!-- Tombol Jepret Bulat Kamera HP -->
-                    <button type="button" id="btn-doc-capture" onclick="captureDocumentationPhoto()" class="w-16 h-16 rounded-full bg-white border-4 border-[#D6A84F] shadow-2xl flex items-center justify-center text-xl active:scale-90 transition shrink-0">
-                        📸
-                    </button>
+                <!-- Tombol Jepret Bulat Kamera HP (Selalu Tampil di Tengah Bawah / Tengah Kanan) -->
+                <button type="button" id="btn-doc-capture" onclick="captureDocumentationPhoto()" class="w-16 h-16 rounded-full bg-white border-4 border-[#D6A84F] shadow-[0_0_20px_rgba(214,168,79,0.85)] flex items-center justify-center text-2xl active:scale-90 transition shrink-0">
+                    📸
+                </button>
 
-                    <!-- Thumbnail Strip Koleksi Jepretan -->
-                    <div id="my-doc-photos-strip" class="flex gap-1.5 overflow-x-auto max-w-[110px] py-1 items-center">
-                        <span class="text-[9px] text-gray-400 italic">0 Foto</span>
-                    </div>
+                <!-- Thumbnail Strip Koleksi Jepretan -->
+                <div id="my-doc-photos-strip" class="flex gap-1 overflow-x-auto max-w-[92px] py-1 items-center shrink-0">
+                    <span class="text-[9px] text-gray-300 italic">0 Foto</span>
                 </div>
             </div>
         </div>
@@ -812,7 +883,7 @@
         const BASE64_QR_PERSEMBAHAN = "PASTE_BASE64_QR_PERSEMBAHAN_ANDA_DISINI";
 
         // =========================================================================
-        // 2. STATE GLOBAL, COLLAPSE CARD, & DRAGGABLE FLOATING ORB
+        // 2. STATE GLOBAL, COLLAPSE CARD, & FLOATING ORB (1X KLIK vs TEKAN LAMA)
         // =========================================================================
         let currentSlideIndex = 0;
         let slideNotes = {}; 
@@ -842,7 +913,7 @@
         let docFlashEnabled = false;
         let docTimerSeconds = 0;
         let docFilterKey = 'normal';
-        let docOrientation = 'portrait'; // Otomatis berubah ke 'landscape' saat HP tidur
+        let docOrientation = 'portrait';
         let pbOrientation = 'portrait';
         let isForcedLandscapeRotate = false;
 
@@ -857,7 +928,12 @@
                 bodyEl.classList.remove('hidden');
                 if (chevEl) chevEl.classList.add('open');
                 if (autoLoadPb) loadGallery();
-                if (bodyId === 'body-materi') setTimeout(resizeAnnotationCanvas, 120);
+                if (bodyId === 'body-materi') {
+                    setTimeout(() => {
+                        initTinyMCE();
+                        resizeAnnotationCanvas();
+                    }, 120);
+                }
             } else {
                 bodyEl.classList.add('hidden');
                 if (chevEl) chevEl.classList.remove('open');
@@ -880,22 +956,28 @@
                 if (bodyEl && bodyEl.classList.contains('hidden')) {
                     bodyEl.classList.remove('hidden');
                     if (chevEl) chevEl.classList.add('open');
+                    if (target[0] === 'body-materi') {
+                        setTimeout(() => {
+                            initTinyMCE();
+                            resizeAnnotationCanvas();
+                        }, 120);
+                    }
                 }
             }
         }
 
-        // Inisialisasi Draggable Floating Orb (Bisa Digeser ke Mana Saja)
+        // Inisialisasi Floating Orb: Ketuk 1x = Buka Menu, Tekan Lama (350ms) = Geser Posisi
         function initDraggableOrb() {
             const orbContainer = document.getElementById('draggable-orb-container');
             const orbBtn = document.getElementById('floating-orb-btn');
             if (!orbContainer || !orbBtn) return;
 
-            let isDragging = false;
-            let hasMoved = false;
+            let isPointerDown = false;
+            let isDragMode = false;
+            let longPressTimer = null;
             let startX = 0, startY = 0;
             let initialLeft = 0, initialTop = 0;
 
-            // Pulihkan posisi terakhir jika pernah digeser
             try {
                 const savedPos = JSON.parse(localStorage.getItem('cwo_orb_pos'));
                 if (savedPos && typeof savedPos.left === 'number' && typeof savedPos.top === 'number') {
@@ -906,9 +988,9 @@
                 }
             } catch (e) {}
 
-            const onPointerDown = (e) => {
-                isDragging = true;
-                hasMoved = false;
+            const onStart = (e) => {
+                isPointerDown = true;
+                isDragMode = false;
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 startX = clientX;
@@ -916,22 +998,34 @@
                 const rect = orbContainer.getBoundingClientRect();
                 initialLeft = rect.left;
                 initialTop = rect.top;
+
+                clearTimeout(longPressTimer);
+                longPressTimer = setTimeout(() => {
+                    if (isPointerDown) {
+                        isDragMode = true;
+                        orbBtn.classList.add('dragging-active');
+                        if (isOrbMenuOpen) closeOrbMenu();
+                    }
+                }, 350);
             };
 
-            const onPointerMove = (e) => {
-                if (!isDragging) return;
+            const onMove = (e) => {
+                if (!isPointerDown) return;
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 const dx = clientX - startX;
                 const dy = clientY - startY;
 
-                if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
-                    hasMoved = true;
+                // Jika belum mencapai waktu tekan lama tapi jari bergeser jauh, batalkan timer
+                if (!isDragMode && (Math.abs(dx) > 12 || Math.abs(dy) > 12)) {
+                    clearTimeout(longPressTimer);
+                    isDragMode = true;
+                    orbBtn.classList.add('dragging-active');
                     if (isOrbMenuOpen) closeOrbMenu();
                 }
 
-                if (hasMoved) {
-                    e.preventDefault();
+                if (isDragMode) {
+                    if (e.cancelable) e.preventDefault();
                     const newLeft = Math.min(window.innerWidth - 62, Math.max(6, initialLeft + dx));
                     const newTop = Math.min(window.innerHeight - 62, Math.max(6, initialTop + dy));
                     orbContainer.style.left = newLeft + 'px';
@@ -941,26 +1035,32 @@
                 }
             };
 
-            const onPointerUp = () => {
-                if (!isDragging) return;
-                isDragging = false;
-                if (hasMoved) {
+            const onEnd = (e) => {
+                if (!isPointerDown) return;
+                isPointerDown = false;
+                clearTimeout(longPressTimer);
+                orbBtn.classList.remove('dragging-active');
+
+                if (isDragMode) {
                     const rect = orbContainer.getBoundingClientRect();
                     try {
                         localStorage.setItem('cwo_orb_pos', JSON.stringify({ left: rect.left, top: rect.top }));
-                    } catch (e) {}
+                    } catch (err) {}
                 } else {
+                    // Klik 1x Cepat -> Langsung Buka / Tutup Menu Orb
+                    if (e && e.cancelable) e.preventDefault();
                     toggleOrbMenu();
                 }
+                isDragMode = false;
             };
 
-            orbBtn.addEventListener('mousedown', onPointerDown);
-            window.addEventListener('mousemove', onPointerMove, { passive: false });
-            window.addEventListener('mouseup', onPointerUp);
+            orbBtn.addEventListener('mousedown', onStart);
+            window.addEventListener('mousemove', onMove, { passive: false });
+            window.addEventListener('mouseup', onEnd);
 
-            orbBtn.addEventListener('touchstart', onPointerDown, { passive: true });
-            window.addEventListener('touchmove', onPointerMove, { passive: false });
-            window.addEventListener('touchend', onPointerUp);
+            orbBtn.addEventListener('touchstart', onStart, { passive: true });
+            window.addEventListener('touchmove', onMove, { passive: false });
+            orbBtn.addEventListener('touchend', onEnd);
         }
 
         function toggleOrbMenu() {
@@ -975,7 +1075,6 @@
                 backdrop.classList.remove('hidden');
                 icon.innerText = '✕';
 
-                // Posisikan pop-up menyesuaikan letak bola Orb saat ini
                 const popupW = 265;
                 const popupH = popup.offsetHeight || 360;
                 let leftPos = orbRect.right - popupW;
@@ -1061,31 +1160,28 @@
 
             const btnDocRot = document.getElementById('btn-doc-rotate-view');
             if (btnDocRot) {
-                btnDocRot.innerText = effectiveLandscape ? "🖼️ Posisi: Tidur (16:9)" : "🔄 Putar Layar Tidur (16:9)";
+                btnDocRot.innerText = effectiveLandscape ? "🖼️ Posisi: Tidur (16:9)" : "🔄 Putar Tidur (16:9)";
             }
 
             const btnPbRot = document.getElementById('btn-pb-rotate-view');
             if (btnPbRot) {
-                btnPbRot.innerText = effectiveLandscape ? "🖼️ Posisi: Tidur (Lebar)" : "📱 Posisi: Tegak (Auto)";
+                btnPbRot.innerText = effectiveLandscape ? "🖼️ Posisi: Tidur" : "📱 Posisi: Tegak";
             }
         }
 
         window.addEventListener('resize', checkDeviceCameraOrientation);
         window.addEventListener('orientationchange', () => setTimeout(checkDeviceCameraOrientation, 200));
 
-        // Tombol Putar Layar Tidur (Landscape) seperti Kamera HP Asli
-        async function toggleCameraRotateView(modalId, type) {
+        async function toggleCameraRotateView(modalId) {
             const modal = document.getElementById(modalId);
             if (!modal) return;
 
-            // Masuk Fullscreen jika belum
             if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
                 try { await document.documentElement.requestFullscreen(); } catch (e) {}
             }
 
             isForcedLandscapeRotate = !isForcedLandscapeRotate;
 
-            // Coba kunci orientasi layar asli HP jika didukung browser Android
             if (screen.orientation && screen.orientation.lock) {
                 try {
                     await screen.orientation.lock(isForcedLandscapeRotate ? 'landscape' : 'portrait');
@@ -1095,7 +1191,6 @@
                 } catch (e) {}
             }
 
-            // Fallback CSS Rotasi 90 Derajat Layar Penuh jika Auto-Rotate HP peserta dikunci
             if (isForcedLandscapeRotate && window.innerHeight > window.innerWidth) {
                 modal.classList.add('force-landscape-rotate');
             } else {
@@ -1570,7 +1665,7 @@
                 box.classList.remove('slide-fullscreen-active');
                 topBar.classList.add('hidden');
                 topBar.classList.remove('flex');
-                btn.innerText = "⛶ Perbesar Slide";
+                btn.innerText = "⛶ Perbesar Slide Fullscreen";
             }
 
             setTimeout(resizeAnnotationCanvas, 200);
@@ -2209,7 +2304,7 @@
         }
 
         // =========================================================================
-        // 8. FUNGSI OPTIMASI SENSOR KAMERA FULL HD/4K & KETUK UNTUK FOKUS
+        // 8. FUNGSI OPTIMASI SENSOR KAMERA FULL HD & KETUK UNTUK FOKUS
         // =========================================================================
         async function openHighResCameraStream(facingMode) {
             const constraintCandidates = [
@@ -2565,7 +2660,6 @@
             const video = document.getElementById('doc-video-feed');
             const canvas = document.createElement('canvas');
 
-            // Jika posisi HP tidur (Landscape) atau mode tidur aktif -> 16:9 Widescreen (1920x1080)
             if (docOrientation === 'landscape') {
                 canvas.width = 1920;
                 canvas.height = 1080;
@@ -2587,7 +2681,6 @@
                 ctx.scale(-1, 1);
             }
 
-            // Jika pengguna menekan tombol Paksa Tidur sementara HP dipegang tegak, putar frame sensor 90 derajat agar hasil foto benar-benar tidur (Landscape 16:9)
             if (isForcedLandscapeRotate && vH > vW) {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.rotate(-Math.PI / 2);
@@ -2730,11 +2823,11 @@
         function filterEventPhotos(mode) {
             currentEventPhotoFilter = mode;
             document.getElementById('ep-tab-ALL').className = (mode === 'ALL')
-                ? "shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] shadow-sm"
-                : "shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-white text-[#1e293b] border border-[#D6A84F]/30";
+                ? "px-3 py-1.5 rounded-full text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] shadow-sm"
+                : "px-3 py-1.5 rounded-full text-[10px] font-extrabold bg-white text-[#1e293b] border border-[#D6A84F]/30";
             document.getElementById('ep-tab-MINE').className = (mode === 'MINE')
-                ? "shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] shadow-sm"
-                : "shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold bg-white text-[#1e293b] border border-[#D6A84F]/30";
+                ? "px-3 py-1.5 rounded-full text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] shadow-sm"
+                : "px-3 py-1.5 rounded-full text-[10px] font-extrabold bg-white text-[#1e293b] border border-[#D6A84F]/30";
             renderAestheticEventGallery();
         }
 
@@ -2743,6 +2836,7 @@
             renderAestheticEventGallery();
         }
 
+        // Render Event Photo's Gallery (Teks Kosong Utuh di Tengah, Masonry Aktif Saat Ada Foto)
         function renderAestheticEventGallery() {
             const container = document.getElementById('event-photos-masonry');
             const fsGrid = document.getElementById('aesthetic-fullscreen-grid');
@@ -2755,11 +2849,18 @@
                 : sourceList;
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="col-span-2 text-center py-8 text-xs text-gray-500 font-semibold">Belum ada dokumentasi foto di kategori ini. Jadilah pasangan pertama yang mengabadikan momen!</div>`;
+                container.classList.remove('aesthetic-masonry');
+                container.innerHTML = `
+                    <div class="empty-gallery-box text-center py-8 px-4 bg-white/65 rounded-2xl border border-dashed border-[#D6A84F]/40">
+                        <span class="text-2xl block mb-1.5">📸</span>
+                        <p class="text-xs text-gray-600 font-bold leading-relaxed">Belum ada dokumentasi foto di kategori ini.<br>Jadilah pasangan pertama yang mengabadikan momen!</p>
+                    </div>
+                `;
                 if (fsGrid) fsGrid.innerHTML = '';
                 return;
             }
 
+            container.classList.add('aesthetic-masonry');
             const moods = ["✨ Golden Moments", "📸 Candid Vibes", "💑 Royal Couple", "🌟 Event Highlight"];
 
             const buildCardHTML = (item, idx, isDarkFs = false) => {
@@ -3019,9 +3120,9 @@
             [1, 2, 3].forEach(num => {
                 const btn = document.getElementById(`mode-btn-${num}`);
                 if (num === count) {
-                    btn.className = "px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b] shadow";
+                    btn.className = "px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#D6A84F] text-[#1e293b] shadow";
                 } else {
-                    btn.className = "px-3 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20";
+                    btn.className = "px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-black/60 text-white border border-white/20";
                 }
             });
 
