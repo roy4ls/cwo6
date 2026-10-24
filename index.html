@@ -381,7 +381,7 @@
                         <span class="text-lg">📊</span>
                         <div>
                             <h3 id="materi-title" class="font-extrabold text-[15px] text-[#1e293b]">Presentation & Notes</h3>
-                            <p class="text-[10px] font-bold text-green-700">💑 Ketuk untuk membuka Slide Materi & Catatan Pasangan</p>
+                            <p class="text-[10px] font-bold text-green-700">👩‍❤️‍👨 Ketuk untuk membuka Slide Materi & Catatan Pasangan</p>
                         </div>
                     </div>
                     <span id="chev-materi" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center shrink-0">▼</span>
@@ -590,7 +590,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-2 py-2 mb-3">
                         <div class="flex flex-wrap items-center gap-1.5">
                             <button type="button" onclick="filterEventPhotos('ALL')" id="ep-tab-ALL" class="px-3 py-1.5 rounded-full text-[10px] font-extrabold bg-[#1e293b] text-[#D6A84F] shadow-sm">✨ Semua</button>
-                            <button type="button" onclick="filterEventPhotos('MINE')" id="ep-tab-MINE" class="px-3 py-1.5 rounded-full text-[10px] font-extrabold bg-white text-[#1e293b] border border-[#D6A84F]/30">💑 Foto Kami</button>
+                            <button type="button" onclick="filterEventPhotos('MINE')" id="ep-tab-MINE" class="px-3 py-1.5 rounded-full text-[10px] font-extrabold bg-white text-[#1e293b] border border-[#D6A84F]/30">👩‍❤️‍👨 Foto Kami</button>
                             <button type="button" onclick="shuffleAndRenderEventPhotos()" class="px-3 py-1.5 rounded-full text-[10px] font-extrabold bg-[#D6A84F]/20 text-[#1e293b] border border-[#D6A84F]/40">🎲 Acak Estetik</button>
                         </div>
                         <button type="button" onclick="openAestheticFullscreenModal()" class="bg-[#1e293b] text-[#D6A84F] text-[10px] font-extrabold px-3.5 py-1.5 rounded-full shadow">
@@ -2861,7 +2861,7 @@
             }
 
             container.classList.add('aesthetic-masonry');
-            const moods = ["✨ Golden Moments", "📸 Candid Vibes", "💑 Royal Couple", "🌟 Event Highlight"];
+            const moods = ["✨ Golden Moments", "📸 Candid Vibes", "👩‍❤️‍👨 Royal Couple", "🌟 Event Highlight"];
 
             const buildCardHTML = (item, idx, isDarkFs = false) => {
                 const displayUrl = formatDriveUrl(item.url);
@@ -2878,7 +2878,7 @@
                             <img src="${displayUrl}" loading="lazy" referrerpolicy="no-referrer" class="w-full h-auto object-cover rounded-xl bg-gray-200" alt="${safeNames}">
                         </div>
                         <div class="pt-2 px-1 flex justify-between items-center">
-                            <span class="text-[10px] font-extrabold ${isDarkFs ? 'text-[#F7F1E3]' : 'text-[#1e293b]'} truncate">💑 ${item.names || 'Peserta'}</span>
+                            <span class="text-[10px] font-extrabold ${isDarkFs ? 'text-[#F7F1E3]' : 'text-[#1e293b]'} truncate">👩‍❤️‍👨 ${item.names || 'Peserta'}</span>
                             ${isMine ? '<span class="text-[9px] font-bold text-[#D6A84F]">Milik Kami</span>' : ''}
                         </div>
                     </div>
@@ -2893,7 +2893,7 @@
 
         function previewSingleEventPhoto(url, names, photoId, isMine) {
             Swal.fire({
-                title: `💑 ${names}`,
+                title: `👩‍❤️‍👨 ${names}`,
                 imageUrl: url,
                 imageAlt: names,
                 showCloseButton: true,
