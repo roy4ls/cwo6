@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ice Breaker Game: SEPAKAT - CWO Season VI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #DCEFF7 0%, #EAF4F6 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+        .clean-card {
+            background: #F7F1E3;
+            border-radius: 22px;
+            border: 2px solid rgba(214, 168, 79, 0.35);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        }
+        .item-option-card {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 2.5px solid rgba(214, 168, 79, 0.25);
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .item-option-card:hover {
+            transform: translateY(-3px);
+            border-color: #D6A84F;
+            box-shadow: 0 10px 25px rgba(214, 168, 79, 0.25);
+        }
+        .item-option-card:active {
+            transform: scale(0.96);
+        }
+        .item-png-shadow {
+            filter: drop-shadow(0 10px 14px rgba(15, 23, 42, 0.18));
+            transition: transform 0.3s ease;
+        }
+        .item-option-card:hover .item-png-shadow {
+            transform: scale(1.08) rotate(2deg);
+        }
+        .reveal-bounce {
+            animation: popIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.6); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .pulse-gold {
+            animation: pulseGold 2s infinite;
+        }
+        @keyframes pulseGold {
+            0% { box-shadow: 0 0 0 0 rgba(214, 168, 79, 0.7); }
+            70% { box-shadow: 0 0 0 14px rgba(214, 168, 79, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(214, 168, 79, 0); }
+        }
+    </style>
+</head>
+<body class="pb-14">
+
+    <!-- TOP BAR NAVIGASI KEMBALI KE WEB UTAMA -->
+    <header class="sticky top-0 z-40 bg-[#F7F1E3]/95 backdrop-blur-md border-b border-[#D6A84F]/30 px-4 py-3 flex justify-between items-center shadow-sm">
+        <a href="index.html" class="bg-[#1e293b] text-[#D6A84F] px-3.5 py-1.5 rounded-full text-xs font-extrabold shadow flex items-center gap-1.5 hover:bg-gray-800 transition">
+            <span>⬅ Dashboard Peserta</span>
+        </a>
+        <div class="text-right">
+            <span class="text-[10px] font-extrabold text-[#D6A84F] uppercase tracking-wider block">Ice Breaker CWO VI</span>
+            <span id="header-couple-name" class="text-xs font-extrabold text-[#1e293b]">👩‍❤️‍👨 Pasangan Royals</span>
+        </div>
+    </header>
+
+    <main class="max-w-lg mx-auto p-4 pt-5">
+
+        <!-- ========================================================================= -->
+        <!-- LAYAR 1: PEMBUKA & PILIH PERAN (SUAMI / ISTRI)                            -->
+        <!-- ========================================================================= -->
+        <section id="screen-intro" class="clean-card p-6 text-center">
+            <div class="w-20 h-20 mx-auto mb-3 rounded-3xl bg-[#1e293b] border-2 border-[#D6A84F] flex items-center justify-center text-4xl shadow-lg">
+                👩‍❤️‍👨
+            </div>
+            <span class="bg-[#D6A84F]/20 text-[#1e293b] border border-[#D6A84F]/50 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                Couple's Financial Ice Breaker
+            </span>
+            <h1 class="text-3xl font-black text-[#1e293b] mt-2 mb-1 tracking-tight">GAME "SEPAKAT"</h1>
+            <p class="text-xs text-[#D6A84F] font-extrabold uppercase tracking-wide mb-4">In This Economy: Seberapa Sehati Pilihan Kalian?</p>
+
+            <div class="bg-white/80 rounded-2xl p-4 text-left border border-[#D6A84F]/30 mb-5 space-y-2 text-xs text-gray-700 font-medium">
+                <p class="font-extrabold text-[#1e293b]">📌 Cara Bermain Bersama Pasangan:</p>
+                <ol class="list-decimal pl-4 space-y-1.5">
+                    <li>Buka halaman game ini di <b>HP Suami</b> dan <b>HP Istri</b> masing-masing.</li>
+                    <li>Ada <b>5 Pertanyaan Nominal Uang Tunai</b> (mulai dari <b>Rp 100.000</b> hingga <b>Rp 1.000.000.000</b>).</li>
+                    <li>Pilih 1 dari 4 barang yang nilainya setara dengan uang tersebut <b>tanpa mengintip HP pasangan</b>.</li>
+                    <li>Dalam hitungan ke-3, <b>tunjukkan layar HP kalian berdua</b>! Jika gambar barangnya sama, berarti kalian <b>SEPAKAT!</b> 🎉</li>
+                </ol>
+            </div>
+
+            <!-- Input Nama Pasangan (Otomatis Terisi jika sudah Login di Web Peserta) -->
+            <div class="mb-5 text-left">
+                <label class="block text-[11px] font-extrabold text-[#1e293b] mb-1">Nama Pasangan:</label>
+                <input type="text" id="input-couple-names" placeholder="Contoh: Ardi & Afan" class="w-full p-3 rounded-xl bg-white border border-[#D6A84F]/40 text-xs font-extrabold text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#D6A84F]">
+            </div>
+
+            <p class="text-xs font-extrabold text-[#1e293b] mb-2.5">Siapa yang memegang HP ini?</p>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button type="button" onclick="selectRole('Suami')" id="role-btn-Suami" class="py-3 px-4 rounded-2xl font-extrabold text-xs border-2 border-[#D6A84F] bg-[#1e293b] text-[#D6A84F] shadow-md transition flex flex-col items-center gap-1">
+                    <span class="text-2xl">🤵</span>
+                    <span>HP Suami</span>
+                </button>
+                <button type="button" onclick="selectRole('Istri')" id="role-btn-Istri" class="py-3 px-4 rounded-2xl font-extrabold text-xs border-2 border-gray-300 bg-white text-[#1e293b] transition flex flex-col items-center gap-1">
+                    <span class="text-2xl">👰</span>
+                    <span>HP Istri</span>
+                </button>
+            </div>
+
+            <button type="button" onclick="startGame()" class="w-full bg-[#D6A84F] hover:bg-[#c29542] text-[#1e293b] font-black py-4 rounded-2xl text-sm shadow-lg pulse-gold transition">
+                🚀 MULAI TANTANGAN NOMOR 1
+            </button>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- LAYAR 2: PERTANYAAN & PILIHAN 4 BARANG BERGAMBAR PNG NYATA                -->
+        <!-- ========================================================================= -->
+        <section id="screen-question" class="hidden space-y-4">
+            <!-- Progress Bar & Indikator Skor -->
+            <div class="clean-card p-3.5 px-4 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <span id="badge-role-active" class="bg-[#1e293b] text-[#D6A84F] text-[10px] font-extrabold px-2.5 py-1 rounded-full">🤵 Suami</span>
+                    <span id="question-step-text" class="text-xs font-extrabold text-[#1e293b]">Nomor 1 dari 5</span>
+                </div>
+                <div class="flex gap-1" id="progress-dots"></div>
+            </div>
+
+            <!-- Kartu Pertanyaan Uang Tunai -->
+            <div class="clean-card p-5 text-center relative overflow-hidden">
+                <div class="inline-flex items-center gap-1.5 bg-emerald-600/15 border border-emerald-600/30 text-emerald-800 px-3 py-1 rounded-full text-[11px] font-extrabold mb-2">
+                    <span>💵 TANTANGAN UANG TUNAI</span>
+                </div>
+                <p class="text-xs text-gray-600 font-bold">Jika kalian memiliki uang tunai sebesar:</p>
+                <div class="my-2 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#1e293b] to-[#0f172a] border-2 border-[#D6A84F] shadow-md inline-block">
+                    <span id="cash-nominal-display" class="text-2xl md:text-3xl font-black text-[#D6A84F] tracking-tight">Rp 100.000</span>
+                </div>
+                <p id="cash-question-subtitle" class="text-xs text-[#1e293b] font-extrabold mt-1">
+                    Pilih 1 barang senilai nominal tersebut tanpa melihat HP pasanganmu!
+                </p>
+            </div>
+
+            <!-- Grid 4 Pilihan Barang (Gambar PNG Berwarna & Nyata) -->
+            <div id="choices-grid" class="grid grid-cols-2 gap-3.5"></div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- LAYAR 3: KUNCI JAWABAN & REVEAL GAMBAR BESAR UNTUK DICOCOKKAN BERDUA       -->
+        <!-- ========================================================================= -->
+        <section id="screen-reveal" class="hidden clean-card p-6 text-center">
+            <!-- Tahap A: Jawaban Terkunci (Agar tidak diintip sebelum aba-aba) -->
+            <div id="reveal-locked-state" class="py-6 space-y-4">
+                <div class="w-20 h-20 mx-auto rounded-full bg-[#1e293b] border-4 border-[#D6A84F] flex items-center justify-center text-4xl shadow-xl">
+                    🔒
+                </div>
+                <h2 class="text-xl font-black text-[#1e293b]">Pilihanmu Sudah Terkunci!</h2>
+                <p class="text-xs text-gray-600 font-semibold max-w-xs mx-auto leading-relaxed">
+                    Tunggu sampai pasanganmu juga selesai memilih di HP-nya. Jika sudah siap keduanya, hitung <b>1... 2... 3...</b> lalu tekan tombol di bawah bersama-sama!
+                </p>
+                <div class="pt-2 space-y-2.5">
+                    <button type="button" onclick="showRevealedItem()" class="w-full bg-[#D6A84F] hover:bg-[#c29542] text-[#1e293b] font-black py-4 rounded-2xl text-sm shadow-lg pulse-gold transition">
+                        👁️ BUKA & TUNJUKKAN GAMBAR KE PASANGAN!
+                    </button>
+                    <button type="button" onclick="cancelAndChangeChoice()" class="w-full bg-white text-gray-600 border border-gray-300 font-bold py-2.5 rounded-xl text-xs">
+                        ↩️ Ganti Pilihan Barang
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tahap B: Layar Gambar Besar Saat Dicocokkan Berdua -->
+            <div id="reveal-open-state" class="hidden space-y-4 reveal-bounce">
+                <div class="flex justify-between items-center border-b border-[#D6A84F]/30 pb-2.5">
+                    <span id="reveal-nominal-badge" class="text-[11px] font-extrabold bg-[#1e293b] text-[#D6A84F] px-3 py-1 rounded-full">Nomor 1 • Rp 100.000</span>
+                    <span id="reveal-role-badge" class="text-xs font-extrabold text-gray-600">Pilihan Suami</span>
+                </div>
+
+                <p class="text-xs font-extrabold text-emerald-700 uppercase tracking-wider">📱 Dekatkan & Cocokkan Layar HP Kalian!</p>
+
+                <!-- Kartu Gambar PNG Besar Berwarna -->
+                <div class="bg-white rounded-3xl p-6 border-4 border-[#D6A84F] shadow-xl flex flex-col items-center">
+                    <span id="reveal-option-letter" class="bg-[#F7F1E3] text-[#1e293b] border border-[#D6A84F] text-xs font-black px-3 py-1 rounded-full mb-3">
+                        PILIHAN A
+                    </span>
+                    <img id="reveal-item-img" src="" alt="Barang Pilihan" class="w-36 h-36 object-contain item-png-shadow my-2">
+                    <h3 id="reveal-item-title" class="text-lg font-black text-[#1e293b] mt-2 leading-snug">Nama Barang</h3>
+                    <p id="reveal-item-price" class="text-xs font-extrabold text-[#D6A84F] mt-1">Senilai Rp 100.000</p>
+                    <p id="reveal-item-desc" class="text-[11px] text-gray-500 font-medium mt-1.5"></p>
+                </div>
+
+                <!-- Pertanyaan Konfirmasi Hasil Cocokkan HP -->
+                <div class="pt-2">
+                    <p class="text-xs font-extrabold text-[#1e293b] mb-2.5">Apakah gambar di HP Suami & HP Istri SAMA?</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" onclick="recordRoundResult(true)" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 px-3 rounded-2xl text-xs shadow-lg active:scale-95 transition flex flex-col items-center gap-1">
+                            <span class="text-xl">👩‍❤️‍👨</span>
+                            <span>SEPAKAT!</span>
+                            <span class="text-[9px] font-semibold opacity-90">(Pilihan Kami Sama)</span>
+                        </button>
+                        <button type="button" onclick="recordRoundResult(false)" class="bg-rose-600 hover:bg-rose-500 text-white font-black py-3.5 px-3 rounded-2xl text-xs shadow-lg active:scale-95 transition flex flex-col items-center gap-1">
+                            <span class="text-xl">🤭</span>
+                            <span>TIDAK SEPAKAT</span>
+                            <span class="text-[9px] font-semibold opacity-90">(Pilihan Kami Beda)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- LAYAR 4: HASIL AKHIR & SERTIFIKAT KESEPAKATAN FINANSIAL PASANGAN           -->
+        <!-- ========================================================================= -->
+        <section id="screen-result" class="hidden clean-card p-6 text-center space-y-5">
+            <div>
+                <span class="bg-[#D6A84F]/25 text-[#1e293b] border border-[#D6A84F] px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                    🏆 Hasil Akhir Ice Breaker
+                </span>
+                <h2 class="text-2xl font-black text-[#1e293b] mt-2" id="result-couple-title">👩‍❤️‍👨 Pasangan Royals</h2>
+                <p class="text-xs text-gray-600 font-semibold">Tingkat Kesepakatan Prioritas Keuangan Kalian:</p>
+            </div>
+
+            <!-- Lingkaran Skor Persentase Kesepakatan -->
+            <div class="bg-gradient-to-b from-[#1e293b] to-[#0f172a] text-white p-6 rounded-3xl border-2 border-[#D6A84F] shadow-xl">
+                <p id="result-score-percent" class="text-5xl font-black text-[#D6A84F]">100%</p>
+                <p id="result-score-badge" class="text-sm font-extrabold text-white mt-2">🎉 SEPAKAT SEMPURNA (5 dari 5 Ronde)</p>
+                <p id="result-score-message" class="text-xs text-gray-300 mt-2 leading-relaxed"></p>
+            </div>
+
+            <!-- Rincian 5 Ronde Nominal -->
+            <div class="bg-white/90 rounded-2xl p-4 border border-[#D6A84F]/30 text-left space-y-2.5" id="result-rounds-summary"></div>
+
+            <div class="space-y-2.5 pt-1">
+                <button type="button" onclick="restartGame()" class="w-full bg-[#D6A84F] hover:bg-[#c29542] text-[#1e293b] font-black py-3.5 rounded-2xl text-xs shadow-md transition">
+                    🔄 Main Ulang Game "SEPAKAT"
+                </button>
+                <a href="index.html" class="w-full bg-[#1e293b] text-[#D6A84F] font-extrabold py-3.5 rounded-2xl text-xs shadow-md block hover:bg-gray-800 transition">
+                    ⬅ Kembali ke Web Utama Peserta
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // =========================================================================
+        // DATA 5 PERTANYAAN NOMINAL UANG TUNAI & 4 PILIHAN BARANG (GAMBAR PNG NYATA)
+        // =========================================================================
+        const SEPAKAT_QUESTIONS = [
+            {
+                number: 1,
+                nominal: "Rp 100.000",
+                question: "Jika kalian memegang uang tunai Rp 100.000 malam ini untuk langsung dibelikan barang senilai Rp 100.000, mana yang kalian pilih?",
+                options: [
+                    {
+                        code: "A",
+                        name: "Paket Kuliner Malam Berdua",
+                        value: "Senilai Rp 100.000",
+                        desc: "Makan malam ayam/seafood spesial berdua",
+                        img: "https://img.icons8.com/3d-fluency/512/fried-chicken.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Poultry%20leg/3D/poultry_leg_3d.png"
+                    },
+                    {
+                        code: "B",
+                        name: "Paket Sembako & Dapur",
+                        value: "Senilai Rp 100.000",
+                        desc: "Beras 5 Kg & minyak goreng untuk stok rumah",
+                        img: "https://img.icons8.com/3d-fluency/512/shopping-cart-loaded.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Shopping%20cart/3D/shopping_cart_3d.png"
+                    },
+                    {
+                        code: "C",
+                        name: "2 Tiket Bioskop & Popcorn",
+                        value: "Senilai Rp 100.000",
+                        desc: "Nonton film favorit berdua di akhir pekan",
+                        img: "https://img.icons8.com/3d-fluency/512/popcorn.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Popcorn/3D/popcorn_3d.png"
+                    },
+                    {
+                        code: "D",
+                        name: "2 Cup Kopi Kekinian & Cake",
+                        value: "Senilai Rp 100.000",
+                        desc: "Nongkrong santai ngobrol berdua di kafe",
+                        img: "https://img.icons8.com/3d-fluency/512/takeaway-hot-drink.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Hot%20beverage/3D/hot_beverage_3d.png"
+                    }
+                ]
+            },
+            {
+                number: 2,
+                nominal: "Rp 1.000.000",
+                question: "Jika kalian memiliki uang tunai Rp 1.000.000 dan harus ditukar dengan 1 barang senilai Rp 1.000.000, apa pilihanmu?",
+                options: [
+                    {
+                        code: "A",
+                        name: "Emas Mini / Logam Mulia",
+                        value: "Senilai Rp 1.000.000",
+                        desc: "Kepingan emas murni untuk tabungan masa depan",
+                        img: "https://img.icons8.com/3d-fluency/512/gold-bars.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Coin/3D/coin_3d.png"
+                    },
+                    {
+                        code: "B",
+                        name: "Sepasang Sepatu Sneakers",
+                        value: "Senilai Rp 1.000.000",
+                        desc: "Sepatu jalan/olahraga baru yang nyaman",
+                        img: "https://img.icons8.com/3d-fluency/512/trainers.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Running%20shoe/3D/running_shoe_3d.png"
+                    },
+                    {
+                        code: "C",
+                        name: "Air Fryer & Alat Masak",
+                        value: "Senilai Rp 1.000.000",
+                        desc: "Peralatan elektronik praktis untuk dapur rumah",
+                        img: "https://img.icons8.com/3d-fluency/512/ pressure-cooker.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Cooking/3D/cooking_3d.png"
+                    },
+                    {
+                        code: "D",
+                        name: "Staycation Hotel Bintang 4",
+                        value: "Senilai Rp 1.000.000",
+                        desc: "Voucher menginap 1 malam + sarapan berdua",
+                        img: "https://img.icons8.com/3d-fluency/512/bed.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Bed/3D/bed_3d.png"
+                    }
+                ]
+            },
+            {
+                number: 3,
+                nominal: "Rp 10.000.000",
+                question: "Jika kalian memiliki uang tunai Rp 10.000.000 hari ini, barang/aset senilai Rp 10.000.000 mana yang kalian ambil?",
+                options: [
+                    {
+                        code: "A",
+                        name: "Smartphone / Laptop Baru",
+                        value: "Senilai Rp 10.000.000",
+                        desc: "Gadget spesifikasi tinggi untuk kerja & produktivitas",
+                        img: "https://img.icons8.com/3d-fluency/512/laptop.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Laptop/3D/laptop_3d.png"
+                    },
+                    {
+                        code: "B",
+                        name: "Emas Batangan Antam",
+                        value: "Senilai Rp 10.000.000",
+                        desc: "Aset emas batangan murni penyimpan nilai",
+                        img: "https://img.icons8.com/3d-fluency/512/money-bag.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Money%20bag/3D/money_bag_3d.png"
+                    },
+                    {
+                        code: "C",
+                        name: "Paket Liburan ke Bali Berdua",
+                        value: "Senilai Rp 10.000.000",
+                        desc: "Tiket pesawat PP, resort & liburan romantis",
+                        img: "https://img.icons8.com/3d-fluency/512/airplane-take-off.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Airplane/3D/airplane_3d.png"
+                    },
+                    {
+                        code: "D",
+                        name: "Smart TV 55\" & Kulkas 2 Pintu",
+                        value: "Senilai Rp 10.000.000",
+                        desc: "Upgrade elektronik ruang keluarga & dapur",
+                        img: "https://img.icons8.com/3d-fluency/512/retro-tv.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Television/3D/television_3d.png"
+                    }
+                ]
+            },
+            {
+                number: 4,
+                nominal: "Rp 100.000.000",
+                question: "Jika kalian memiliki uang tunai Rp 100.000.000, wujud barang/aset senilai Rp 100.000.000 mana yang menjadi prioritasmu?",
+                options: [
+                    {
+                        code: "A",
+                        name: "1 Unit Mobil City Car",
+                        value: "Senilai Rp 100.000.000",
+                        desc: "Kendaraan keluarga yang nyaman & bebas hujan",
+                        img: "https://img.icons8.com/3d-fluency/512/car.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Automobile/3D/automobile_3d.png"
+                    },
+                    {
+                        code: "B",
+                        name: "Renovasi Interior Rumah",
+                        value: "Senilai Rp 100.000.000",
+                        desc: "Percantik kamar tidur, ruang tamu & kitchen set",
+                        img: "https://img.icons8.com/3d-fluency/512/home.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/House%20with%20garden/3D/house_with_garden_3d.png"
+                    },
+                    {
+                        code: "C",
+                        name: "Modal Bisnis / Franchise Toko",
+                        value: "Senilai Rp 100.000.000",
+                        desc: "Buka usaha kuliner/minimarket penghasil cuan",
+                        img: "https://img.icons8.com/3d-fluency/512/shop.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Convenience%20store/3D/convenience_store_3d.png"
+                    },
+                    {
+                        code: "D",
+                        name: "Dana Pendidikan Anak & Emas",
+                        value: "Senilai Rp 100.000.000",
+                        desc: "Jaminan masa depan sekolah anak & dana darurat",
+                        img: "https://img.icons8.com/3d-fluency/512/graduation-cap.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Graduation%20cap/3D/graduation_cap_3d.png"
+                    }
+                ]
+            },
+            {
+                number: 5,
+                nominal: "Rp 1.000.000.000",
+                question: "Pertanyaan Puncak! Jika kalian memiliki uang tunai Rp 1 Miliar, aset senilai Rp 1.000.000.000 mana yang kalian pilih?",
+                options: [
+                    {
+                        code: "A",
+                        name: "Rumah Baru 2 Lantai Impian",
+                        value: "Senilai Rp 1.000.000.000",
+                        desc: "Hunian keluarga nyaman dengan taman asri",
+                        img: "https://img.icons8.com/3d-fluency/512/cottage.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/House/3D/house_3d.png"
+                    },
+                    {
+                        code: "B",
+                        name: "Kos-Kosan / Ruko Sewa",
+                        value: "Senilai Rp 1.000.000.000",
+                        desc: "Properti produktif penghasil passive income bulanan",
+                        img: "https://img.icons8.com/3d-fluency/512/city-buildings.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Office%20building/3D/office_building_3d.png"
+                    },
+                    {
+                        code: "C",
+                        name: "Obligasi Negara & Saham",
+                        value: "Senilai Rp 1.000.000.000",
+                        desc: "Portofolio investasi cair dengan dividen rutin",
+                        img: "https://img.icons8.com/3d-fluency/512/combo-chart.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Chart%20increasing/3D/chart_increasing_3d.png"
+                    },
+                    {
+                        code: "D",
+                        name: "SUV Mewah & Tur Keliling Dunia",
+                        value: "Senilai Rp 1.000.000.000",
+                        desc: "Mobil impian + pengalaman wisata berdua",
+                        img: "https://img.icons8.com/3d-fluency/512/globe.png",
+                        fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Globe%20showing%20Asia-Australia/3D/globe_showing_asia-australia_3d.png"
+                    }
+                ]
+            }
+        ];
+
+        let playerRole = 'Suami';
+        let coupleNames = 'Pasangan Royals';
+        let currentRoundIdx = 0;
+        let selectedOptionObj = null;
+        let roundHistory = [];
+
+        // Otomatis baca sesi nama pasangan dari Web Peserta (localStorage)
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                const sessionStr = localStorage.getItem('cwo_active_session');
+                if (sessionStr) {
+                    const session = JSON.parse(sessionStr);
+                    if (session.husband && session.wife) {
+                        coupleNames = `${session.husband} & ${session.wife}`;
+                        document.getElementById('input-couple-names').value = coupleNames;
+                        document.getElementById('header-couple-name').innerText = `👩‍❤️‍👨 ${coupleNames}`;
+                    }
+                }
+            } catch (e) {}
+        });
+
+        function selectRole(role) {
+            playerRole = role;
+            const btnS = document.getElementById('role-btn-Suami');
+            const btnI = document.getElementById('role-btn-Istri');
+            if (role === 'Suami') {
+                btnS.className = "py-3 px-4 rounded-2xl font-extrabold text-xs border-2 border-[#D6A84F] bg-[#1e293b] text-[#D6A84F] shadow-md transition flex flex-col items-center gap-1";
+                btnI.className = "py-3 px-4 rounded-2xl font-extrabold text-xs border-2 border-gray-300 bg-white text-[#1e293b] transition flex flex-col items-center gap-1";
+            } else {
+                btnI.className = "py-3 px-4 rounded-2xl font-extrabold text-xs border-2 border-[#D6A84F] bg-[#1e293b] text-[#D6A84F] shadow-md transition flex flex-col items-center gap-1";
+                btnS.className = "py-3 px-4 rounded-2xl font-extrabold text-xs border-2 border-gray-300 bg-white text-[#1e293b] transition flex flex-col items-center gap-1";
+            }
+        }
+
+        function startGame() {
+            const customName = document.getElementById('input-couple-names').value.trim();
+            if (customName) {
+                coupleNames = customName;
+                document.getElementById('header-couple-name').innerText = `👩‍❤️‍👨 ${coupleNames}`;
+            }
+            currentRoundIdx = 0;
+            roundHistory = [];
+            document.getElementById('screen-intro').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            renderQuestionScreen();
+        }
+
+        function renderQuestionScreen() {
+            const qData = SEPAKAT_QUESTIONS[currentRoundIdx];
+            document.getElementById('screen-reveal').classList.add('hidden');
+            document.getElementById('screen-question').classList.remove('hidden');
+
+            document.getElementById('badge-role-active').innerText = playerRole === 'Suami' ? '🤵 HP Suami' : '👰 HP Istri';
+            document.getElementById('question-step-text').innerText = `Nomor ${qData.number} dari ${SEPAKAT_QUESTIONS.length}`;
+            document.getElementById('cash-nominal-display').innerText = qData.nominal;
+            document.getElementById('cash-question-subtitle').innerText = qData.question;
+
+            // Render titik progres
+            const dotsEl = document.getElementById('progress-dots');
+            dotsEl.innerHTML = SEPAKAT_QUESTIONS.map((_, idx) => {
+                if (idx < currentRoundIdx) {
+                    const wasMatch = roundHistory[idx] && roundHistory[idx].matched;
+                    return `<span class="w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold ${wasMatch ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}">${wasMatch ? '✓' : '✕'}</span>`;
+                }
+                if (idx === currentRoundIdx) {
+                    return `<span class="w-5 h-5 rounded-full bg-[#D6A84F] text-[#1e293b] text-[10px] font-black flex items-center justify-center shadow">${idx + 1}</span>`;
+                }
+                return `<span class="w-5 h-5 rounded-full bg-gray-300 text-gray-600 text-[10px] font-bold flex items-center justify-center">${idx + 1}</span>`;
+            }).join('');
+
+            // Render 4 Kartu Barang PNG
+            const gridEl = document.getElementById('choices-grid');
+            gridEl.innerHTML = qData.options.map((opt, oIdx) => `
+                <div onclick="pickOption(${oIdx})" class="item-option-card p-3.5 flex flex-col items-center text-center justify-between relative">
+                    <span class="self-start bg-[#1e293b] text-[#D6A84F] text-[10px] font-black px-2.5 py-0.5 rounded-full">
+                        Pilihan ${opt.code}
+                    </span>
+                    <img src="${opt.img}" onerror="this.onerror=null; this.src='${opt.fallbackImg}';" alt="${opt.name}" class="w-24 h-24 object-contain my-2 item-png-shadow">
+                    <div>
+                        <h4 class="text-xs font-extrabold text-[#1e293b] leading-snug">${opt.name}</h4>
+                        <span class="inline-block bg-[#D6A84F]/20 text-[#1e293b] text-[9px] font-extrabold px-2 py-0.5 rounded-md mt-1">${opt.value}</span>
+                        <p class="text-[10px] text-gray-500 font-medium mt-1 leading-tight">${opt.desc}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function pickOption(optionIdx) {
+            const qData = SEPAKAT_QUESTIONS[currentRoundIdx];
+            selectedOptionObj = qData.options[optionIdx];
+
+            document.getElementById('screen-question').classList.add('hidden');
+            document.getElementById('screen-reveal').classList.remove('hidden');
+            document.getElementById('reveal-locked-state').classList.remove('hidden');
+            document.getElementById('reveal-open-state').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelAndChangeChoice() {
+            selectedOptionObj = null;
+            document.getElementById('screen-reveal').classList.add('hidden');
+            document.getElementById('screen-question').classList.remove('hidden');
+        }
+
+        function showRevealedItem() {
+            if (!selectedOptionObj) return;
+            const qData = SEPAKAT_QUESTIONS[currentRoundIdx];
+
+            document.getElementById('reveal-locked-state').classList.add('hidden');
+            document.getElementById('reveal-open-state').classList.remove('hidden');
+
+            document.getElementById('reveal-nominal-badge').innerText = `Nomor ${qData.number} • ${qData.nominal}`;
+            document.getElementById('reveal-role-badge').innerText = playerRole === 'Suami' ? '🤵 Pilihan Suami' : '👰 Pilihan Istri';
+            document.getElementById('reveal-option-letter').innerText = `PILIHAN ${selectedOptionObj.code}`;
+
+            const imgEl = document.getElementById('reveal-item-img');
+            imgEl.onerror = function () {
+                this.onerror = null;
+                this.src = selectedOptionObj.fallbackImg;
+            };
+            imgEl.src = selectedOptionObj.img;
+
+            document.getElementById('reveal-item-title').innerText = selectedOptionObj.name;
+            document.getElementById('reveal-item-price').innerText = selectedOptionObj.value;
+            document.getElementById('reveal-item-desc').innerText = selectedOptionObj.desc;
+        }
+
+        function recordRoundResult(isMatch) {
+            const qData = SEPAKAT_QUESTIONS[currentRoundIdx];
+            roundHistory.push({
+                number: qData.number,
+                nominal: qData.nominal,
+                pickedName: selectedOptionObj.name,
+                pickedCode: selectedOptionObj.code,
+                pickedImg: selectedOptionObj.img,
+                fallbackImg: selectedOptionObj.fallbackImg,
+                matched: isMatch
+            });
+
+            if (isMatch) {
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 55, spread: 65, origin: { y: 0.65 } });
+                }
+                Swal.fire({
+                    title: '👩‍❤️‍👨 SEPAKAT!',
+                    text: `Kompak sekali! Kalian berdua sama-sama memilih "${selectedOptionObj.name}" untuk uang ${qData.nominal}!`,
+                    icon: 'success',
+                    confirmButtonText: currentRoundIdx < SEPAKAT_QUESTIONS.length - 1 ? 'Lanjut Nomor Berikutnya ➡' : 'Lihat Skor Akhir 🏆',
+                    confirmButtonColor: '#16a34a',
+                    background: '#F7F1E3'
+                }).then(() => nextRoundOrFinish());
+            } else {
+                Swal.fire({
+                    title: '🤭 Belum Sepakat!',
+                    text: `Pilihan kalian berbeda di nominal ${qData.nominal}. Yuk obrolkan singkat 20 detik kenapa kalian memilih barang tersebut!`,
+                    icon: 'info',
+                    confirmButtonText: currentRoundIdx < SEPAKAT_QUESTIONS.length - 1 ? 'Lanjut Nomor Berikutnya ➡' : 'Lihat Skor Akhir 🏆',
+                    confirmButtonColor: '#D6A84F',
+                    background: '#F7F1E3'
+                }).then(() => nextRoundOrFinish());
+            }
+        }
+
+        function nextRoundOrFinish() {
+            currentRoundIdx++;
+            if (currentRoundIdx < SEPAKAT_QUESTIONS.length) {
+                renderQuestionScreen();
+            } else {
+                showFinalScoreScreen();
+            }
+        }
+
+        function showFinalScoreScreen() {
+            document.getElementById('screen-question').classList.add('hidden');
+            document.getElementById('screen-reveal').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            const totalMatch = roundHistory.filter(r => r.matched).length;
+            const percent = Math.round((totalMatch / SEPAKAT_QUESTIONS.length) * 100);
+
+            document.getElementById('result-couple-title').innerText = `👩‍❤️‍👨 ${coupleNames}`;
+            document.getElementById('result-score-percent').innerText = `${percent}%`;
+            document.getElementById('result-score-badge').innerText = `${totalMatch} dari ${SEPAKAT_QUESTIONS.length} Pertanyaan SEPAKAT!`;
+
+            let msg = "";
+            if (totalMatch === 5) {
+                msg = "Luar biasa! Kalian adalah Pasangan Sehati Sejiwa! Visi dan prioritas pengelolaan uang kalian dari Rp 100 Ribu hingga Rp 1 Miliar sangat selaras.";
+                if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+            } else if (totalMatch >= 3) {
+                msg = "Sangat Kompak! Kalian memiliki fondasi kesepakatan finansial yang kuat, dan perbedaan kecil justru membuat kalian saling melengkapi.";
+                if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+            } else {
+                msg = "Unik & Saling Melengkapi! Kalian punya sudut pandang prioritas yang beragam—inilah pentingnya komunikasi terbuka saat menyusun anggaran keluarga bersama!";
+            }
+            document.getElementById('result-score-message').innerText = msg;
+
+            const summaryEl = document.getElementById('result-rounds-summary');
+            summaryEl.innerHTML = `<p class="text-xs font-extrabold text-[#1e293b] mb-2">📋 Rekap Pilihan (${playerRole}):</p>` +
+                roundHistory.map(r => `
+                    <div class="flex items-center justify-between gap-2 bg-[#F7F1E3]/70 p-2.5 rounded-xl border border-[#D6A84F]/30">
+                        <div class="flex items-center gap-2.5 truncate">
+                            <img src="${r.pickedImg}" onerror="this.onerror=null; this.src='${r.fallbackImg}';" class="w-9 h-9 object-contain shrink-0">
+                            <div class="truncate">
+                                <p class="text-[10px] font-extrabold text-[#D6A84F]">Nomor ${r.number} • ${r.nominal}</p>
+                                <p class="text-xs font-extrabold text-[#1e293b] truncate">${r.pickedName}</p>
+                            </div>
+                        </div>
+                        <span class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold ${r.matched ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-700 border border-rose-300'}">
+                            ${r.matched ? '👩‍❤️‍👨 Sepakat' : '🤭 Beda'}
+                        </span>
+                    </div>
+                `).join('');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function restartGame() {
+            startGame();
+        }
+    </script>
+</body>
+</html>
