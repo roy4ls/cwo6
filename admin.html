@@ -26,6 +26,17 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
         ::-webkit-scrollbar-thumb { background: #D6A84F; border-radius: 10px; }
+
+        /* Smooth Fade Animation untuk Slideshow */
+        .fade-img-transition {
+            transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+            opacity: 1;
+            transform: scale(1);
+        }
+        .fade-img-out {
+            opacity: 0;
+            transform: scale(0.97);
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -44,15 +55,15 @@
 
         <div class="flex items-center gap-2 flex-wrap">
             <!-- Indikator & Tombol Cepat Saklar Alarm -->
-            <button id="header-alarm-btn" onclick="toggleBreakAlarm()" class="bg-gray-700/80 hover:bg-gray-600 text-gray-200 text-xs font-extrabold px-3.5 py-2 rounded-xl border border-white/15 transition flex items-center gap-1.5 shadow">
+            <button type="button" id="header-alarm-btn" onclick="toggleBreakAlarm()" class="bg-gray-700/80 hover:bg-gray-600 text-gray-200 text-xs font-extrabold px-3.5 py-2 rounded-xl border border-white/15 transition flex items-center gap-1.5 shadow">
                 🔔 Alarm Istirahat: <span id="header-alarm-status">OFF</span>
             </button>
 
-            <button onclick="fetchAdminAllData(true)" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow transition">
+            <button type="button" onclick="fetchAdminAllData(true)" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow transition">
                 🔄 Refresh Data
             </button>
 
-            <button onclick="toggleFullScreenAdmin()" class="bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] text-xs font-extrabold px-3.5 py-2 rounded-xl shadow transition">
+            <button type="button" onclick="toggleFullScreenAdmin()" class="bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] text-xs font-extrabold px-3.5 py-2 rounded-xl shadow transition">
                 ⛶ Fullscreen
             </button>
         </div>
@@ -102,16 +113,16 @@
 
         <!-- BARIS 2: NAVIGASI TAB MENU ADMIN -->
         <div class="glass-card p-1.5 rounded-2xl flex flex-wrap gap-1.5">
-            <button onclick="switchAdminTab('eventphotos')" id="admintab-eventphotos" class="flex-1 min-w-[160px] py-2.5 px-3 rounded-xl text-xs font-extrabold bg-[#D6A84F] text-[#0f172a] shadow transition">
+            <button type="button" onclick="switchAdminTab('eventphotos')" id="admintab-eventphotos" class="flex-1 min-w-[160px] py-2.5 px-3 rounded-xl text-xs font-extrabold bg-[#D6A84F] text-[#0f172a] shadow transition">
                 📷 Dokumentasi Event Photo & Token
             </button>
-            <button onclick="switchAdminTab('photobooth')" id="admintab-photobooth" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
+            <button type="button" onclick="switchAdminTab('photobooth')" id="admintab-photobooth" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
                 🖼️ Galeri Photobooth
             </button>
-            <button onclick="switchAdminTab('controls')" id="admintab-controls" class="flex-1 min-w-[160px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
+            <button type="button" onclick="switchAdminTab('controls')" id="admintab-controls" class="flex-1 min-w-[160px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
                 🛠️ Upload Slide, Rundown & Alarm
             </button>
-            <button onclick="switchAdminTab('attendance')" id="admintab-attendance" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
+            <button type="button" onclick="switchAdminTab('attendance')" id="admintab-attendance" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
                 👩‍❤️‍👨 Kehadiran & Kuota Token
             </button>
         </div>
@@ -126,12 +137,12 @@
                         <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F] flex items-center gap-2">
                             📷 Pantauan Dokumentasi Event Photo's Gallery
                         </h2>
-                        <p class="text-xs text-gray-300">Admin dapat memantau foto dokumentasi peserta, menayangkan Slideshow Proyektor, atau menghapus foto yang kurang layak (token peserta otomatis kembali).</p>
+                        <p class="text-xs text-gray-300">Admin dapat memantau foto dokumentasi peserta, menayangkan Slideshow Proyektor, atau menghapus foto yang kurang layak.</p>
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <input type="text" id="search-ep-couple" oninput="renderAdminEventPhotos()" placeholder="🔍 Cari nama pasangan..." class="bg-[#0f172a]/90 border border-[#D6A84F]/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                        <button onclick="startProjectorSlideshow()" class="bg-gradient-to-r from-amber-500 to-yellow-600 text-[#0f172a] text-xs font-extrabold px-4 py-2 rounded-xl shadow hover:opacity-95 transition flex items-center gap-1.5">
-                            🎬 Putar Slideshow Proyektor
+                        <button type="button" onclick="startProjectorSlideshow('event')" class="bg-gradient-to-r from-amber-500 to-yellow-600 text-[#0f172a] text-xs font-extrabold px-4 py-2.5 rounded-xl shadow hover:opacity-95 transition flex items-center gap-1.5">
+                            🎬 Putar Slideshow Dokumentasi (Event)
                         </button>
                     </div>
                 </div>
@@ -153,7 +164,12 @@
                         <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">🖼️ Pantauan Photobooth Gallery (Berbingkai)</h2>
                         <p class="text-xs text-gray-300">Daftar seluruh hasil foto strip Photobooth berbingkai dari pasangan peserta.</p>
                     </div>
-                    <input type="text" id="search-pb-couple" oninput="renderAdminPhotobooths()" placeholder="🔍 Cari nama pasangan..." class="bg-[#0f172a]/90 border border-[#D6A84F]/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <input type="text" id="search-pb-couple" oninput="renderAdminPhotobooths()" placeholder="🔍 Cari nama pasangan..." class="bg-[#0f172a]/90 border border-[#D6A84F]/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                        <button type="button" onclick="startProjectorSlideshow('photobooth')" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl shadow hover:opacity-95 transition flex items-center gap-1.5">
+                            🎬 Putar Slideshow Photobooth Frame
+                        </button>
+                    </div>
                 </div>
 
                 <div id="admin-photobooth-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
@@ -166,7 +182,6 @@
         <!-- TAB 3: UPLOAD SLIDE / RUNDOWN & KONTROL ALARM ISTIRAHAT                   -->
         <!-- ========================================================================= -->
         <section id="panel-controls" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5">
-            <!-- Kartu 1: Upload Banyak Slide / Rundown langsung dari Web Admin -->
             <div class="glass-card p-5 rounded-2xl space-y-4">
                 <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">➕ Upload Slide Materi / Rundown</h2>
                 <p class="text-xs text-gray-300">Unggah banyak file gambar Slide Presentasi atau Rundown sekaligus langsung dari browser ini (otomatis dipecah ke Spreadsheet & me-refresh Cache Server).</p>
@@ -199,12 +214,11 @@
                     </div>
                 </div>
 
-                <button id="btn-web-upload-start" onclick="startAdminWebUpload()" class="w-full bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] font-extrabold py-3 rounded-xl text-xs shadow-lg transition">
+                <button type="button" id="btn-web-upload-start" onclick="startAdminWebUpload()" class="w-full bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] font-extrabold py-3 rounded-xl text-xs shadow-lg transition">
                     🚀 Mulai Upload & Sinkronkan ke Web Peserta
                 </button>
             </div>
 
-            <!-- Kartu 2: Kontrol Alarm Istirahat & Manajemen Cache Server -->
             <div class="space-y-5">
                 <div class="glass-card p-5 rounded-2xl space-y-3">
                     <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">🔔 Kontrol Alarm Istirahat Peserta</h2>
@@ -214,7 +228,7 @@
                             <p class="text-xs font-bold text-gray-300">Status Alarm Saat Ini:</p>
                             <p id="panel-alarm-text" class="text-lg font-extrabold text-gray-400">NONAKTIF (OFF)</p>
                         </div>
-                        <button onclick="toggleBreakAlarm()" id="panel-alarm-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow transition">
+                        <button type="button" onclick="toggleBreakAlarm()" id="panel-alarm-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow transition">
                             🔊 Nyalakan Alarm (ON)
                         </button>
                     </div>
@@ -223,7 +237,7 @@
                 <div class="glass-card p-5 rounded-2xl space-y-3">
                     <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">⚡ Bersihkan Cache RAM Server</h2>
                     <p class="text-xs text-gray-300">Jika Anda baru saja mengubah isi Sheet <i>Slides</i> atau <i>Rundown</i> secara manual di Google Spreadsheet, tekan tombol ini agar perubahan langsung tampil di HP peserta.</p>
-                    <button onclick="clearServerCacheFromWeb()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3 rounded-xl text-xs shadow transition">
+                    <button type="button" onclick="clearServerCacheFromWeb()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3 rounded-xl text-xs shadow transition">
                         ⚡ Refresh Cache Slide & Rundown Sekarang
                     </button>
                 </div>
@@ -265,26 +279,33 @@
 
     </main>
 
-    <!-- MODAL SLIDESHOW PROYEKTOR FULLSCREEN (UNTUK DITAYANGKAN DI LAYAR ACARA) -->
+    <!-- ========================================================================= -->
+    <!-- MODAL SLIDESHOW PROYEKTOR FULLSCREEN (EVENT / PHOTOBOOTH, AUTO FADE 3 DETIK)-->
+    <!-- ========================================================================= -->
     <div id="projector-slideshow-modal" class="hidden fixed inset-0 z-[150] bg-black/95 backdrop-blur-xl flex flex-col justify-between p-6">
         <div class="flex justify-between items-center">
             <div>
-                <h2 class="text-xl md:text-2xl font-extrabold text-[#D6A84F]">✨ LIVE EVENT PHOTO'S SLIDESHOW • CWO SEASON VI</h2>
+                <h2 id="slideshow-title" class="text-xl md:text-2xl font-extrabold text-[#D6A84F]">✨ LIVE SLIDESHOW • CWO SEASON VI</h2>
                 <p id="slideshow-caption" class="text-sm text-gray-200 font-bold mt-0.5">Menampilkan Momen Terbaik Pasangan Peserta</p>
             </div>
-            <button onclick="stopProjectorSlideshow()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow">
-                ✕ Tutup Slideshow
-            </button>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="togglePlayPauseSlideshow()" id="btn-slideshow-play" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow">
+                    ⏸ Jeda Auto-Play
+                </button>
+                <button type="button" onclick="stopProjectorSlideshow()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow">
+                    ✕ Tutup Slideshow
+                </button>
+            </div>
         </div>
 
         <div class="flex-1 flex items-center justify-center my-4 overflow-hidden relative">
-            <img id="slideshow-main-img" src="" class="max-h-[75vh] max-w-full object-contain rounded-2xl border-4 border-[#D6A84F] shadow-2xl transition-all duration-500" alt="Slideshow">
+            <img id="slideshow-main-img" src="" class="max-h-[75vh] max-w-full object-contain rounded-2xl border-4 border-[#D6A84F] shadow-2xl fade-img-transition" alt="Slideshow">
         </div>
 
         <div class="flex justify-center items-center gap-3">
-            <button onclick="stepSlideshow(-1)" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs font-bold">⬅ Sebelumnya</button>
+            <button type="button" onclick="stepSlideshow(-1, true)" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs font-bold">⬅ Sebelumnya</button>
             <span id="slideshow-counter" class="text-xs font-extrabold text-[#D6A84F] px-3 py-1 bg-white/10 rounded-full">1 / 1</span>
-            <button onclick="stepSlideshow(1)" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs font-bold">Selanjutnya ➡</button>
+            <button type="button" onclick="stepSlideshow(1, true)" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs font-bold">Selanjutnya ➡</button>
         </div>
     </div>
 
@@ -303,6 +324,9 @@
 
         let slideshowTimer = null;
         let slideshowIdx = 0;
+        let currentSlideshowType = 'event'; // 'event' or 'photobooth'
+        let isSlideshowPlaying = true;
+        let isAnimatingFade = false;
 
         function formatDriveUrl(url) {
             if (!url) return '';
@@ -392,7 +416,6 @@
             }
         }
 
-        // Render Grid Dokumentasi Event Photo + Moderasi Hapus
         function renderAdminEventPhotos() {
             const grid = document.getElementById('admin-eventphotos-grid');
             const query = (document.getElementById('search-ep-couple').value || '').toLowerCase().trim();
@@ -424,7 +447,7 @@
                                 <p class="text-[11px] font-extrabold text-white truncate">👩‍❤️‍👨 ${escapeHtml(item.names)}</p>
                                 <p class="text-[9px] text-gray-400 truncate">${escapeHtml(item.photoId)}</p>
                             </div>
-                            <button onclick="adminRemoveEventPhoto('${item.photoId}', '${escapeHtml(item.names)}')" title="Hapus Foto & Kembalikan Token Peserta" class="shrink-0 bg-red-600 hover:bg-red-500 text-white text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg shadow transition">
+                            <button type="button" onclick="adminRemoveEventPhoto('${item.photoId}', '${escapeHtml(item.names)}')" title="Hapus Foto & Kembalikan Token Peserta" class="shrink-0 bg-red-600 hover:bg-red-500 text-white text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg shadow transition">
                                 🗑️ Hapus
                             </button>
                         </div>
@@ -482,7 +505,6 @@
             });
         }
 
-        // Render Grid Photobooth Gallery
         function renderAdminPhotobooths() {
             const grid = document.getElementById('admin-photobooth-grid');
             const query = (document.getElementById('search-pb-couple').value || '').toLowerCase().trim();
@@ -507,7 +529,7 @@
                         </div>
                         <div class="p-2.5 flex items-center justify-between gap-1 bg-[#1e293b]">
                             <p class="text-[11px] font-extrabold text-white truncate">👩‍❤️‍👨 ${escapeHtml(item.names)}</p>
-                            <button onclick="adminRemovePhotobooth('${item.url}', '${escapeHtml(item.names)}')" class="shrink-0 bg-red-600 hover:bg-red-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-lg">
+                            <button type="button" onclick="adminRemovePhotobooth('${item.url}', '${escapeHtml(item.names)}')" class="shrink-0 bg-red-600 hover:bg-red-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-lg">
                                 🗑️
                             </button>
                         </div>
@@ -542,7 +564,6 @@
             });
         }
 
-        // Render Tabel Kehadiran & Kuota Token
         function renderAdminAttendance() {
             const tbody = document.getElementById('admin-attendance-tbody');
             const query = (document.getElementById('search-login-couple').value || '').toLowerCase().trim();
@@ -573,7 +594,7 @@
                             </span>
                         </td>
                         <td class="py-3 px-3 text-right">
-                            <button onclick="filterPhotosByCouple('${escapeHtml(item.coupleId)}')" class="bg-[#D6A84F]/20 hover:bg-[#D6A84F] text-[#D6A84F] hover:text-[#0f172a] px-3 py-1 rounded-lg text-[10px] font-extrabold transition">
+                            <button type="button" onclick="filterPhotosByCouple('${escapeHtml(item.coupleId)}')" class="bg-[#D6A84F]/20 hover:bg-[#D6A84F] text-[#D6A84F] hover:text-[#0f172a] px-3 py-1 rounded-lg text-[10px] font-extrabold transition">
                                 🔍 Lihat Foto Mereka
                             </button>
                         </td>
@@ -588,7 +609,6 @@
             renderAdminEventPhotos();
         }
 
-        // Saklar Alarm Istirahat ON / OFF
         async function toggleBreakAlarm() {
             const nextState = adminState.alarmActive ? 'OFF' : 'ON';
             try {
@@ -602,7 +622,7 @@
                 Swal.fire({
                     title: adminState.alarmActive ? '🔔 Alarm Diaktifkan (ON)!' : '🔇 Alarm Dimatikan (OFF)',
                     text: adminState.alarmActive ? 'Peringatan selesai istirahat akan muncul di layar HP peserta.' : 'Status alarm kembali normal.',
-                    icon: adminState.alarmActive ? 'warning' : 'success',
+                    icon: adminState.alarmActive ? 'warning',
                     timer: 1600,
                     showConfirmButton: false
                 });
@@ -611,7 +631,6 @@
             }
         }
 
-        // Upload Banyak Slide / Rundown langsung dari Web Admin
         function fileToOptimizedBase64Admin(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -692,7 +711,7 @@
                 await fetch(GAS_WEB_APP_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({ 'action': 'clearCache' })
+                    body: newSearchParams({ 'action': 'clearCache' })
                 });
                 Swal.fire('Cache Diperbarui!', 'Slide & Rundown terbaru siap tampil instan di HP peserta.', 'success');
             } catch (e) {
@@ -700,39 +719,121 @@
             }
         }
 
-        // Mode Slideshow Proyektor untuk Event Photo's Gallery
-        function startProjectorSlideshow() {
-            if (adminState.eventPhotos.length === 0) {
-                Swal.fire('Belum Ada Foto', 'Belum ada foto di Event Photo\'s Gallery untuk ditampilkan.', 'info');
+        // =========================================================================
+        // ENGINE SLIDESHOW FULLSCREEN (AUTO FADE SETIAP 3 DETIK)
+        // =========================================================================
+        function startProjectorSlideshow(type) {
+            currentSlideshowType = type; // 'event' or 'photobooth'
+            const list = type === 'event' ? adminState.eventPhotos : adminState.photobooths;
+
+            if (list.length === 0) {
+                Swal.fire('Belum Ada Foto', `Belum ada foto di Galeri ${type === 'event' ? 'Dokumentasi' : 'Photobooth'} untuk ditampilkan.`, 'info');
                 return;
             }
+
             slideshowIdx = 0;
-            document.getElementById('projector-slideshow-modal').classList.remove('hidden');
-            showSlideshowItem();
-            if (slideshowTimer) clearInterval(slideshowTimer);
-            slideshowTimer = setInterval(() => {
-                stepSlideshow(1);
-            }, 4000);
+            isSlideshowPlaying = true;
+            document.getElementById('btn-slideshow-play').innerText = "⏸ Jeda Auto-Play";
+            document.getElementById('slideshow-title').innerText = type === 'event' 
+                ? "✨ LIVE EVENT PHOTO'S SLIDESHOW" 
+                : "🖼️ LIVE PHOTOBOOTH SLIDESHOW";
+
+            const modal = document.getElementById('projector-slideshow-modal');
+            modal.classList.remove('hidden');
+            
+            // Masuk Fullscreen
+            if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                try { document.documentElement.requestFullscreen(); } catch (e) {}
+            }
+
+            showSlideshowItem(true);
+            startSlideshowTimer();
         }
 
         function stopProjectorSlideshow() {
             if (slideshowTimer) clearInterval(slideshowTimer);
             slideshowTimer = null;
             document.getElementById('projector-slideshow-modal').classList.add('hidden');
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(() => {});
+            }
         }
 
-        function stepSlideshow(delta) {
-            if (adminState.eventPhotos.length === 0) return;
-            slideshowIdx = (slideshowIdx + delta + adminState.eventPhotos.length) % adminState.eventPhotos.length;
-            showSlideshowItem();
+        function startSlideshowTimer() {
+            if (slideshowTimer) clearInterval(slideshowTimer);
+            slideshowTimer = setInterval(() => {
+                if (isSlideshowPlaying) stepSlideshow(1, false);
+            }, 3000); // Ganti foto setiap 3 detik
         }
 
-        function showSlideshowItem() {
-            const item = adminState.eventPhotos[slideshowIdx];
+        function togglePlayPauseSlideshow() {
+            isSlideshowPlaying = !isSlideshowPlaying;
+            const btn = document.getElementById('btn-slideshow-play');
+            if (isSlideshowPlaying) {
+                btn.innerText = "⏸ Jeda Auto-Play";
+                btn.className = "bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow";
+            } else {
+                btn.innerText = "▶ Putar Auto-Play";
+                btn.className = "bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow";
+            }
+        }
+
+        function stepSlideshow(delta, isManual = false) {
+            if (isAnimatingFade) return; // Cegah ganti cepat saat animasi berjalan
+            const list = currentSlideshowType === 'event' ? adminState.eventPhotos : adminState.photobooths;
+            if (list.length === 0) return;
+
+            if (isManual && isSlideshowPlaying) {
+                // Jeda timer jika diklik manual agar tidak menabrak auto-play
+                clearInterval(slideshowTimer);
+                setTimeout(startSlideshowTimer, 3000);
+            }
+
+            slideshowIdx = (slideshowIdx + delta + list.length) % list.length;
+            showSlideshowItem(false);
+        }
+
+        function showSlideshowItem(isInitialLoad = false) {
+            const list = currentSlideshowType === 'event' ? adminState.eventPhotos : adminState.photobooths;
+            const item = list[slideshowIdx];
             if (!item) return;
-            document.getElementById('slideshow-main-img').src = formatDriveUrl(item.url);
-            document.getElementById('slideshow-caption').innerText = `👩‍❤️‍👨 ${item.names} • ${item.mood || '✨ Golden Moments'} (${item.time || '--:--'} WIB)`;
-            document.getElementById('slideshow-counter').innerText = `${slideshowIdx + 1} / ${adminState.eventPhotos.length}`;
+
+            const imgEl = document.getElementById('slideshow-main-img');
+            const captionEl = document.getElementById('slideshow-caption');
+            const counterEl = document.getElementById('slideshow-counter');
+
+            if (isInitialLoad) {
+                imgEl.src = formatDriveUrl(item.url);
+                imgEl.classList.remove('fade-img-out');
+            } else {
+                // Animasi Smooth Fade-Out
+                isAnimatingFade = true;
+                imgEl.classList.add('fade-img-out');
+                
+                setTimeout(() => {
+                    // Ganti source saat gambar memudar
+                    imgEl.src = formatDriveUrl(item.url);
+                    
+                    // Fade-In kembali setelah source diganti
+                    imgEl.onload = () => {
+                        imgEl.classList.remove('fade-img-out');
+                        isAnimatingFade = false;
+                    };
+                    
+                    // Fallback jika load gagal/lama
+                    setTimeout(() => {
+                        imgEl.classList.remove('fade-img-out');
+                        isAnimatingFade = false;
+                    }, 500);
+                }, 800); // Tunggu durasi CSS transisi opacity
+            }
+
+            if (currentSlideshowType === 'event') {
+                captionEl.innerText = `👩‍❤️‍👨 ${item.names} • ${item.mood || '✨ Golden Moments'} (${item.time || '--:--'} WIB)`;
+            } else {
+                captionEl.innerText = `👩‍❤️‍👨 ${item.names} (${item.time || '--:--'} WIB)`;
+            }
+            counterEl.innerText = `${slideshowIdx + 1} / ${list.length}`;
         }
 
         function toggleFullScreenAdmin() {
