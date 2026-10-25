@@ -72,9 +72,9 @@
     <!-- MAIN CONTENT CONTAINER -->
     <main class="flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto space-y-6">
 
-        <!-- BARIS 1: KPI RINGKASAN REAL-TIME -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-            <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+        <!-- BARIS 1: KPI RINGKASAN REAL-TIME (5 KARTU) -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+            <div onclick="switchAdminTab('attendance')" class="glass-card p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:border-[#D6A84F] transition">
                 <div>
                     <p class="text-[11px] text-gray-300 font-bold uppercase">Pasangan Hadir</p>
                     <p id="stat-logins" class="text-2xl md:text-3xl font-extrabold text-[#D6A84F] mt-1">0</p>
@@ -83,7 +83,7 @@
                 <span class="text-3xl">👩‍❤️‍👨</span>
             </div>
 
-            <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+            <div onclick="switchAdminTab('eventphotos')" class="glass-card p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:border-[#D6A84F] transition">
                 <div>
                     <p class="text-[11px] text-gray-300 font-bold uppercase">Dokumentasi Event</p>
                     <p id="stat-eventphotos" class="text-2xl md:text-3xl font-extrabold text-emerald-400 mt-1">0</p>
@@ -92,7 +92,7 @@
                 <span class="text-3xl">📷</span>
             </div>
 
-            <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+            <div onclick="switchAdminTab('photobooth')" class="glass-card p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:border-[#D6A84F] transition">
                 <div>
                     <p class="text-[11px] text-gray-300 font-bold uppercase">Photobooth Frame</p>
                     <p id="stat-photobooths" class="text-2xl md:text-3xl font-extrabold text-purple-400 mt-1">0</p>
@@ -101,7 +101,16 @@
                 <span class="text-3xl">📸</span>
             </div>
 
-            <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+            <div onclick="switchAdminTab('qnafb')" class="glass-card p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:border-[#D6A84F] transition">
+                <div>
+                    <p class="text-[11px] text-gray-300 font-bold uppercase">Q&A & Feedback</p>
+                    <p id="stat-qna" class="text-xl md:text-2xl font-extrabold text-sky-400 mt-1">0 Tanya</p>
+                    <p id="stat-fb" class="text-[10px] text-gray-400 mt-0.5">0 Feedback Masuk</p>
+                </div>
+                <span class="text-3xl">💬</span>
+            </div>
+
+            <div onclick="switchAdminTab('controls')" class="glass-card p-4 rounded-2xl flex items-center justify-between col-span-2 md:col-span-1 cursor-pointer hover:border-[#D6A84F] transition">
                 <div>
                     <p class="text-[11px] text-gray-300 font-bold uppercase">Materi & Rundown</p>
                     <p id="stat-slides" class="text-xl md:text-2xl font-extrabold text-amber-300 mt-1">0 Slide</p>
@@ -113,17 +122,20 @@
 
         <!-- BARIS 2: NAVIGASI TAB MENU ADMIN -->
         <div class="glass-card p-1.5 rounded-2xl flex flex-wrap gap-1.5">
-            <button type="button" onclick="switchAdminTab('eventphotos')" id="admintab-eventphotos" class="flex-1 min-w-[160px] py-2.5 px-3 rounded-xl text-xs font-extrabold bg-[#D6A84F] text-[#0f172a] shadow transition">
-                📷 Dokumentasi Event Photo & Token
+            <button type="button" onclick="switchAdminTab('eventphotos')" id="admintab-eventphotos" class="flex-1 min-w-[145px] py-2.5 px-3 rounded-xl text-xs font-extrabold bg-[#D6A84F] text-[#0f172a] shadow transition">
+                📷 Dokumentasi & Token
             </button>
-            <button type="button" onclick="switchAdminTab('photobooth')" id="admintab-photobooth" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
+            <button type="button" onclick="switchAdminTab('photobooth')" id="admintab-photobooth" class="flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
                 🖼️ Galeri Photobooth
             </button>
-            <button type="button" onclick="switchAdminTab('controls')" id="admintab-controls" class="flex-1 min-w-[160px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
-                🛠️ Upload Slide, Rundown & Alarm
+            <button type="button" onclick="switchAdminTab('qnafb')" id="admintab-qnafb" class="flex-1 min-w-[145px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
+                ❓ Q&A & 💬 Feedback
             </button>
-            <button type="button" onclick="switchAdminTab('attendance')" id="admintab-attendance" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
-                👩‍❤️‍👨 Kehadiran & Kuota Token
+            <button type="button" onclick="switchAdminTab('controls')" id="admintab-controls" class="flex-1 min-w-[145px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
+                🛠️ Upload Slide & Alarm
+            </button>
+            <button type="button" onclick="switchAdminTab('attendance')" id="admintab-attendance" class="flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
+                👩‍❤️‍👨 Kehadiran Peserta
             </button>
         </div>
 
@@ -147,7 +159,6 @@
                     </div>
                 </div>
 
-                <!-- Grid Foto Dokumentasi Acara -->
                 <div id="admin-eventphotos-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
                     <p class="text-xs text-gray-400 col-span-full text-center py-10">Memuat foto dokumentasi dari Spreadsheet...</p>
                 </div>
@@ -179,7 +190,59 @@
         </section>
 
         <!-- ========================================================================= -->
-        <!-- TAB 3: UPLOAD SLIDE / RUNDOWN & KONTROL ALARM ISTIRAHAT                   -->
+        <!-- TAB 3: PANTAUAN LIVE ANONYMOUS Q&A DAN EVENT FEEDBACK (BARU)              -->
+        <!-- ========================================================================= -->
+        <section id="panel-qnafb" class="hidden space-y-4">
+            <!-- Bar Kontrol Filter Q&A & Feedback -->
+            <div class="glass-card p-4 rounded-2xl flex flex-wrap justify-between items-center gap-3">
+                <div>
+                    <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">❓ Live Anonymous Q&A & 💬 Feedback Peserta</h2>
+                    <p class="text-xs text-gray-300">Ketuk kartu pertanyaan atau feedback untuk menyorot (memperbesar) ke layar penuh.</p>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <input type="text" id="search-qnafb" oninput="renderAdminQnAAndFeedback()" placeholder="🔍 Cari kata kunci / nama..." class="bg-[#0f172a]/90 border border-[#D6A84F]/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                    <button type="button" onclick="toggleHideAnsweredAdmin()" id="btn-admin-filter-answered" class="bg-gray-700/80 hover:bg-gray-600 text-xs font-bold px-3.5 py-2 rounded-xl border border-white/15 transition">
+                        👁 Sembunyikan Terjawab
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid 2 Kolom: Q&A di Kiri, Feedback di Kanan -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Kolom 1: Live Anonymous Q&A -->
+                <div class="glass-card rounded-2xl border gold-border p-4 md:p-5 flex flex-col h-[560px]">
+                    <div class="flex justify-between items-center mb-4 pb-3 border-b border-white/10 shrink-0">
+                        <div>
+                            <h3 class="text-base md:text-lg font-extrabold text-[#D6A84F] flex items-center gap-2">❓ Live Anonymous Q&A</h3>
+                            <p class="text-[11px] text-gray-300">Pertanyaan anonim dari peserta untuk pembicara.</p>
+                        </div>
+                        <span id="admin-qna-count" class="bg-[#D6A84F]/25 text-[#D6A84F] border border-[#D6A84F]/50 px-3 py-1 rounded-full text-xs font-extrabold shrink-0">0 Pertanyaan</span>
+                    </div>
+
+                    <div id="admin-qna-list" class="space-y-3 overflow-y-auto flex-1 pr-1">
+                        <p class="text-xs text-gray-400 text-center py-10">Memuat daftar pertanyaan Q&A...</p>
+                    </div>
+                </div>
+
+                <!-- Kolom 2: Live Event Feedback -->
+                <div class="glass-card rounded-2xl border gold-border p-4 md:p-5 flex flex-col h-[560px]">
+                    <div class="flex justify-between items-center mb-4 pb-3 border-b border-white/10 shrink-0">
+                        <div>
+                            <h3 class="text-base md:text-lg font-extrabold text-[#D6A84F] flex items-center gap-2">💬 Live Event Feedback</h3>
+                            <p class="text-[11px] text-gray-300">Kesan & pesan langsung dari pasangan peserta.</p>
+                        </div>
+                        <span id="admin-fb-count" class="bg-[#D6A84F]/25 text-[#D6A84F] border border-[#D6A84F]/50 px-3 py-1 rounded-full text-xs font-extrabold shrink-0">0 Feedback</span>
+                    </div>
+
+                    <div id="admin-fb-list" class="space-y-3 overflow-y-auto flex-1 pr-1">
+                        <p class="text-xs text-gray-400 text-center py-10">Memuat daftar feedback peserta...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 4: UPLOAD SLIDE / RUNDOWN & KONTROL ALARM ISTIRAHAT                   -->
         <!-- ========================================================================= -->
         <section id="panel-controls" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5">
             <!-- Kartu 1: Upload Banyak Slide / Rundown langsung dari Web Admin -->
@@ -247,7 +310,7 @@
         </section>
 
         <!-- ========================================================================= -->
-        <!-- TAB 4: DAFTAR KEHADIRAN PASANGAN (LOGINS) & PEMAKAIAN TOKEN DOKUMENTASI    -->
+        <!-- TAB 5: DAFTAR KEHADIRAN PASANGAN (LOGINS) & PEMAKAIAN TOKEN DOKUMENTASI    -->
         <!-- ========================================================================= -->
         <section id="panel-attendance" class="hidden space-y-4">
             <div class="glass-card p-4 md:p-5 rounded-2xl">
@@ -322,14 +385,23 @@
             logins: [],
             tokenCounts: {},
             eventPhotos: [],
-            photobooths: []
+            photobooths: [],
+            qna: [],
+            feedback: []
         };
+
+        let answeredIds = [];
+        try {
+            answeredIds = JSON.parse(localStorage.getItem('cwo_speaker_answered') || "[]");
+        } catch (e) {
+            answeredIds = [];
+        }
+        let hideAnsweredAdmin = false;
 
         let slideshowTimer = null;
         let slideshowIdx = 0;
         let currentSlideshowMode = 'event'; // 'event' atau 'photobooth'
         let isSlideshowPlaying = true;
-        let isFadeTransitioning = false;
 
         function formatDriveUrl(url) {
             if (!url) return '';
@@ -345,38 +417,51 @@
             return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        // Navigasi Tab Admin
+        // Navigasi 5 Tab Admin
         function switchAdminTab(tabName) {
-            ['eventphotos', 'photobooth', 'controls', 'attendance'].forEach(t => {
+            ['eventphotos', 'photobooth', 'qnafb', 'controls', 'attendance'].forEach(t => {
                 const panel = document.getElementById('panel-' + t);
                 const btn = document.getElementById('admintab-' + t);
+                if (!panel || !btn) return;
                 if (t === tabName) {
                     panel.classList.remove('hidden');
-                    btn.className = "flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-extrabold bg-[#D6A84F] text-[#0f172a] shadow transition";
+                    btn.className = "flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-xs font-extrabold bg-[#D6A84F] text-[#0f172a] shadow transition";
                 } else {
                     panel.classList.add('hidden');
-                    btn.className = "flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition";
+                    btn.className = "flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition";
                 }
             });
         }
 
-        // Tarik Semua Data Admin dari Spreadsheet
+        // Tarik Semua Data Admin + Data Q&A & Feedback dari Spreadsheet
         async function fetchAdminAllData(manual = false) {
             try {
-                const res = await fetch(`${GAS_WEB_APP_URL}?action=getAdminDashboard&t=${Date.now()}`);
-                const data = await res.json();
+                const [dashRes, qnaFbRes] = await Promise.allSettled([
+                    fetch(`${GAS_WEB_APP_URL}?action=getAdminDashboard&t=${Date.now()}`).then(r => r.json()),
+                    fetch(`${GAS_WEB_APP_URL}?action=getQnAAndFeedback&t=${Date.now()}`).then(r => r.json())
+                ]);
 
-                adminState.alarmActive = !!data.alarmActive;
-                adminState.slidesCount = data.slidesCount || 0;
-                adminState.rundownCount = data.rundownCount || 0;
-                adminState.logins = Array.isArray(data.logins) ? data.logins : [];
-                adminState.tokenCounts = data.tokenCounts || {};
-                adminState.eventPhotos = Array.isArray(data.eventPhotos) ? data.eventPhotos : [];
-                adminState.photobooths = Array.isArray(data.photobooths) ? data.photobooths : [];
+                if (dashRes.status === 'fulfilled' && dashRes.value) {
+                    const data = dashRes.value;
+                    adminState.alarmActive = !!data.alarmActive;
+                    adminState.slidesCount = data.slidesCount || 0;
+                    adminState.rundownCount = data.rundownCount || 0;
+                    adminState.logins = Array.isArray(data.logins) ? data.logins : [];
+                    adminState.tokenCounts = data.tokenCounts || {};
+                    adminState.eventPhotos = Array.isArray(data.eventPhotos) ? data.eventPhotos : [];
+                    adminState.photobooths = Array.isArray(data.photobooths) ? data.photobooths : [];
+                }
+
+                if (qnaFbRes.status === 'fulfilled' && qnaFbRes.value) {
+                    const qData = qnaFbRes.value;
+                    adminState.qna = Array.isArray(qData.qna) ? qData.qna : [];
+                    adminState.feedback = Array.isArray(qData.feedback) ? qData.feedback : [];
+                }
 
                 updateAdminKPIAndAlarmUI();
                 renderAdminEventPhotos();
                 renderAdminPhotobooths();
+                renderAdminQnAAndFeedback();
                 renderAdminAttendance();
 
                 if (manual) {
@@ -394,6 +479,8 @@
             document.getElementById('stat-logins').innerText = adminState.logins.length;
             document.getElementById('stat-eventphotos').innerText = adminState.eventPhotos.length;
             document.getElementById('stat-photobooths').innerText = adminState.photobooths.length;
+            document.getElementById('stat-qna').innerText = `${adminState.qna.length} Tanya`;
+            document.getElementById('stat-fb').innerText = `${adminState.feedback.length} Feedback Masuk`;
             document.getElementById('stat-slides').innerText = `${adminState.slidesCount} Slide`;
             document.getElementById('stat-rundown').innerText = `${adminState.rundownCount} Gambar Rundown`;
 
@@ -417,6 +504,126 @@
                 pBtn.innerText = "🔊 Nyalakan Alarm (ON)";
                 pBtn.className = "bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow transition";
             }
+        }
+
+        // =========================================================================
+        // RENDER LIVE Q&A DAN FEEDBACK DI ADMIN (SEPERTI SPEAKER DASHBOARD)
+        // =========================================================================
+        function renderAdminQnAAndFeedback() {
+            const qnaListEl = document.getElementById('admin-qna-list');
+            const fbListEl = document.getElementById('admin-fb-list');
+            if (!qnaListEl || !fbListEl) return;
+
+            const query = (document.getElementById('search-qnafb').value || '').toLowerCase().trim();
+
+            const filteredQna = (adminState.qna || []).filter(item => {
+                if (hideAnsweredAdmin && answeredIds.includes(item.id)) return false;
+                if (!query) return true;
+                return (item.question || '').toLowerCase().includes(query);
+            });
+
+            const filteredFb = (adminState.feedback || []).filter(item => {
+                if (!query) return true;
+                return (item.feedback || '').toLowerCase().includes(query) || (item.names || '').toLowerCase().includes(query);
+            });
+
+            document.getElementById('admin-qna-count').innerText = `${filteredQna.length} Pertanyaan`;
+            document.getElementById('admin-fb-count').innerText = `${filteredFb.length} Feedback`;
+
+            if (filteredQna.length === 0) {
+                qnaListEl.innerHTML = `<div class="text-center py-12 text-gray-400 text-xs font-bold">Belum ada pertanyaan Q&A yang sesuai.</div>`;
+            } else {
+                qnaListEl.innerHTML = filteredQna.map((item, idx) => {
+                    const isDone = answeredIds.includes(item.id);
+                    return `
+                        <div class="p-4 rounded-2xl border transition flex flex-col justify-between gap-2 ${isDone ? 'bg-[#0f172a]/40 border-gray-700 opacity-50' : 'bg-[#0f172a]/85 border-[#D6A84F]/60 shadow-lg'}">
+                            <div class="flex justify-between items-center flex-wrap gap-2">
+                                <span class="text-[11px] font-extrabold text-[#D6A84F] tracking-wide">ANONIM • ${escapeHtml(item.time)} WIB</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button type="button" onclick="openAdminSpotlightQna(${idx})" class="bg-[#D6A84F]/25 hover:bg-[#D6A84F]/40 text-[#D6A84F] px-2.5 py-1 rounded-lg text-[11px] font-bold transition">🔍 Sorot</button>
+                                    <button type="button" onclick="toggleAdminAnswered(${item.id})" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${isDone ? 'bg-emerald-800 text-emerald-200' : 'bg-gray-700 hover:bg-emerald-700 text-white'}">
+                                        ${isDone ? '✔ Terjawab' : 'Tandai Selesai'}
+                                    </button>
+                                </div>
+                            </div>
+                            <p onclick="openAdminSpotlightQna(${idx})" class="cursor-pointer text-sm md:text-base font-bold text-white leading-relaxed break-words">${escapeHtml(item.question)}</p>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            if (filteredFb.length === 0) {
+                fbListEl.innerHTML = `<div class="text-center py-12 text-gray-400 text-xs font-bold">Belum ada feedback peserta yang masuk.</div>`;
+            } else {
+                fbListEl.innerHTML = filteredFb.map((item, idx) => `
+                    <div onclick="openAdminSpotlightFb(${idx})" class="cursor-pointer p-4 rounded-2xl bg-[#0f172a]/85 border border-white/15 hover:border-[#D6A84F]/60 transition shadow-md">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-xs font-extrabold text-[#D6A84F] uppercase tracking-wider">👩‍❤️‍👨 ${escapeHtml(item.names)}</span>
+                            <span class="text-[11px] text-gray-300 font-semibold">${escapeHtml(item.time)} WIB</span>
+                        </div>
+                        <p class="text-xs md:text-sm text-gray-100 font-medium leading-relaxed break-words">${escapeHtml(item.feedback)}</p>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function toggleAdminAnswered(id) {
+            if (answeredIds.includes(id)) {
+                answeredIds = answeredIds.filter(i => i !== id);
+            } else {
+                answeredIds.push(id);
+            }
+            localStorage.setItem('cwo_speaker_answered', JSON.stringify(answeredIds));
+            renderAdminQnAAndFeedback();
+        }
+
+        function toggleHideAnsweredAdmin() {
+            hideAnsweredAdmin = !hideAnsweredAdmin;
+            const btn = document.getElementById('btn-admin-filter-answered');
+            btn.innerText = hideAnsweredAdmin ? "👁 Tampilkan Semua" : "👁 Sembunyikan Terjawab";
+            btn.className = hideAnsweredAdmin
+                ? "bg-[#D6A84F] text-[#0f172a] text-xs font-extrabold px-3.5 py-2 rounded-xl transition"
+                : "bg-gray-700/80 hover:bg-gray-600 text-xs font-bold px-3.5 py-2 rounded-xl border border-white/15 transition";
+            renderAdminQnAAndFeedback();
+        }
+
+        function openAdminSpotlightQna(idx) {
+            const query = (document.getElementById('search-qnafb').value || '').toLowerCase().trim();
+            const filteredQna = (adminState.qna || []).filter(item => {
+                if (hideAnsweredAdmin && answeredIds.includes(item.id)) return false;
+                if (!query) return true;
+                return (item.question || '').toLowerCase().includes(query);
+            });
+            const item = filteredQna[idx];
+            if (!item) return;
+
+            Swal.fire({
+                title: `<span style="color:#D6A84F; font-size:15px; font-weight:800;">❓ PERTANYAAN PESERTA (${escapeHtml(item.time)} WIB)</span>`,
+                html: `<div style="font-size:24px; font-weight:800; color:#1e293b; line-height:1.45; padding:16px 8px;">"${escapeHtml(item.question)}"</div>`,
+                width: '750px',
+                background: '#F7F1E3',
+                confirmButtonText: 'Tutup Sorotan',
+                confirmButtonColor: '#1e293b'
+            });
+        }
+
+        function openAdminSpotlightFb(idx) {
+            const query = (document.getElementById('search-qnafb').value || '').toLowerCase().trim();
+            const filteredFb = (adminState.feedback || []).filter(item => {
+                if (!query) return true;
+                return (item.feedback || '').toLowerCase().includes(query) || (item.names || '').toLowerCase().includes(query);
+            });
+            const item = filteredFb[idx];
+            if (!item) return;
+
+            Swal.fire({
+                title: `<span style="color:#D6A84F; font-size:15px; font-weight:800;">💬 FEEDBACK DARI ${escapeHtml(item.names)} (${escapeHtml(item.time)} WIB)</span>`,
+                html: `<div style="font-size:22px; font-weight:700; color:#1e293b; line-height:1.45; padding:16px 8px;">"${escapeHtml(item.feedback)}"</div>`,
+                width: '750px',
+                background: '#F7F1E3',
+                confirmButtonText: 'Tutup Sorotan',
+                confirmButtonColor: '#1e293b'
+            });
         }
 
         // Render Grid Dokumentasi Event Photo + Moderasi Hapus
@@ -751,7 +958,6 @@
 
             slideshowIdx = 0;
             isSlideshowPlaying = true;
-            isFadeTransitioning = false;
 
             const titleEl = document.getElementById('slideshow-title');
             if (titleEl) {
@@ -784,7 +990,7 @@
                 if (isSlideshowPlaying) {
                     stepSlideshow(1, false);
                 }
-            }, 3000); // Otomatis berganti setiap 3 detik
+            }, 3000);
         }
 
         function togglePlayPauseSlideshow() {
@@ -856,7 +1062,6 @@
                 return;
             }
 
-            // Animasi pergantian Smooth Fade
             imgEl.classList.add('fade-img-out');
             setTimeout(() => {
                 imgEl.onload = () => {
