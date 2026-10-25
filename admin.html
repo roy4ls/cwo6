@@ -27,15 +27,15 @@
         ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
         ::-webkit-scrollbar-thumb { background: #D6A84F; border-radius: 10px; }
 
-        /* Smooth Fade Animation untuk Slideshow */
+        /* Animasi Smooth Fade untuk Slideshow Proyektor */
         .fade-img-transition {
-            transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+            transition: opacity 0.65s ease-in-out, transform 0.65s ease-in-out;
             opacity: 1;
             transform: scale(1);
         }
         .fade-img-out {
             opacity: 0;
-            transform: scale(0.97);
+            transform: scale(0.96);
         }
     </style>
 </head>
@@ -137,12 +137,12 @@
                         <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F] flex items-center gap-2">
                             📷 Pantauan Dokumentasi Event Photo's Gallery
                         </h2>
-                        <p class="text-xs text-gray-300">Admin dapat memantau foto dokumentasi peserta, menayangkan Slideshow Proyektor, atau menghapus foto yang kurang layak.</p>
+                        <p class="text-xs text-gray-300">Admin dapat memantau foto dokumentasi peserta, menayangkan Slideshow Proyektor Fullscreen, atau menghapus foto yang kurang layak.</p>
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <input type="text" id="search-ep-couple" oninput="renderAdminEventPhotos()" placeholder="🔍 Cari nama pasangan..." class="bg-[#0f172a]/90 border border-[#D6A84F]/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                        <button type="button" onclick="startProjectorSlideshow('event')" class="bg-gradient-to-r from-amber-500 to-yellow-600 text-[#0f172a] text-xs font-extrabold px-4 py-2.5 rounded-xl shadow hover:opacity-95 transition flex items-center gap-1.5">
-                            🎬 Putar Slideshow Dokumentasi (Event)
+                        <button type="button" onclick="startProjectorSlideshow('event')" class="bg-gradient-to-r from-amber-500 to-yellow-600 text-[#0f172a] text-xs font-extrabold px-4 py-2 rounded-xl shadow hover:opacity-95 transition flex items-center gap-1.5">
+                            🎬 Putar Slideshow Proyektor
                         </button>
                     </div>
                 </div>
@@ -166,8 +166,8 @@
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <input type="text" id="search-pb-couple" oninput="renderAdminPhotobooths()" placeholder="🔍 Cari nama pasangan..." class="bg-[#0f172a]/90 border border-[#D6A84F]/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                        <button type="button" onclick="startProjectorSlideshow('photobooth')" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl shadow hover:opacity-95 transition flex items-center gap-1.5">
-                            🎬 Putar Slideshow Photobooth Frame
+                        <button type="button" onclick="startProjectorSlideshow('photobooth')" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow hover:opacity-95 transition flex items-center gap-1.5">
+                            🎬 Putar Slideshow Photobooth
                         </button>
                     </div>
                 </div>
@@ -182,6 +182,7 @@
         <!-- TAB 3: UPLOAD SLIDE / RUNDOWN & KONTROL ALARM ISTIRAHAT                   -->
         <!-- ========================================================================= -->
         <section id="panel-controls" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- Kartu 1: Upload Banyak Slide / Rundown langsung dari Web Admin -->
             <div class="glass-card p-5 rounded-2xl space-y-4">
                 <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">➕ Upload Slide Materi / Rundown</h2>
                 <p class="text-xs text-gray-300">Unggah banyak file gambar Slide Presentasi atau Rundown sekaligus langsung dari browser ini (otomatis dipecah ke Spreadsheet & me-refresh Cache Server).</p>
@@ -219,6 +220,7 @@
                 </button>
             </div>
 
+            <!-- Kartu 2: Kontrol Alarm Istirahat & Manajemen Cache Server -->
             <div class="space-y-5">
                 <div class="glass-card p-5 rounded-2xl space-y-3">
                     <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">🔔 Kontrol Alarm Istirahat Peserta</h2>
@@ -279,18 +281,19 @@
 
     </main>
 
-    <!-- ========================================================================= -->
-    <!-- MODAL SLIDESHOW PROYEKTOR FULLSCREEN (EVENT / PHOTOBOOTH, AUTO FADE 3 DETIK)-->
-    <!-- ========================================================================= -->
+    <!-- MODAL SLIDESHOW PROYEKTOR FULLSCREEN (EVENT & PHOTOBOOTH, AUTO FADE 3 DETIK) -->
     <div id="projector-slideshow-modal" class="hidden fixed inset-0 z-[150] bg-black/95 backdrop-blur-xl flex flex-col justify-between p-6">
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center flex-wrap gap-2">
             <div>
-                <h2 id="slideshow-title" class="text-xl md:text-2xl font-extrabold text-[#D6A84F]">✨ LIVE SLIDESHOW • CWO SEASON VI</h2>
+                <h2 id="slideshow-title" class="text-xl md:text-2xl font-extrabold text-[#D6A84F]">✨ LIVE EVENT PHOTO'S SLIDESHOW • CWO SEASON VI</h2>
                 <p id="slideshow-caption" class="text-sm text-gray-200 font-bold mt-0.5">Menampilkan Momen Terbaik Pasangan Peserta</p>
             </div>
             <div class="flex items-center gap-2">
                 <button type="button" onclick="togglePlayPauseSlideshow()" id="btn-slideshow-play" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow">
-                    ⏸ Jeda Auto-Play
+                    ⏸ Jeda (3s)
+                </button>
+                <button type="button" onclick="toggleSlideshowFullscreenWindow()" class="bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] text-xs font-extrabold px-4 py-2 rounded-xl shadow">
+                    ⛶ Fullscreen Layar
                 </button>
                 <button type="button" onclick="stopProjectorSlideshow()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow">
                     ✕ Tutup Slideshow
@@ -299,7 +302,7 @@
         </div>
 
         <div class="flex-1 flex items-center justify-center my-4 overflow-hidden relative">
-            <img id="slideshow-main-img" src="" class="max-h-[75vh] max-w-full object-contain rounded-2xl border-4 border-[#D6A84F] shadow-2xl fade-img-transition" alt="Slideshow">
+            <img id="slideshow-main-img" src="" class="max-h-[76vh] max-w-full object-contain rounded-2xl border-4 border-[#D6A84F] shadow-2xl fade-img-transition" alt="Slideshow">
         </div>
 
         <div class="flex justify-center items-center gap-3">
@@ -324,9 +327,9 @@
 
         let slideshowTimer = null;
         let slideshowIdx = 0;
-        let currentSlideshowType = 'event'; // 'event' or 'photobooth'
+        let currentSlideshowMode = 'event'; // 'event' atau 'photobooth'
         let isSlideshowPlaying = true;
-        let isAnimatingFade = false;
+        let isFadeTransitioning = false;
 
         function formatDriveUrl(url) {
             if (!url) return '';
@@ -416,6 +419,7 @@
             }
         }
 
+        // Render Grid Dokumentasi Event Photo + Moderasi Hapus
         function renderAdminEventPhotos() {
             const grid = document.getElementById('admin-eventphotos-grid');
             const query = (document.getElementById('search-ep-couple').value || '').toLowerCase().trim();
@@ -505,6 +509,7 @@
             });
         }
 
+        // Render Grid Photobooth Gallery
         function renderAdminPhotobooths() {
             const grid = document.getElementById('admin-photobooth-grid');
             const query = (document.getElementById('search-pb-couple').value || '').toLowerCase().trim();
@@ -564,6 +569,7 @@
             });
         }
 
+        // Render Tabel Kehadiran & Kuota Token
         function renderAdminAttendance() {
             const tbody = document.getElementById('admin-attendance-tbody');
             const query = (document.getElementById('search-login-couple').value || '').toLowerCase().trim();
@@ -609,6 +615,7 @@
             renderAdminEventPhotos();
         }
 
+        // Saklar Alarm Istirahat ON / OFF
         async function toggleBreakAlarm() {
             const nextState = adminState.alarmActive ? 'OFF' : 'ON';
             try {
@@ -622,7 +629,7 @@
                 Swal.fire({
                     title: adminState.alarmActive ? '🔔 Alarm Diaktifkan (ON)!' : '🔇 Alarm Dimatikan (OFF)',
                     text: adminState.alarmActive ? 'Peringatan selesai istirahat akan muncul di layar HP peserta.' : 'Status alarm kembali normal.',
-                    icon: adminState.alarmActive ? 'warning',
+                    icon: adminState.alarmActive ? 'warning' : 'success',
                     timer: 1600,
                     showConfirmButton: false
                 });
@@ -631,6 +638,7 @@
             }
         }
 
+        // Upload Banyak Slide / Rundown langsung dari Web Admin
         function fileToOptimizedBase64Admin(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -711,7 +719,7 @@
                 await fetch(GAS_WEB_APP_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: newSearchParams({ 'action': 'clearCache' })
+                    body: new URLSearchParams({ 'action': 'clearCache' })
                 });
                 Swal.fire('Cache Diperbarui!', 'Slide & Rundown terbaru siap tampil instan di HP peserta.', 'success');
             } catch (e) {
@@ -720,34 +728,85 @@
         }
 
         // =========================================================================
-        // ENGINE SLIDESHOW FULLSCREEN (AUTO FADE SETIAP 3 DETIK)
+        // MODE SLIDESHOW PROYEKTOR FULLSCREEN (EVENT & PHOTOBOOTH, AUTO 3 DETIK)
         // =========================================================================
-        function startProjectorSlideshow(type) {
-            currentSlideshowType = type; // 'event' or 'photobooth'
-            const list = type === 'event' ? adminState.eventPhotos : adminState.photobooths;
+        function getActiveSlideshowList() {
+            return currentSlideshowMode === 'photobooth' ? adminState.photobooths : adminState.eventPhotos;
+        }
+
+        function startProjectorSlideshow(mode = 'event') {
+            currentSlideshowMode = mode;
+            const list = getActiveSlideshowList();
 
             if (list.length === 0) {
-                Swal.fire('Belum Ada Foto', `Belum ada foto di Galeri ${type === 'event' ? 'Dokumentasi' : 'Photobooth'} untuk ditampilkan.`, 'info');
+                Swal.fire(
+                    'Belum Ada Foto',
+                    mode === 'photobooth'
+                        ? 'Belum ada foto di Galeri Photobooth untuk ditayangkan.'
+                        : 'Belum ada foto di Event Photo\'s Gallery untuk ditayangkan.',
+                    'info'
+                );
                 return;
             }
 
             slideshowIdx = 0;
             isSlideshowPlaying = true;
-            document.getElementById('btn-slideshow-play').innerText = "⏸ Jeda Auto-Play";
-            document.getElementById('slideshow-title').innerText = type === 'event' 
-                ? "✨ LIVE EVENT PHOTO'S SLIDESHOW" 
-                : "🖼️ LIVE PHOTOBOOTH SLIDESHOW";
+            isFadeTransitioning = false;
+
+            const titleEl = document.getElementById('slideshow-title');
+            if (titleEl) {
+                titleEl.innerText = mode === 'photobooth'
+                    ? "🖼️ LIVE PHOTOBOOTH SLIDESHOW • CWO SEASON VI"
+                    : "✨ LIVE EVENT PHOTO'S SLIDESHOW • CWO SEASON VI";
+            }
+
+            const playBtn = document.getElementById('btn-slideshow-play');
+            if (playBtn) {
+                playBtn.innerText = "⏸ Jeda (3s)";
+                playBtn.className = "bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow";
+            }
 
             const modal = document.getElementById('projector-slideshow-modal');
             modal.classList.remove('hidden');
-            
-            // Masuk Fullscreen
+
+            // Otomatis masuk Fullscreen saat Slideshow diputar
             if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-                try { document.documentElement.requestFullscreen(); } catch (e) {}
+                document.documentElement.requestFullscreen().catch(() => {});
             }
 
             showSlideshowItem(true);
-            startSlideshowTimer();
+            restartSlideshowInterval();
+        }
+
+        function restartSlideshowInterval() {
+            if (slideshowTimer) clearInterval(slideshowTimer);
+            slideshowTimer = setInterval(() => {
+                if (isSlideshowPlaying) {
+                    stepSlideshow(1, false);
+                }
+            }, 3000); // Otomatis berganti setiap 3 detik
+        }
+
+        function togglePlayPauseSlideshow() {
+            isSlideshowPlaying = !isSlideshowPlaying;
+            const playBtn = document.getElementById('btn-slideshow-play');
+            if (!playBtn) return;
+            if (isSlideshowPlaying) {
+                playBtn.innerText = "⏸ Jeda (3s)";
+                playBtn.className = "bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow";
+                restartSlideshowInterval();
+            } else {
+                playBtn.innerText = "▶ Putar (3s)";
+                playBtn.className = "bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow";
+            }
+        }
+
+        function toggleSlideshowFullscreenWindow() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
         }
 
         function stopProjectorSlideshow() {
@@ -759,81 +818,56 @@
             }
         }
 
-        function startSlideshowTimer() {
-            if (slideshowTimer) clearInterval(slideshowTimer);
-            slideshowTimer = setInterval(() => {
-                if (isSlideshowPlaying) stepSlideshow(1, false);
-            }, 3000); // Ganti foto setiap 3 detik
-        }
-
-        function togglePlayPauseSlideshow() {
-            isSlideshowPlaying = !isSlideshowPlaying;
-            const btn = document.getElementById('btn-slideshow-play');
-            if (isSlideshowPlaying) {
-                btn.innerText = "⏸ Jeda Auto-Play";
-                btn.className = "bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow";
-            } else {
-                btn.innerText = "▶ Putar Auto-Play";
-                btn.className = "bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow";
-            }
-        }
-
-        function stepSlideshow(delta, isManual = false) {
-            if (isAnimatingFade) return; // Cegah ganti cepat saat animasi berjalan
-            const list = currentSlideshowType === 'event' ? adminState.eventPhotos : adminState.photobooths;
+        function stepSlideshow(delta, isManualClick = false) {
+            const list = getActiveSlideshowList();
             if (list.length === 0) return;
 
-            if (isManual && isSlideshowPlaying) {
-                // Jeda timer jika diklik manual agar tidak menabrak auto-play
-                clearInterval(slideshowTimer);
-                setTimeout(startSlideshowTimer, 3000);
+            if (isManualClick && isSlideshowPlaying) {
+                restartSlideshowInterval();
             }
 
             slideshowIdx = (slideshowIdx + delta + list.length) % list.length;
             showSlideshowItem(false);
         }
 
-        function showSlideshowItem(isInitialLoad = false) {
-            const list = currentSlideshowType === 'event' ? adminState.eventPhotos : adminState.photobooths;
+        function showSlideshowItem(immediate = false) {
+            const list = getActiveSlideshowList();
             const item = list[slideshowIdx];
             if (!item) return;
 
             const imgEl = document.getElementById('slideshow-main-img');
             const captionEl = document.getElementById('slideshow-caption');
             const counterEl = document.getElementById('slideshow-counter');
+            const nextUrl = formatDriveUrl(item.url);
 
-            if (isInitialLoad) {
-                imgEl.src = formatDriveUrl(item.url);
+            const updateTexts = () => {
+                if (currentSlideshowMode === 'photobooth') {
+                    captionEl.innerText = `👩‍❤️‍👨 ${item.names} • Photobooth Frame (${item.time || '--:--'} WIB)`;
+                } else {
+                    captionEl.innerText = `👩‍❤️‍👨 ${item.names} • ${item.mood || '✨ Golden Moments'} (${item.time || '--:--'} WIB)`;
+                }
+                counterEl.innerText = `${slideshowIdx + 1} / ${list.length}`;
+            };
+
+            if (immediate) {
                 imgEl.classList.remove('fade-img-out');
-            } else {
-                // Animasi Smooth Fade-Out
-                isAnimatingFade = true;
-                imgEl.classList.add('fade-img-out');
-                
-                setTimeout(() => {
-                    // Ganti source saat gambar memudar
-                    imgEl.src = formatDriveUrl(item.url);
-                    
-                    // Fade-In kembali setelah source diganti
-                    imgEl.onload = () => {
-                        imgEl.classList.remove('fade-img-out');
-                        isAnimatingFade = false;
-                    };
-                    
-                    // Fallback jika load gagal/lama
-                    setTimeout(() => {
-                        imgEl.classList.remove('fade-img-out');
-                        isAnimatingFade = false;
-                    }, 500);
-                }, 800); // Tunggu durasi CSS transisi opacity
+                imgEl.src = nextUrl;
+                updateTexts();
+                return;
             }
 
-            if (currentSlideshowType === 'event') {
-                captionEl.innerText = `👩‍❤️‍👨 ${item.names} • ${item.mood || '✨ Golden Moments'} (${item.time || '--:--'} WIB)`;
-            } else {
-                captionEl.innerText = `👩‍❤️‍👨 ${item.names} (${item.time || '--:--'} WIB)`;
-            }
-            counterEl.innerText = `${slideshowIdx + 1} / ${list.length}`;
+            // Animasi pergantian Smooth Fade
+            imgEl.classList.add('fade-img-out');
+            setTimeout(() => {
+                imgEl.onload = () => {
+                    imgEl.classList.remove('fade-img-out');
+                };
+                imgEl.onerror = () => {
+                    imgEl.classList.remove('fade-img-out');
+                };
+                imgEl.src = nextUrl;
+                updateTexts();
+            }, 380);
         }
 
         function toggleFullScreenAdmin() {
