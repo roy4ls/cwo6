@@ -360,8 +360,8 @@
             <button type="button" onclick="login(false)" id="loginBtn" class="w-full bg-[#D6A84F] text-white font-bold py-3.5 rounded-xl hover:bg-[#c29542] transition shadow-lg shadow-[#D6A84F]/30">Enter Session</button>
 			
 			<!-- 👇 TAMBAHKAN KODE SPONSOR LOGIN DI SINI 👇 -->
-            <div id="login-sponsor-wrapper" class="hidden mt-6 pt-4 border-t border-[#D6A84F]/25">
-                <p id="login-sponsor-title" class="text-[10px] font-extrabold uppercase tracking-widest text-gray-500 mb-3">Supported by :</p>
+            <div id="login-sponsor-wrapper" class="hidden mt-4 pt-2 border-t border-[#D6A84F]/25">
+                <p id="login-sponsor-title" class="text-[8px] font-extrabold uppercase tracking-widest text-gray-500 mb-3">Supported by :</p>
                 <div id="login-sponsor-grid" class="flex flex-wrap justify-center items-stretch gap-2.5"></div>
             </div>
             <!-- 👆 AKHIR KODE SPONSOR LOGIN 👆 -->
@@ -849,8 +849,8 @@
             <!-- 👆 AKHIR KODE FOOTER GEREJA 👆 -->
 			
 			<!-- 👇 TAMBAHKAN KODE SPONSOR BAWAH DASHBOARD DI SINI 👇 -->
-            <div id="dashboard-sponsor-wrapper" class="hidden mt-2 mb-8 pt-4 border-t border-[#D6A84F]/25 text-center">
-                <p id="dashboard-sponsor-title" class="text-[10px] font-extrabold uppercase tracking-widest text-gray-500 mb-3">Supported by :</p>
+            <div id="dashboard-sponsor-wrapper" class="hidden mt-2 mb-4 pt-2 border-t border-[#D6A84F]/25 text-center">
+                <p id="dashboard-sponsor-title" class="text-[8px] font-extrabold uppercase tracking-widest text-gray-500 mb-3">Supported by :</p>
                 <div id="dashboard-sponsor-grid" class="flex flex-wrap justify-center items-stretch gap-2.5"></div>
             </div>
             <!-- 👆 AKHIR KODE SPONSOR BAWAH DASHBOARD 👆 -->
@@ -1160,10 +1160,18 @@
             judulRundownPDF: "EVENT RUNDOWN - CWO SEASON VI",
             judulFullscreenGaleri: "✨ EVENT PHOTO'S GALLERY • CWO SEASON VI",
 
-            // D. TEKS FOOTER & LABEL SPONSOR
+            // D. TEKS FOOTER & PENGATURAN UKURAN SPONSOR
             teksFooterBaris1: "GBI Rock Ministry Embassy Surabaya",
             teksFooterBaris2: "Rock Young and Adult Surabaya",
-            labelSponsor: "Supported by :"
+            labelSponsor: "Supported by :",
+
+            // 👇 PENGATURAN UKURAN KOTAK, LOGO & TEKS SPONSOR 👇
+            tinggiLogoSponsor: "14px",      // Tinggi logo (14px = mungil, 18px = kecil rapi, 24px = sedang)
+            lebarMaksLogoSponsor: "42px",   // Batas lebar logo agar logo persegi panjang tidak melebar
+            ukuranTeksSponsor: "7px",       // Ukuran huruf nama perusahaan di bawah logo (7px - 9px)
+            lebarMinKotakSponsor: "64px",   // Lebar minimal kotak kartu sponsor
+            lebarMaksKotakSponsor: "72px",  // Lebar maksimal kotak kartu sponsor
+            paddingKotakSponsor: "5px 8px"  // Ruang dalam kotak (Atas-Bawah 5px, Kiri-Kanan 8px)
         };
 
         // 👇 6. DAFTAR SPONSOR (URUT & OTOMATIS TAMPIL ESTETIK) 👇
@@ -1634,28 +1642,32 @@ function terapkanKonfigurasiDanSponsor() {
                 [class*="bg-[#1e293b]"] { background-color: ${C.warnaGelapNavy} !important; }
                 [class*="text-[#1e293b]"] { color: ${C.warnaGelapNavy} !important; }
                 .orb-btn { border-color: ${C.warnaUtamaEmas} !important; color: ${C.warnaUtamaEmas} !important; }
-                /* Gaya Estetik Bento/Honeycomb untuk Sponsor */
+                /* Gaya Estetik Bento/Honeycomb untuk Sponsor (Ukuran Terkunci Rapi) */
                 .sponsor-card-item {
                     background: rgba(255, 255, 255, 0.78);
                     backdrop-filter: blur(6px);
                     border: 1px solid rgba(214, 168, 79, 0.35);
-                    border-radius: 14px;
-                    padding: 8px 12px;
-                    min-width: 88px;
-                    max-width: 120px;
+                    border-radius: 10px;
+                    padding: ${C.paddingKotakSponsor || '5px 8px'};
+                    min-width: ${C.lebarMinKotakSponsor || '64px'};
+                    max-width: ${C.lebarMaksKotakSponsor || '88px'};
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
-                    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
                     transition: transform 0.2s ease, box-shadow 0.2s ease;
                 }
-                .sponsor-card-item:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 14px rgba(214, 168, 79, 0.18);
+                .sponsor-card-item img {
+                    height: ${C.tinggiLogoSponsor || '18px'} !important;
+                    max-width: ${C.lebarMaksLogoSponsor || '50px'} !important;
+                    width: auto !important;
+                    object-fit: contain !important;
+                    display: block;
                 }
-                .sponsor-card-item:nth-child(even) {
-                    transform: translateY(3px);
+                .sponsor-card-item span {
+                    font-size: ${C.ukuranTeksSponsor || '8px'} !important;
+                    line-height: 1.15 !important;
                 }
             `;
 
@@ -1714,8 +1726,8 @@ function terapkanKonfigurasiDanSponsor() {
                 const imgSrc = hasLogo ? normalizeImageSource(sp.logo) : "";
                 return `
                     <div class="sponsor-card-item">
-                        ${hasLogo ? `<img src="${imgSrc}" alt="${sp.nama || 'Sponsor'}" class="h-7 w-auto max-w-[78px] object-contain mb-1 select-none">` : ''}
-                        ${sp.nama ? `<span class="text-[9px] font-extrabold text-[#1e293b] text-center leading-tight line-clamp-2">${sp.nama}</span>` : ''}
+                        ${hasLogo ? `<img src="${imgSrc}" alt="${sp.nama || 'Sponsor'}" class="mb-1 select-none">` : ''}
+                        ${sp.nama ? `<span class="font-extrabold text-[#1e293b] text-center line-clamp-2">${sp.nama}</span>` : ''}
                     </div>
                 `;
             }).join('');
