@@ -58,9 +58,14 @@
             </div>
 
             <div class="flex items-center gap-2 flex-wrap">
+                <!-- Tautan Buka Web Utama Peserta -->
+                <a href="https://roy4ls.github.io/cwo6/" target="_blank" class="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-md transition flex items-center gap-1.5">
+                    📱 Buka Web Peserta
+                </a>
+
                 <!-- Tombol Aplikasi Deskin (Sharing Layar HP ke PC) -->
                 <button type="button" onclick="openDeskinModal()" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-md transition flex items-center gap-1.5">
-                    💻 Aplikasi Deskin (Share Layar)
+                    💻 Share Layar HP (Deskin)
                 </button>
 
                 <div class="bg-[#0f172a]/70 px-3 py-2 rounded-xl border gold-border text-xs font-extrabold text-[#F7F1E3]">
@@ -277,7 +282,7 @@
                 fbListEl.innerHTML = allFb.map((item, idx) => `
                     <div onclick="openSpotlightFb(${idx})" class="cursor-pointer p-4 md:p-5 rounded-2xl bg-[#0f172a]/80 border border-white/15 hover:border-[#D6A84F]/60 transition shadow-md">
                         <div class="flex justify-between items-center mb-1.5">
-                            <span class="text-xs md:text-sm font-extrabold text-[#D6A84F] uppercase tracking-wider">💑 ${escapeHtmlText(item.names)}</span>
+                            <span class="text-xs md:text-sm font-extrabold text-[#D6A84F] uppercase tracking-wider">👩‍❤️‍👨 ${escapeHtmlText(item.names)}</span>
                             <span class="text-xs text-gray-300 font-semibold">${escapeHtmlText(item.time)} WIB</span>
                         </div>
                         <p class="text-sm md:text-lg text-gray-100 font-medium leading-relaxed break-words">${escapeHtmlText(item.feedback)}</p>
