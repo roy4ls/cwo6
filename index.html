@@ -3104,6 +3104,19 @@ function terapkanKonfigurasiDanSponsor() {
             });
         }
 
+// 👇 TAMBAHKAN FUNGSI INI (Mengubah "Ardi & Afan" menjadi "A & A") 👇
+        function formatInitials(namesStr) {
+            if (!namesStr) return 'P & P';
+            const parts = String(namesStr).split('&');
+            if (parts.length >= 2) {
+                const h = parts[0].trim().charAt(0).toUpperCase() || 'H';
+                const w = parts[1].trim().charAt(0).toUpperCase() || 'W';
+                return `${h} & ${w}`;
+            }
+            return String(namesStr).trim().charAt(0).toUpperCase();
+        }
+        // 👆 BATAS TAMBAHAN FUNGSI 👆
+
         function formatDriveUrl(url) {
             if (!url) return '';
             if (url.startsWith('data:image')) return url;
@@ -3229,7 +3242,8 @@ function terapkanKonfigurasiDanSponsor() {
                 data.forEach(item => {
                     const rawUrl = String(item.url || '').replace(/'/g, "\\'");
                     const displayUrl = formatDriveUrl(item.url);
-                    const safeNames = (item.names || 'Peserta').replace(/'/g, "\\'");
+                    const initialNames = formatInitials(item.names); // <-- DIUBAH JADI INISIAL
+                    const safeNames = initialNames.replace(/'/g, "\\'");
                     const isMine = !!(item.coupleId && item.coupleId.toLowerCase() === myCoupleId);
                     
                     container.innerHTML += `
@@ -3241,7 +3255,7 @@ function terapkanKonfigurasiDanSponsor() {
                                 </button>
                             ` : ''}
                             <img src="${displayUrl}" loading="lazy" referrerpolicy="no-referrer" class="w-full h-auto object-cover aspect-[9/16] bg-gray-100" alt="${safeNames}">
-                            <div class="p-2 text-center text-[10px] font-extrabold text-[#1e293b] uppercase tracking-wider bg-[#F7F1E3]/60 truncate">👩‍❤️‍👨 ${item.names}</div>
+                            <div class="p-2 text-center text-[10px] font-extrabold text-[#1e293b] uppercase tracking-wider bg-[#F7F1E3]/60 truncate">👩‍❤️‍👨 ${initialNames}</div>
                         </div>
                     `;
                 });
@@ -3437,7 +3451,7 @@ function terapkanKonfigurasiDanSponsor() {
             }
             strip.innerHTML = myDocPhotosList.map((item) => `
                 <div class="relative shrink-0 w-12 h-12 rounded-xl overflow-hidden border border-[#D6A84F] bg-black">
-                    <img src="${formatDriveUrl(item.url)}" class="w-full h-full object-cover" onclick="previewSingleEventPhoto('${formatDriveUrl(item.url)}', '${(item.names || '').replace(/'/g, "\\'")}', '${item.photoId}', true)">
+                    <img src="${formatDriveUrl(item.url)}" class="w-full h-full object-cover" onclick="previewSingleEventPhoto('${formatDriveUrl(item.url)}', '${formatInitials(item.names)}', '${item.photoId}', true)">
                     <button type="button" onclick="deleteMyEventPhoto('${item.photoId}')" class="absolute top-0 right-0 bg-red-600 text-white rounded-bl-lg w-4 h-4 text-[8px] font-bold flex items-center justify-center">
                         🗑️
                     </button>
@@ -3832,7 +3846,8 @@ function terapkanKonfigurasiDanSponsor() {
 
             const buildCardHTML = (item, idx, isDarkFs = false) => {
                 const displayUrl = formatDriveUrl(item.url);
-                const safeNames = (item.names || 'Peserta').replace(/'/g, "\\'");
+                const initialNames = formatInitials(item.names); // <-- DIUBAH JADI INISIAL
+                const safeNames = initialNames.replace(/'/g, "\\'");
                 const isMine = item.coupleId && item.coupleId.toLowerCase() === myCoupleId;
                 const tiltClass = (idx % 3 === 0) ? 'tilt-left' : ((idx % 3 === 1) ? 'tilt-right' : '');
                 const moodLabel = item.mood || moods[idx % moods.length];
@@ -3845,7 +3860,7 @@ function terapkanKonfigurasiDanSponsor() {
                             <img src="${displayUrl}" loading="lazy" referrerpolicy="no-referrer" class="w-full h-auto object-cover rounded-xl bg-gray-200" alt="${safeNames}">
                         </div>
                         <div class="pt-2 px-1 flex justify-between items-center">
-                            <span class="text-[10px] font-extrabold ${isDarkFs ? 'text-[#F7F1E3]' : 'text-[#1e293b]'} truncate">👩‍❤️‍👨 ${item.names || 'Peserta'}</span>
+                            <span class="text-[10px] font-extrabold ${isDarkFs ? 'text-[#F7F1E3]' : 'text-[#1e293b]'} truncate">👩‍❤️‍👨 ${initialNames}</span>
                             ${isMine ? '<span class="text-[9px] font-bold text-[#D6A84F]">Milik Kami</span>' : ''}
                         </div>
                     </div>
