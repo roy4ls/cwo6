@@ -819,10 +819,10 @@
                     <p class="text-xs text-gray-600 font-medium leading-relaxed mb-4">
                         Uji kekompakan finansial kalian berdua! Pilih barang dari 5 tantangan uang tunai (<b>Rp 100 Ribu</b> hingga <b>Rp 1 Miliar</b>) di HP masing-masing, lalu cocokkan layar HP kalian—apakah kalian <b>SEPAKAT</b> atau tidak?
                     </p>
-                    <a href="sepakat.html" class="w-full bg-gradient-to-r from-[#D6A84F] to-[#c29542] text-[#1e293b] py-3.5 px-4 rounded-xl text-xs font-extrabold shadow-md hover:opacity-95 active:scale-[0.99] transition flex items-center justify-center gap-2">
-                        <span>🚀 Mulai Main Ice Breaker "SEPAKAT" Sekarang</span>
-                        <span>➡</span>
-                    </a>
+                    <button type="button" onclick="openSepakatGame()" class="w-full bg-gradient-to-r from-[#D6A84F] to-[#c29542] text-[#1e293b] py-3.5 px-4 rounded-xl text-xs font-extrabold shadow-md hover:opacity-95 active:scale-[0.99] transition flex items-center justify-center gap-2">
+    <span>🚀 Mulai Main Ice Breaker "SEPAKAT" Sekarang</span>
+    <span>➡</span>
+</button>
                 </div>
             </div>
 
@@ -3932,6 +3932,18 @@ function terapkanKonfigurasiDanSponsor() {
             });
             Swal.fire({ title: 'Thank You!', text: 'Kesan dan pesan telah tersimpan.', icon: 'success', confirmButtonColor: '#D6A84F'}); 
             document.getElementById('feedbackText').value = '';
+        }
+
+function openSepakatGame() {
+            const husband = document.getElementById('husbandName').value.trim();
+            const wife = document.getElementById('wifeName').value.trim();
+            const coupleId = getCoupleId();
+            const params = new URLSearchParams({
+                coupleId: coupleId,
+                husband: husband,
+                wife: wife
+            });
+            window.location.href = `sepakat.html?${params.toString()}`;
         }
 
         function openFinancialApp() {
