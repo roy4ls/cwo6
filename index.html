@@ -3396,51 +3396,33 @@ function formatGoogleDriveVideoPreviewUrl(rawUrl) {
         }
 
 
-function previewActiveSlide() {
+function openImageZoomViewer(imgSrc, titleText) {
+            const modal = document.getElementById('image-zoom-modal');
+            const imgEl = document.getElementById('zoom-modal-img');
+            const titleEl = document.getElementById('zoom-modal-title');
+            if (!modal || !imgEl) return;
+
+            titleEl.innerText = titleText || 'Perbesar Gambar';
+            imgEl.src = imgSrc;
+            modal.classList.remove('hidden');
+        }
+
+        function closeImageZoomModal() {
+            const modal = document.getElementById('image-zoom-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function previewActiveSlide() {
             if (!slidesListData || slidesListData.length === 0) return;
             const currentImgSrc = slidesListData[currentSlideIndex];
             if (!currentImgSrc) return;
-
-            Swal.fire({
-                title: `<span style="color:#1e293b; font-size:14px; font-weight:800;">Slide Presentasi ${currentSlideIndex + 1} / ${slidesListData.length}</span>`,
-                html: `<div style="width:100%; height:72vh; overflow:auto; -webkit-overflow-scrolling:touch; display:flex; justify-content:center; align-items:flex-start;">
-                           <img src="${currentImgSrc}" alt="Slide ${currentSlideIndex + 1}" style="width:100%; height:auto; object-fit:contain; border-radius:10px;" />
-                       </div>`,
-                showCloseButton: true,
-                showConfirmButton: true,
-                confirmButtonText: '⬇ Download Materi (PDF)',
-                confirmButtonColor: '#D6A84F',
-                width: '98%',
-                background: '#F7F1E3'
-            }).then((res) => {
-                if (res.isConfirmed) {
-                    downloadPDF();
-                }
-            });
+            openImageZoomViewer(currentImgSrc, `Slide Presentasi ${currentSlideIndex + 1} / ${slidesListData.length}`);
         }
 
-        // =========================================================================
-        // 7. RUNDOWN PREVIEW & PHOTOBOOTH GALLERY (DENGAN HAPUS FOTO SENDIRI)
-        // =========================================================================
         function previewRundownImage(idx = 0) {
             const src = rundownListData[idx];
             if (!src) return;
-            Swal.fire({
-                title: `<span style="color:#1e293b; font-size:14px; font-weight:800;">Event Rundown (Jadwal Acara)</span>`,
-                html: `<div style="width:100%; height:72vh; overflow:auto; -webkit-overflow-scrolling:touch; display:flex; justify-content:center; align-items:flex-start;">
-                           <img src="${src}" alt="Rundown Acara" style="width:100%; height:auto; object-fit:contain; border-radius:10px;" />
-                       </div>`,
-                showCloseButton: true,
-                showConfirmButton: true,
-                confirmButtonText: '⬇ Download Rundown (PDF)',
-                confirmButtonColor: '#D6A84F',
-                width: '98%',
-                background: '#F7F1E3'
-            }).then((res) => {
-                if (res.isConfirmed) {
-                    downloadRundownPDF();
-                }
-            });
+            openImageZoomViewer(src, `Event Rundown (${idx + 1}/${rundownListData.length})`);
         }
 
 // 👇 TAMBAHKAN FUNGSI INI (Mengubah "Ardi & Afan" menjadi "A & A") 👇
@@ -4988,5 +4970,26 @@ function openSepakatGame() {
             }, 30000); 
         }
     </script>
+	
+	
+	<!-- MODAL FULLSCREEN KHUSUS ZOOM SLIDE & RUNDOWN (MENDUKUNG PINCH-TO-ZOOM) -->
+    <div id="image-zoom-modal" class="hidden fixed inset-0 z-[300] bg-black/95 backdrop-blur-md flex flex-col justify-between p-3 select-none">
+        <div class="flex justify-between items-center py-2 px-3 bg-[#1e293b] rounded-2xl border border-[#D6A84F]/40 text-white shrink-0">
+            <span id="zoom-modal-title" class="text-xs font-extrabold text-[#D6A84F]">Perbesar Gambar</span>
+            <button type="button" onclick="closeImageZoomModal()" class="bg-red-600 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl shadow">
+                ✕ Tutup
+            </button>
+        </div>
+        
+        <!-- Wadah Gambar dengan Overflow Auto agar Bisa Di-Zoom & Digeser -->
+        <div class="flex-1 flex items-center justify-center overflow-auto my-2 relative" style="-webkit-overflow-scrolling: touch;">
+            <img id="zoom-modal-img" src="" alt="Zoom View" class="max-w-none w-auto h-auto object-contain transition-transform duration-200" style="min-width: 100%; min-height: 100%;">
+        </div>
+
+        <div class="text-center py-1 text-[10px] text-gray-400 font-bold shrink-0">
+            💡 Gunakan dua jari untuk cubit (pinch-to-zoom) atau ketuk dua kali untuk memperbesar.
+        </div>
+    </div>
+	
 </body>
 </html>
