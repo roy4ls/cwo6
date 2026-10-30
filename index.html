@@ -644,7 +644,10 @@
                             <p id="annot-hint" class="text-[10px] text-center text-gray-500 mt-1.5 font-medium">Mode Geser aktif: Gunakan tombol Prev/Next atau usap layar untuk berpindah slide.</p>
                         </div>
                         
-                        <div class="slide-stage-wrapper" id="slide-stage">
+                        <p class="text-[10px] text-center text-gray-500 font-bold mb-1">
+                            🔍 Ketuk gambar slide di bawah untuk memperbesar & zoom layar penuh
+                        </p>
+                        <div class="slide-stage-wrapper cursor-pointer" id="slide-stage" onclick="previewActiveSlide()" title="Ketuk untuk Perbesar / Zoom">
                             <img id="active-slide-img" src="" alt="Slide Materi" class="hidden">
                             <div id="slide-empty-state" class="text-center p-6 text-gray-300 text-xs font-bold">
                                 Memuat Slide Presentasi...
@@ -653,13 +656,13 @@
                         </div>
 
                         <div class="flex justify-between items-center w-full mb-5 px-1">
-                            <button type="button" id="btn-prev" onclick="changeSlide(-1)" class="text-sm font-bold text-[#D6A84F] bg-[#D6A84F]/15 px-4 py-2 rounded-lg hover:bg-[#D6A84F]/25 transition">⬅ Prev</button>
-                            <div class="flex items-center gap-1.5">
-                                <span id="page-count" class="text-xs text-gray-700 font-extrabold bg-white/90 px-3 py-1 rounded-full shadow-sm">Menyiapkan Slide...</span>
-                                <button type="button" onclick="reloadSlidesForce()" title="Muat Ulang Slide" class="text-xs bg-white/90 hover:bg-white text-[#1e293b] px-2 py-1 rounded-full shadow-sm font-bold">🔄</button>
-                            </div>
-                            <button type="button" id="btn-next" onclick="changeSlide(1)" class="text-sm font-bold text-[#D6A84F] bg-[#D6A84F]/15 px-4 py-2 rounded-lg hover:bg-[#D6A84F]/25 transition">Next ➡</button>
-                        </div>
+    <button type="button" id="btn-prev" onclick="changeSlide(-1)" class="text-xs md:text-sm font-black text-[#1e293b] bg-[#D6A84F] px-4 py-2.5 rounded-xl shadow hover:opacity-90 transition">⬅ Prev</button>
+    <div class="flex items-center gap-1.5">
+        <span id="page-count" class="text-xs text-gray-700 font-extrabold bg-white/90 px-3 py-1 rounded-full shadow-sm">Menyiapkan Slide...</span>
+        <button type="button" onclick="reloadSlidesForce()" title="Muat Ulang Slide" class="text-xs bg-white/90 hover:bg-white text-[#1e293b] px-2 py-1 rounded-full shadow-sm font-bold">🔄</button>
+    </div>
+    <button type="button" id="btn-next" onclick="changeSlide(1)" class="text-xs md:text-sm font-black text-[#1e293b] bg-[#D6A84F] px-4 py-2.5 rounded-xl shadow hover:opacity-90 transition">Next ➡</button>
+</div>
                     </div>
 
                     <!-- ========================================================================= -->
@@ -2367,7 +2370,10 @@ function formatGoogleDriveVideoPreviewUrl(rawUrl) {
             if (rundownListData.length > 0) {
                 rundownListData.forEach((imgSrc, idx) => {
                     container.innerHTML += `
-                        <div class="rounded-xl overflow-hidden border border-[#D6A84F]/30 bg-white shadow-sm cursor-pointer" onclick="previewRundownImage(${idx})">
+                        <div class="rounded-xl overflow-hidden border border-[#D6A84F]/30 bg-white shadow-sm cursor-pointer hover:shadow-md transition" onclick="previewRundownImage(${idx})">
+                            <div class="p-1.5 bg-[#1e293b] text-[#D6A84F] text-[10px] font-extrabold text-center flex items-center justify-center gap-1">
+                                <span>🔍 Ketuk untuk Perbesar / Zoom</span>
+                            </div>
                             <img src="${imgSrc}" alt="Rundown ${idx + 1}" class="w-full h-auto object-contain">
                         </div>
                     `;
@@ -3389,6 +3395,32 @@ function formatGoogleDriveVideoPreviewUrl(rawUrl) {
             }
         }
 
+
+function previewActiveSlide() {
+            if (!slidesListData || slidesListData.length === 0) return;
+            const currentImgSrc = slidesListData[currentSlideIndex];
+            if (!currentImgSrc) return;
+
+            Swal.fire({
+                title: `<span style="color:#1e293b; font-size:14px; font-weight:800;">Slide Presentasi ${currentSlideIndex + 1} / ${slidesListData.length}</span>`,
+                imageUrl: currentImgSrc,
+                imageAlt: `Slide ${currentSlideIndex + 1}`,
+                showCloseButton: true,
+                showConfirmButton: true,
+                confirmButtonText: '⬇ Download Materi (PDF)',
+                confirmButtonColor: '#D6A84F',
+                width: '98%',
+                background: '#F7F1E3',
+                customClass: {
+                    image: 'rounded-xl shadow-2xl border-2 border-[#D6A84F] max-h-[78vh] object-contain'
+                }
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    downloadPDF();
+                }
+            });
+        }
+
         // =========================================================================
         // 7. RUNDOWN PREVIEW & PHOTOBOOTH GALLERY (DENGAN HAPUS FOTO SENDIRI)
         // =========================================================================
@@ -3396,17 +3428,22 @@ function formatGoogleDriveVideoPreviewUrl(rawUrl) {
             const src = rundownListData[idx];
             if (!src) return;
             Swal.fire({
-                title: 'Event Rundown',
+                title: `<span style="color:#1e293b; font-size:14px; font-weight:800;">Event Rundown (Jadwal Acara)</span>`,
                 imageUrl: src,
                 imageAlt: 'Rundown Acara',
                 showCloseButton: true,
                 showConfirmButton: true,
                 confirmButtonText: '⬇ Download Rundown (PDF)',
                 confirmButtonColor: '#D6A84F',
-                width: '92%',
-                background: '#F7F1E3'
+                width: '95%',
+                background: '#F7F1E3',
+                customClass: {
+                    image: 'rounded-xl shadow-lg border border-[#D6A84F]/40 max-h-[72vh] object-contain'
+                }
             }).then((res) => {
-                if (res.isConfirmed) downloadRundownPDF();
+                if (res.isConfirmed) {
+                    downloadRundownPDF();
+                }
             });
         }
 
