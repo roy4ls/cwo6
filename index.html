@@ -455,41 +455,65 @@
                 </div>
             </div>
 
-<!-- 👇 TAMBAHKAN KODE VIDEO TUTORIAL & TUGAS WORKSHOP DI SINI 👇 -->
-            <div id="section-video-tutorial" class="clean-card mb-4 border-2 border-[#D6A84F]/45 overflow-hidden">
+<!-- 👇 KOTAK VIDEO TUTORIAL & TUGAS WORKSHOP (DEFAULT TERTUTUP + VIDEO MINIMIZE) 👇 -->
+            <div id="section-video-tutorial" class="clean-card mb-4 border-2 border-[#D6A84F]/40 overflow-hidden">
                 <button type="button" onclick="toggleCardCollapse('body-tutorial', 'chev-tutorial')" class="w-full p-4 px-5 flex justify-between items-center text-left hover:bg-black/[0.02] transition">
                     <div class="flex items-center gap-2.5">
                         <span class="text-lg">🎬</span>
                         <div>
-                            <h3 class="font-extrabold text-[15px] text-[#1e293b]">Video Tutorial & Tugas Pra-Workshop</h3>
-                            <p class="text-[10px] text-amber-700 font-bold">📌 Wajib ditonton & diisi sebelum sesi dimulai</p>
+                            <h3 id="conf-tutorial-main-title" class="font-extrabold text-[15px] text-[#1e293b]">Video Tutorial & Tugas Pra-Workshop</h3>
+                            <p id="conf-tutorial-sub-title" class="text-[10px] text-amber-700 font-bold">📌 Wajib ditonton & diisi sebelum sesi dimulai</p>
                         </div>
                     </div>
-                    <span id="chev-tutorial" class="collapse-chevron open text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center shrink-0">▼</span>
+                    <!-- Panah menghadap ke bawah (tertutup saat awal dibuka) -->
+                    <span id="chev-tutorial" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center shrink-0">▼</span>
                 </button>
 
-                <!-- Default terbuka (tanpa class hidden) agar langsung terlihat oleh peserta -->
-                <div id="body-tutorial" class="px-5 pb-5 pt-3 border-t border-[#D6A84F]/20 space-y-4">
+                <!-- Kotak isi default tertutup (class "hidden") -->
+                <div id="body-tutorial" class="hidden px-4 pb-5 pt-3.5 border-t border-[#D6A84F]/20 space-y-4">
                     
-                    <!-- Wadah Video Player Google Drive (Bisa Play Langsung & Fullscreen) -->
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-[11px] font-extrabold text-[#1e293b] flex items-center gap-1">
-                                ▶️ Panduan Pengisian Aplikasi CekKeuanganKu
-                            </span>
-                            <button type="button" onclick="toggleTutorialVideoFullscreen()" class="bg-[#1e293b] text-[#D6A84F] px-3 py-1 rounded-full text-[10px] font-extrabold shadow hover:bg-gray-800 transition">
-                                ⛶ Fullscreen Video
-                            </button>
-                        </div>
+                    <!-- Bagian Atas: Judul di Tengah & Tombol Besar Memenuhi Kotak -->
+                    <div class="bg-white/85 p-3.5 rounded-2xl border-2 border-[#D6A84F]/45 shadow-sm">
+                        <p id="conf-video-title" class="text-xs font-extrabold text-[#1e293b] text-center mb-2.5">
+                            ▶️ Panduan Pengisian Aplikasi CekKeuanganKu
+                        </p>
 
-                        <div id="tutorial-video-wrapper" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-[#0f172a] border-2 border-[#D6A84F]/50 shadow-md">
-                            <iframe 
-                                id="tutorial-video-iframe"
-                                src="https://drive.google.com/file/d/1IYfUVKZtLr0rPK-n8ksTwnq7wQspFXap/preview" 
-                                class="w-full h-full border-0"
-                                allow="autoplay; fullscreen; encrypted-media; picture-in-picture" 
-                                allowfullscreen>
-                            </iframe>
+                        <!-- Tombol Utama Besar & Memenuhi Lebar Kotak (Full Width) -->
+                        <button type="button" id="btn-minimize-video-box" onclick="toggleMinimizeTutorialVideo()" class="w-full bg-gradient-to-r from-[#D6A84F] to-[#c29542] hover:opacity-95 text-[#1e293b] py-3.5 px-4 rounded-xl text-xs md:text-sm font-black uppercase tracking-wide shadow-md active:scale-[0.99] transition flex items-center justify-center gap-2 border border-[#1e293b]/15">
+                            <span class="text-base leading-none">▶️</span>
+                            <span>Tampilkan Video Tutorial</span>
+                        </button>
+
+                        <!-- Wadah Video Default Ter-Minimize (Muncul Saat Tombol Di Atas Diklik) -->
+                        <div id="tutorial-video-collapsible" class="hidden transition-all duration-300 mt-3 pt-3 border-t border-[#D6A84F]/25">
+                            
+                            <!-- Tombol Fullscreen Lebar di Atas Video -->
+                            <button type="button" onclick="toggleTutorialVideoFullscreen()" class="w-full mb-3 bg-[#1e293b] hover:bg-gray-800 text-[#D6A84F] py-2.5 px-4 rounded-xl text-xs font-extrabold shadow active:scale-[0.99] transition flex items-center justify-center gap-1.5">
+                                <span>⛶</span>
+                                <span>Perbesar Video Layar Penuh (Fullscreen)</span>
+                            </button>
+
+                            <div id="tutorial-video-wrapper" class="relative w-full max-w-[290px] mx-auto aspect-[9/16] rounded-2xl overflow-hidden bg-[#0f172a] border-2 border-[#D6A84F]/60 shadow-lg flex flex-col justify-center">
+                                
+                                <!-- Tombol Keluar saat Fullscreen -->
+                                <button type="button" id="btn-exit-video-fs" onclick="toggleTutorialVideoFullscreen()" class="hidden absolute top-3 left-3 z-30 bg-red-600/95 text-white px-3.5 py-1.5 rounded-full text-xs font-extrabold shadow-lg border border-white/30 items-center gap-1.5">
+                                    🗕 Minimize / Keluar Fullscreen
+                                </button>
+
+                                <!-- Pelindung Pojok Kanan Atas Iframe -->
+                                <div class="absolute top-0 right-0 w-14 h-14 z-20"></div>
+
+                                <iframe 
+                                    id="tutorial-video-iframe"
+                                    src="https://drive.google.com/file/d/1IYfUVKZtLr0rPK-n8ksTwnq7wQspFXap/preview" 
+                                    class="w-full h-full border-0"
+                                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture" 
+                                    allowfullscreen>
+                                </iframe>
+                            </div>
+                            <p class="text-[10px] text-center text-gray-500 font-semibold mt-2">
+                                💡 Ketuk sekali pada layar video saat berputar untuk menyembunyikan tombol navigasi.
+                            </p>
                         </div>
                     </div>
 
@@ -498,29 +522,27 @@
                         <div class="flex items-center justify-between border-b border-[#D6A84F]/25 pb-2">
                             <div class="flex items-center gap-2">
                                 <span class="bg-[#1e293b] text-[#D6A84F] w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black shadow-sm">📝</span>
-                                <h4 class="text-xs font-extrabold text-[#1e293b] uppercase tracking-wider">Tugas sebelum Workshop:</h4>
+                                <h4 id="conf-task-title" class="text-xs font-extrabold text-[#1e293b] uppercase tracking-wider">Tugas sebelum Workshop:</h4>
                             </div>
-                            <span class="bg-amber-500/15 text-amber-800 border border-amber-500/30 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full">Penting</span>
+                            <span id="conf-task-badge" class="bg-amber-500/15 text-amber-800 border border-amber-500/30 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full">Penting</span>
                         </div>
 
-                        <!-- Daftar Tugas dengan Desain Checklist Estetik -->
                         <ul class="space-y-2 text-xs font-bold text-[#1e293b]">
                             <li class="flex items-center gap-2.5 bg-[#F7F1E3]/70 p-2.5 rounded-xl border border-[#D6A84F]/30">
                                 <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center font-black shrink-0">1</span>
-                                <span>Isi <b>Anggaran</b> <span class="text-gray-600 font-semibold">(Pengeluaran &amp; Pendapatan)</span></span>
+                                <span><b id="conf-task-1-main">Isi Anggaran</b> <span id="conf-task-1-sub" class="text-gray-600 font-semibold">(Pengeluaran &amp; Pendapatan)</span></span>
                             </li>
                             <li class="flex items-center gap-2.5 bg-[#F7F1E3]/70 p-2.5 rounded-xl border border-[#D6A84F]/30">
                                 <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center font-black shrink-0">2</span>
-                                <span>Isi <b>Neraca</b> <span class="text-gray-600 font-semibold">(Aset &amp; Kewajiban)</span></span>
+                                <span><b id="conf-task-2-main">Isi Neraca</b> <span id="conf-task-2-sub" class="text-gray-600 font-semibold">(Aset &amp; Kewajiban)</span></span>
                             </li>
                         </ul>
 
-                        <!-- Kotak Note (Catatan Ramah) -->
                         <div class="bg-gradient-to-r from-[#1e293b] to-[#0f172a] text-white p-3 rounded-xl border border-[#D6A84F]/50 flex items-start gap-2.5 shadow-sm">
                             <span class="text-base leading-none mt-0.5">💡</span>
                             <div class="text-[11px] leading-relaxed">
-                                <span class="font-extrabold text-[#D6A84F] uppercase tracking-wide block mb-0.5">Note:</span>
-                                <p class="text-gray-200 font-medium">Diisi sebisanya saja, nanti saat workshop sambil dikoreksi.</p>
+                                <span id="conf-note-title" class="font-extrabold text-[#D6A84F] uppercase tracking-wide block mb-0.5">Note:</span>
+                                <p id="conf-note-desc" class="text-gray-200 font-medium">Diisi sebisanya saja, nanti saat workshop sambil dikoreksi.</p>
                             </div>
                         </div>
                     </div>
@@ -532,7 +554,7 @@
             <!-- ========================================================================= -->
             <!-- 4. KOLOM EVENT RUNDOWN (COLLAPSIBLE - DEFAULT TERTUTUP)                   -->
             <!-- ========================================================================= -->
-            <div id="section-rundown" class="clean-card mb-4 overflow-hidden">
+            <div id="section-rundown" class="clean-card mb-4 border-2 border-[#D6A84F]/40 overflow-hidden">
                 <button type="button" onclick="toggleCardCollapse('body-rundown', 'chev-rundown')" class="w-full p-4 px-5 flex justify-between items-center text-left hover:bg-black/[0.02] transition">
                     <div class="flex items-center gap-2.5">
                         <span class="text-lg">📅</span>
@@ -560,7 +582,7 @@
             <!-- ========================================================================= -->
             <!-- 5. PRESENTATION & NOTES (COLLAPSIBLE + FOTO DRAG/RESIZE + CORET NOTES)    -->
             <!-- ========================================================================= -->
-            <div class="clean-card mb-4 overflow-hidden" id="materi-container">
+            <div class="clean-card mb-4 border-2 border-[#D6A84F]/40 overflow-hidden" id="materi-container">
                 <button type="button" onclick="toggleCardCollapse('body-materi', 'chev-materi')" class="w-full p-4 px-5 flex justify-between items-center text-left hover:bg-black/[0.02] transition">
                     <div class="flex items-center gap-2.5">
                         <span class="text-lg">📊</span>
@@ -737,7 +759,7 @@
             <!-- ========================================================================= -->
             <!-- 6. Q&A DAN FEEDBACK (COLLAPSIBLE - DEFAULT TERTUTUP)                      -->
             <!-- ========================================================================= -->
-            <div id="section-qna-feedback" class="clean-card mb-4 overflow-hidden">
+            <div id="section-qna-feedback" class="clean-card mb-4 border-2 border-[#D6A84F]/40 overflow-hidden">
                 <button type="button" onclick="toggleCardCollapse('body-qna', 'chev-qna')" class="w-full p-4 px-5 flex justify-between items-center text-left hover:bg-black/[0.02] transition">
                     <div class="flex items-center gap-2.5">
                         <span class="text-lg">💬</span>
@@ -1213,7 +1235,7 @@
         // Cukup ubah di bagian ini untuk seminar-seminar berikutnya:
         const KONFIGURASI_SEMINAR = {
             // A. PENGATURAN WARNA & BACKGROUND
-            warnaUtamaEmas: "#D6A84F",       // Warna aksen utama (emas/kuning/biru dll)
+            warnaUtamaEmas: "#D6A84F",       // Warna aksen utama (emas)
             warnaGelapNavy: "#1e293b",       // Warna tombol & teks utama (navy gelap)
             warnaKartuKotak: "#F7F1E3",      // Warna dasar kotak kartu (krem)
             warnaBgGradasiAtas: "#DCEFF7",   // Warna background halaman (atas)
@@ -1238,17 +1260,31 @@
             judulFullscreenGaleri: "✨ EVENT PHOTO'S GALLERY • CWO SEASON VI",
 
             // D. TEKS FOOTER & PENGATURAN UKURAN SPONSOR
-            teksFooterBaris1: "GBI Rock Surabaya",
-            teksFooterBaris2: "Rock Young Adult Surabaya",
+            teksFooterBaris1: "GBI Rock Ministry Embassy Surabaya",
+            teksFooterBaris2: "Rock Young and Adult Surabaya",
             labelSponsor: "Supported by :",
+            tinggiLogoSponsor: "18px",
+            lebarMaksLogoSponsor: "50px",
+            ukuranTeksSponsor: "8px",
+            lebarMinKotakSponsor: "64px",
+            lebarMaksKotakSponsor: "88px",
+            paddingKotakSponsor: "5px 8px",
 
-            // 👇 PENGATURAN UKURAN KOTAK, LOGO & TEKS SPONSOR 👇
-            tinggiLogoSponsor: "14px",      // Tinggi logo (14px = mungil, 18px = kecil rapi, 24px = sedang)
-            lebarMaksLogoSponsor: "42px",   // Batas lebar logo agar logo persegi panjang tidak melebar
-            ukuranTeksSponsor: "7px",       // Ukuran huruf nama perusahaan di bawah logo (7px - 9px)
-            lebarMinKotakSponsor: "64px",   // Lebar minimal kotak kartu sponsor
-            lebarMaksKotakSponsor: "72px",  // Lebar maksimal kotak kartu sponsor
-            paddingKotakSponsor: "5px 8px"  // Ruang dalam kotak (Atas-Bawah 5px, Kiri-Kanan 8px)
+            // E. PENGATURAN VIDEO TUTORIAL & TUGAS PRA-WORKSHOP
+            judulBagianTutorial: "Video Tutorial & Tugas Pra-Workshop",
+            subjudulBagianTutorial: "📌 Wajib ditonton & diisi sebelum sesi dimulai",
+            judulVideoTutorial: "Panduan Pengisian Aplikasi CekKeuanganKu",
+            // Cukup tempel link Google Drive biasa (/view atau /preview otomatis dikenali):
+            linkIframeGoogleDrive: "https://drive.google.com/file/d/1IYfUVKZtLr0rPK-n8ksTwnq7wQspFXap/view?usp=sharing",
+            orientasiVideo: "portrait", // Isi "portrait" untuk video HP tegak (9:16), atau "landscape" untuk video mendatar (16:9)
+            judulKotakTugas: "Tugas sebelum Workshop:",
+            badgeTugas: "Penting",
+            poinTugas1Utama: "Isi Anggaran",
+            poinTugas1Sub: "Pengeluaran & Pendapatan",
+            poinTugas2Utama: "Isi Neraca",
+            poinTugas2Sub: "Aset & Kewajiban",
+            judulCatatanNote: "Note:",
+            isiCatatanNote: "Diisi sebisanya saja, nanti saat workshop sambil dikoreksi."
         };
 
         // 👇 6. DAFTAR SPONSOR (URUT & OTOMATIS TAMPIL ESTETIK) 👇
@@ -1322,6 +1358,44 @@
         let pbTimerSeconds = 3;
         let isForcedLandscapeRotate = false;
 
+        // Daftar seluruh kotak collapsible di halaman peserta
+        const ALL_COLLAPSIBLE_CARDS = [
+            ['body-tutorial', 'chev-tutorial'],
+            ['body-rundown', 'chev-rundown'],
+            ['body-materi', 'chev-materi'],
+            ['body-qna', 'chev-qna'],
+            ['body-persembahan', 'chev-persembahan'],
+            ['body-pbgallery', 'chev-pbgallery'],
+            ['body-epgallery', 'chev-epgallery'],
+            ['body-sepakat', 'chev-sepakat']
+        ];
+
+        // Fungsi pembantu untuk menutup semua kotak selain kotak yang sedang dibuka
+        function closeAllOtherCards(exceptBodyId) {
+            ALL_COLLAPSIBLE_CARDS.forEach(([bId, cId]) => {
+                if (bId !== exceptBodyId) {
+                    const bEl = document.getElementById(bId);
+                    const cEl = document.getElementById(cId);
+                    if (bEl && !bEl.classList.contains('hidden')) {
+                        // Simpan catatan terlebih dahulu jika kotak Materi & Notes ditutup otomatis
+                        if (bId === 'body-materi' && typeof saveCurrentNoteLocally === 'function') {
+                            saveCurrentNoteLocally();
+                        }
+                        // Hentikan suara video jika kotak Video Tutorial ditutup otomatis saat membuka kotak lain
+                        if (bId === 'body-tutorial') {
+                            const iframe = document.getElementById('tutorial-video-iframe');
+                            if (iframe && iframe.src) {
+                                const currentSrc = iframe.src;
+                                iframe.src = currentSrc;
+                            }
+                        }
+                        bEl.classList.add('hidden');
+                    }
+                    if (cEl) cEl.classList.remove('open');
+                }
+            });
+        }
+
         function toggleCardCollapse(bodyId, chevId, autoLoadPb = false) {
             const bodyEl = document.getElementById(bodyId);
             const chevEl = document.getElementById(chevId);
@@ -1329,6 +1403,10 @@
 
             const isHidden = bodyEl.classList.contains('hidden');
             if (isHidden) {
+                // 1. Tutup semua kotak lain terlebih dahulu
+                closeAllOtherCards(bodyId);
+
+                // 2. Buka kotak yang diklik
                 bodyEl.classList.remove('hidden');
                 if (chevEl) chevEl.classList.add('open');
                 if (autoLoadPb) loadGallery();
@@ -1340,6 +1418,10 @@
                     }, 120);
                 }
             } else {
+                // Jika kotak yang sedang terbuka diklik lagi, tutup kotak tersebut
+                if (bodyId === 'body-materi' && typeof saveCurrentNoteLocally === 'function') {
+                    saveCurrentNoteLocally();
+                }
                 bodyEl.classList.add('hidden');
                 if (chevEl) chevEl.classList.remove('open');
             }
@@ -1347,23 +1429,27 @@
 
         function ensureSectionExpanded(sectionId) {
             const map = {
-			'section-video-tutorial': ['body-tutorial', 'chev-tutorial'], // <-- TAMBAHKAN BARIS INI
+                'section-video-tutorial': ['body-tutorial', 'chev-tutorial'],
                 'section-rundown': ['body-rundown', 'chev-rundown'],
                 'materi-container': ['body-materi', 'chev-materi'],
                 'section-qna-feedback': ['body-qna', 'chev-qna'],
                 'section-persembahan': ['body-persembahan', 'chev-persembahan'],
                 'section-photobooth-gallery': ['body-pbgallery', 'chev-pbgallery'],
                 'section-event-gallery': ['body-epgallery', 'chev-epgallery'],
-                'section-game-sepakat': ['body-sepakat', 'chev-sepakat'] // <-- TAMBAHKAN BARIS INI
+                'section-game-sepakat': ['body-sepakat', 'chev-sepakat']
             };
             const target = map[sectionId];
             if (target) {
-                const bodyEl = document.getElementById(target[0]);
-                const chevEl = document.getElementById(target[1]);
+                const [bodyId, chevId] = target;
+                // Tutup semua kotak lain terlebih dahulu
+                closeAllOtherCards(bodyId);
+
+                const bodyEl = document.getElementById(bodyId);
+                const chevEl = document.getElementById(chevId);
                 if (bodyEl && bodyEl.classList.contains('hidden')) {
                     bodyEl.classList.remove('hidden');
                     if (chevEl) chevEl.classList.add('open');
-                    if (target[0] === 'body-materi') {
+                    if (bodyId === 'body-materi') {
                         setTimeout(() => {
                             resizeAnnotationCanvas();
                             resizeNoteScribbleCanvas();
@@ -1728,10 +1814,92 @@ function toggleTutorialVideoFullscreen() {
             return preloadAssetsPromise;
         }
 
-function terapkanKonfigurasiDanSponsor() {
+function formatGoogleDriveVideoPreviewUrl(rawUrl) {
+            if (!rawUrl) return "";
+            const clean = String(rawUrl).trim();
+            const match = clean.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || clean.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return `https://drive.google.com/file/d/${match[1]}/preview`;
+            }
+            return clean;
+        }
+
+        function toggleMinimizeTutorialVideo() {
+            const box = document.getElementById('tutorial-video-collapsible');
+            const btn = document.getElementById('btn-minimize-video-box');
+            if (!box || !btn) return;
+
+            if (box.classList.contains('hidden')) {
+                box.classList.remove('hidden');
+                btn.innerHTML = '<span>🗕</span> <span>Sembunyikan / Minimize Video</span>';
+                btn.className = 'w-full bg-white border-2 border-[#D6A84F] text-[#1e293b] py-3 px-4 rounded-xl text-xs md:text-sm font-extrabold uppercase tracking-wide shadow-sm active:scale-[0.99] transition flex items-center justify-center gap-2';
+            } else {
+                // Hentikan suara video saat di-minimize
+                const iframe = document.getElementById('tutorial-video-iframe');
+                if (iframe && iframe.src) {
+                    const currentSrc = iframe.src;
+                    iframe.src = currentSrc;
+                }
+                box.classList.add('hidden');
+                btn.innerHTML = '<span class="text-base leading-none">▶️</span> <span>Tampilkan Video Tutorial</span>';
+                btn.className = 'w-full bg-gradient-to-r from-[#D6A84F] to-[#c29542] hover:opacity-95 text-[#1e293b] py-3.5 px-4 rounded-xl text-xs md:text-sm font-black uppercase tracking-wide shadow-md active:scale-[0.99] transition flex items-center justify-center gap-2 border border-[#1e293b]/15';
+            }
+        }
+
+        function toggleTutorialVideoFullscreen() {
+            const wrapper = document.getElementById('tutorial-video-wrapper');
+            const exitBtn = document.getElementById('btn-exit-video-fs');
+            const collapsible = document.getElementById('tutorial-video-collapsible');
+            if (!wrapper) return;
+
+            // Pastikan kotak video tidak sedang ter-minimize
+            if (collapsible && collapsible.classList.contains('hidden')) {
+                toggleMinimizeTutorialVideo();
+            }
+
+            const isFsNow = document.fullscreenElement === wrapper || document.webkitFullscreenElement === wrapper || wrapper.classList.contains('fixed-video-fullscreen');
+
+            if (!isFsNow) {
+                wrapper.classList.add('fixed-video-fullscreen');
+                if (exitBtn) {
+                    exitBtn.classList.remove('hidden');
+                    exitBtn.classList.add('flex');
+                }
+                if (wrapper.requestFullscreen) {
+                    wrapper.requestFullscreen().catch(() => {});
+                } else if (wrapper.webkitRequestFullscreen) {
+                    wrapper.webkitRequestFullscreen();
+                }
+            } else {
+                wrapper.classList.remove('fixed-video-fullscreen');
+                if (exitBtn) {
+                    exitBtn.classList.add('hidden');
+                    exitBtn.classList.remove('flex');
+                }
+                if (document.fullscreenElement && document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            const wrapper = document.getElementById('tutorial-video-wrapper');
+            const exitBtn = document.getElementById('btn-exit-video-fs');
+            if (!document.fullscreenElement && wrapper) {
+                wrapper.classList.remove('fixed-video-fullscreen');
+                if (exitBtn) {
+                    exitBtn.classList.add('hidden');
+                    exitBtn.classList.remove('flex');
+                }
+            }
+        });
+
+        function terapkanKonfigurasiDanSponsor() {
             const C = KONFIGURASI_SEMINAR;
 
-            // 1. Terapkan Warna Tema & Background secara menyeluruh
+            // 1. Terapkan Warna Tema, Background & Gaya Fullscreen Video
             let styleEl = document.getElementById('dynamic-seminar-theme');
             if (!styleEl) {
                 styleEl = document.createElement('style');
@@ -1747,7 +1915,17 @@ function terapkanKonfigurasiDanSponsor() {
                 [class*="bg-[#1e293b]"] { background-color: ${C.warnaGelapNavy} !important; }
                 [class*="text-[#1e293b]"] { color: ${C.warnaGelapNavy} !important; }
                 .orb-btn { border-color: ${C.warnaUtamaEmas} !important; color: ${C.warnaUtamaEmas} !important; }
-                /* Gaya Estetik Bento/Honeycomb untuk Sponsor (Ukuran Terkunci Rapi) */
+                .fixed-video-fullscreen {
+                    position: fixed !important;
+                    inset: 0 !important;
+                    width: 100vw !important;
+                    height: 100dvh !important;
+                    max-width: none !important;
+                    aspect-ratio: auto !important;
+                    z-index: 250 !important;
+                    border-radius: 0 !important;
+                    margin: 0 !important;
+                }
                 .sponsor-card-item {
                     background: rgba(255, 255, 255, 0.78);
                     backdrop-filter: blur(6px);
@@ -1805,7 +1983,36 @@ function terapkanKonfigurasiDanSponsor() {
             if (fText1) fText1.innerText = C.teksFooterBaris1;
             if (fText2) fText2.innerText = C.teksFooterBaris2;
 
-            // 3. Render Sponsor secara Berurutan & Estetik di Login & Bawah Dashboard
+            // 3. Terapkan Video Tutorial & Teks Tugas Pra-Workshop Otomatis
+            if (document.getElementById('conf-tutorial-main-title')) {
+                document.getElementById('conf-tutorial-main-title').innerText = C.judulBagianTutorial;
+                document.getElementById('conf-tutorial-sub-title').innerText = C.subjudulBagianTutorial;
+                document.getElementById('conf-video-title').innerHTML = `▶️ ${C.judulVideoTutorial}`;
+
+                const iframeEl = document.getElementById('tutorial-video-iframe');
+                const wrapperEl = document.getElementById('tutorial-video-wrapper');
+                if (iframeEl && C.linkIframeGoogleDrive) {
+                    iframeEl.src = formatGoogleDriveVideoPreviewUrl(C.linkIframeGoogleDrive);
+                }
+                if (wrapperEl) {
+                    if (C.orientasiVideo === 'landscape') {
+                        wrapperEl.className = "relative w-full aspect-video rounded-2xl overflow-hidden bg-[#0f172a] border-2 border-[#D6A84F]/60 shadow-lg flex flex-col justify-center";
+                    } else {
+                        wrapperEl.className = "relative w-full max-w-[290px] mx-auto aspect-[9/16] rounded-2xl overflow-hidden bg-[#0f172a] border-2 border-[#D6A84F]/60 shadow-lg flex flex-col justify-center";
+                    }
+                }
+
+                document.getElementById('conf-task-title').innerText = C.judulKotakTugas;
+                document.getElementById('conf-task-badge').innerText = C.badgeTugas;
+                document.getElementById('conf-task-1-main').innerText = C.poinTugas1Utama;
+                document.getElementById('conf-task-1-sub').innerText = `(${C.poinTugas1Sub})`;
+                document.getElementById('conf-task-2-main').innerText = C.poinTugas2Utama;
+                document.getElementById('conf-task-2-sub').innerText = `(${C.poinTugas2Sub})`;
+                document.getElementById('conf-note-title').innerText = C.judulCatatanNote;
+                document.getElementById('conf-note-desc').innerText = C.isiCatatanNote;
+            }
+
+            // 4. Render Sponsor di Login & Bawah Dashboard
             const sponsorValid = (DAFTAR_SPONSOR || [])
                 .filter(s => s && ((s.logo && !s.logo.includes("PASTE_") && s.logo.trim() !== "") || (s.nama && !s.nama.includes("Nama Sponsor") && s.nama.trim() !== "")))
                 .sort((a, b) => (a.urutan || 999) - (b.urutan || 999));
