@@ -3,961 +3,912 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ice Breaker Game: SEPAKAT - CWO Season VI</title>
+    <title>Situs Sedang Dalam Perbaikan - Mainkan Dino!</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Press+Start+2P&family=Outfit:wght@400;700&display=swap');
+        
         body {
-            font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, #DCEFF7 0%, #EAF4F6 100%);
-            background-attachment: fixed;
-            min-height: 100vh;
-            color: #1e293b;
+            font-family: 'Outfit', 'Inter', sans-serif;
+            background-color: #0f0c29;
+            color: #ffffff;
             overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            overscroll-behavior-y: none;
         }
-        .clean-card {
-            background: #F7F1E3;
-            border-radius: 22px;
-            border: 2px solid rgba(214, 168, 79, 0.35);
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+
+        .game-font {
+            font-family: 'Press Start 2P', cursive;
         }
-        .item-option-card {
-            background: #ffffff;
-            border-radius: 20px;
-            border: 2.5px solid rgba(214, 168, 79, 0.25);
-            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
+
+        /* Animated Mesh Gradient Background */
+        .mesh-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            animation: mesh-anim 15s ease infinite alternate;
+            background-size: 200% 200%;
         }
-        .item-option-card:hover {
-            transform: translateY(-3px);
-            border-color: #D6A84F;
-            box-shadow: 0 10px 25px rgba(214, 168, 79, 0.25);
+
+        @keyframes mesh-anim {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 100%; }
         }
-        .item-option-card:active {
-            transform: scale(0.96);
+
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
-        .item-png-shadow {
-            filter: drop-shadow(0 10px 14px rgba(15, 23, 42, 0.18));
-            transition: transform 0.3s ease;
+
+        .glass-panel {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .item-option-card:hover .item-png-shadow {
-            transform: scale(1.08) rotate(2deg);
+
+        /* Memory Game Cards */
+        .perspective { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .card-inner { transition: transform 0.5s; }
+        
+        .bubble-pop {
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
-        .reveal-bounce {
-            animation: popIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(0); opacity: 0; }
         }
-        @keyframes popIn {
-            0% { opacity: 0; transform: scale(0.6); }
-            100% { opacity: 1; transform: scale(1); }
+
+        canvas {
+            image-rendering: pixelated;
+            touch-action: none; /* Prevent scroll on canvas touch */
         }
-        .pulse-gold {
-            animation: pulseGold 2s infinite;
+        
+        .hide-scroll::-webkit-scrollbar {
+            display: none;
         }
-        @keyframes pulseGold {
-            0% { box-shadow: 0 0 0 0 rgba(214, 168, 79, 0.7); }
-            70% { box-shadow: 0 0 0 14px rgba(214, 168, 79, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(214, 168, 79, 0); }
-        }
+
+        .simon-btn { transition: all 0.1s; }
+        .simon-active { filter: brightness(1.5) drop-shadow(0 0 15px currentColor); transform: scale(0.95); }
     </style>
 </head>
-<body class="pb-14">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 lg:p-8 relative">
 
-    <!-- TOP BAR NAVIGASI KEMBALI KE WEB UTAMA -->
-    <header class="sticky top-0 z-40 bg-[#F7F1E3]/95 backdrop-blur-md border-b border-[#D6A84F]/30 px-4 py-3 flex justify-between items-center shadow-sm">
-        <a href="index.html" class="bg-[#1e293b] text-[#D6A84F] px-3.5 py-1.5 rounded-full text-xs font-extrabold shadow flex items-center gap-1.5 hover:bg-gray-800 transition">
-            <span>⬅ Dashboard Peserta</span>
-        </a>
-        <div class="text-right">
-            <span class="text-[10px] font-extrabold text-[#D6A84F] uppercase tracking-wider block">⏱ Waktu: <span id="live-timer-display">0.0s</span></span>
-            <span id="header-couple-name" class="text-xs font-extrabold text-[#1e293b]">👩‍❤️‍👨 Pasangan Royals</span>
+    <div class="mesh-bg"></div>
+
+    <header class="text-center mb-6 max-w-2xl mt-2 z-10">
+        <div class="inline-flex p-4 glass rounded-full mb-4 shadow-lg">
+            <svg class="w-8 h-8 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         </div>
+        <h1 class="text-3xl md:text-5xl font-bold mb-3 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-purple-300">Situs Sedang Dalam Perbaikan</h1>
+        <p class="text-slate-300 text-sm md:text-base leading-relaxed px-4">
+            Kami sedang melakukan pembaruan sistem. Sambil menunggu, bantu Dino 🦖 menyelesaikan 100 level tantangan ini!
+        </p>
     </header>
 
-    <main class="max-w-lg mx-auto p-4 pt-5">
-
-        <!-- ========================================================================= -->
-        <!-- LAYAR 1: PEMBUKA, VERIFIKASI AKUN PASANGAN & PILIH PERAN (SUAMI / ISTRI)  -->
-        <!-- ========================================================================= -->
-        <section id="screen-intro" class="clean-card p-6 text-center">
-            <div class="w-20 h-20 mx-auto mb-3 rounded-3xl bg-[#1e293b] border-2 border-[#D6A84F] flex items-center justify-center text-4xl shadow-lg">
-                👩‍❤️‍👨
+    <main class="w-full max-w-lg glass p-4 md:p-6 rounded-3xl relative z-10">
+        
+        <!-- Top bar (Level Progress) -->
+        <div class="flex justify-between items-center mb-4 text-teal-200 game-font text-[10px] md:text-xs tracking-wider">
+            <div id="level-display">LEVEL 1/100</div>
+            <div class="w-1/2 bg-black/40 rounded-full h-3 border border-white/20 relative overflow-hidden">
+                <div id="progress-bar" class="bg-gradient-to-r from-teal-400 to-emerald-400 h-full w-[1%] transition-all duration-300 shadow-[0_0_10px_rgba(45,212,191,0.5)]"></div>
             </div>
-            <span class="bg-[#D6A84F]/20 text-[#1e293b] border border-[#D6A84F]/50 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
-                Real-Time Couple Sync Game
-            </span>
-            <h1 class="text-3xl font-black text-[#1e293b] mt-2 mb-1 tracking-tight">GAME "SEPAKAT"</h1>
-            <p class="text-xs text-[#D6A84F] font-extrabold uppercase tracking-wide mb-4">In This Economy: Seberapa Sehati Pilihan Kalian?</p>
+        </div>
 
-            <div class="bg-white/80 rounded-2xl p-4 text-left border border-[#D6A84F]/30 mb-5 space-y-2 text-xs text-gray-700 font-medium">
-                <p class="font-extrabold text-[#1e293b]">📌 Aturan Main & Kompetisi Leaderboard:</p>
-                <ol class="list-decimal pl-4 space-y-1.5">
-                    <li>Pastikan <b>Nama Suami & Istri</b> di bawah ini <b>sama persis</b> dengan akun login kalian.</li>
-                    <li>Di HP Suami pilih tombol <b>"🤵 HP Suami"</b>, dan di HP Istri pilih <b>"👰 HP Istri"</b>.</li>
-                    <li>Setiap pasangan mendapat <b>paket soal acak tersendiri</b> (berbeda dengan pasangan sebelah, namun <b>sama persis antara HP Suami & Istri</b>).</li>
-                    <li>Jawaban kalian akan <b>tersinkron otomatis</b>! Pasangan dengan <b>Skor Tertinggi & Waktu Tercepat</b> akan memuncaki Leaderboard! 🏆</li>
-                </ol>
-            </div>
-
-            <!-- Input Nama Suami & Istri (Otomatis Terisi dari Login Web Utama) -->
-            <div class="bg-white/90 p-3.5 rounded-2xl border border-[#D6A84F]/40 mb-5 text-left space-y-2.5">
-                <div class="flex justify-between items-center">
-                    <span class="text-[11px] font-extrabold text-[#1e293b]">🔐 Akun Pasangan Terhubung:</span>
-                    <span id="sync-account-badge" class="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">✔ Terhubung</span>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Nama Suami</label>
-                        <input type="text" id="input-husband-name" placeholder="Nama Suami" oninput="updateCoupleIdentityFromInputs()" class="w-full p-2.5 rounded-xl bg-[#F7F1E3]/60 border border-[#D6A84F]/40 text-xs font-extrabold text-[#1e293b] focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Nama Istri</label>
-                        <input type="text" id="input-wife-name" placeholder="Nama Istri" oninput="updateCoupleIdentityFromInputs()" class="w-full p-2.5 rounded-xl bg-[#F7F1E3]/60 border border-[#D6A84F]/40 text-xs font-extrabold text-[#1e293b] focus:outline-none">
-                    </div>
-                </div>
-                <p class="text-[10px] text-gray-500 font-semibold">Kode Room Pasangan: <b id="display-room-code" class="text-[#1e293b] font-mono">-</b></p>
-            </div>
-
-            <p class="text-xs font-extrabold text-[#1e293b] mb-2.5">Siapa yang memegang HP ini?</p>
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <button type="button" onclick="selectRole('Suami')" id="role-btn-Suami" class="py-3 px-4 rounded-2xl font-extrabold text-xs border-2 border-[#D6A84F] bg-[#1e293b] text-[#D6A84F] shadow-md transition flex flex-col items-center gap-1">
-                    <span class="text-2xl">🤵</span>
-                    <span>Saya Suami</span>
-                </button>
-                <button type="button" onclick="selectRole('Istri')" id="role-btn-Istri" class="py-3 px-4 rounded-2xl font-extrabold text-xs border-2 border-gray-300 bg-white text-[#1e293b] transition flex flex-col items-center gap-1">
-                    <span class="text-2xl">👰</span>
-                    <span>Saya Istri</span>
+        <!-- Game Screen Wrap -->
+        <div class="relative w-full aspect-square md:aspect-[4/3] glass-panel rounded-2xl overflow-hidden shadow-inner flex items-center justify-center">
+            
+            <!-- Screens (Z-index strictly managed) -->
+            <!-- 1. Main Menu Screen -->
+            <div id="screen-menu" class="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-50">
+                <div class="text-6xl mb-4 animate-bounce">🦖</div>
+                <h2 class="game-font text-xl text-teal-300 text-center mb-6 leading-relaxed">DINO<br>QUEST 100</h2>
+                <button onclick="startGame()" class="game-font bg-teal-500 hover:bg-teal-400 text-black py-4 px-8 rounded-xl shadow-[0_4px_0_rgb(15,118,110)] active:shadow-[0_0px_0_rgb(15,118,110)] active:translate-y-1 transition-all text-xs tracking-widest">
+                    MULAI
                 </button>
             </div>
 
-            <button type="button" onclick="startGame(false)" class="w-full bg-[#D6A84F] hover:bg-[#c29542] text-[#1e293b] font-black py-4 rounded-2xl text-sm shadow-lg pulse-gold transition">
-                🚀 MULAI & SINKRONKAN DENGAN PASANGAN
-            </button>
-        </section>
-
-        <!-- ========================================================================= -->
-        <!-- LAYAR 2: PERTANYAAN & PILIHAN 4 BARANG BERGAMBAR PNG NYATA                -->
-        <!-- ========================================================================= -->
-        <section id="screen-question" class="hidden space-y-4">
-            <!-- Progress Bar & Indikator Skor -->
-            <div class="clean-card p-3.5 px-4 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <span id="badge-role-active" class="bg-[#1e293b] text-[#D6A84F] text-[10px] font-extrabold px-2.5 py-1 rounded-full">🤵 Suami</span>
-                    <span id="question-step-text" class="text-xs font-extrabold text-[#1e293b]">Ronde 1 / 5</span>
-                </div>
-                <div class="flex gap-1" id="progress-dots"></div>
-            </div>
-
-            <!-- Kartu Pertanyaan Uang Tunai -->
-            <div class="clean-card p-5 text-center relative overflow-hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="bg-emerald-600/15 border border-emerald-600/30 text-emerald-800 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold">
-                        💵 TANTANGAN UANG TUNAI
-                    </span>
-                    <span id="question-variant-badge" class="bg-[#1e293b]/10 text-[#1e293b] px-2.5 py-0.5 rounded-full text-[10px] font-extrabold">
-                        Paket Soal Unik
-                    </span>
-                </div>
-                <p class="text-xs text-gray-600 font-bold">Jika kalian memiliki uang tunai sebesar:</p>
-                <div class="my-2 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#1e293b] to-[#0f172a] border-2 border-[#D6A84F] shadow-md inline-block">
-                    <span id="cash-nominal-display" class="text-2xl md:text-3xl font-black text-[#D6A84F] tracking-tight">Rp 100.000</span>
-                </div>
-                <p id="cash-question-subtitle" class="text-xs text-[#1e293b] font-extrabold mt-1 leading-relaxed"></p>
-            </div>
-
-            <!-- Grid 4 Pilihan Barang -->
-            <div id="choices-grid" class="grid grid-cols-2 gap-3.5"></div>
-        </section>
-
-        <!-- ========================================================================= -->
-        <!-- LAYAR 3: MENUNGGU SINKRONISASI PASANGAN & HASIL PENCOCOKAN OTOMATIS       -->
-        <!-- ========================================================================= -->
-        <section id="screen-reveal" class="hidden clean-card p-6 text-center">
-            <!-- Tahap A: Menunggu Pasangan Memilih di HP-nya (Real-Time Polling) -->
-            <div id="reveal-waiting-state" class="py-6 space-y-4">
-                <div class="w-20 h-20 mx-auto rounded-full bg-[#1e293b] border-4 border-[#D6A84F] flex items-center justify-center text-4xl shadow-xl animate-bounce">
-                    📡
-                </div>
-                <h2 class="text-xl font-black text-[#1e293b]">Pilihanmu Terkirim!</h2>
-                <p id="waiting-partner-text" class="text-xs text-gray-600 font-semibold max-w-xs mx-auto leading-relaxed">
-                    Menunggu pasanganmu memilih jawaban untuk ronde ini di HP-nya... Begitu pasanganmu memilih, hasilnya akan langsung terbuka otomatis!
-                </p>
-
-                <!-- Kartu Kecil Pilihan Sendiri -->
-                <div class="bg-white/90 p-3 rounded-2xl border border-[#D6A84F]/40 max-w-xs mx-auto flex items-center gap-3 text-left">
-                    <img id="my-waiting-img" src="" class="w-12 h-12 object-contain shrink-0">
-                    <div class="truncate">
-                        <span class="text-[10px] font-extrabold text-[#D6A84F] block">Pilihanmu (<span id="my-waiting-role">Suami</span>):</span>
-                        <p id="my-waiting-title" class="text-xs font-black text-[#1e293b] truncate">-</p>
-                    </div>
-                </div>
-
-                <div class="pt-3 space-y-2">
-                    <button type="button" onclick="forceCheckPartnerNow()" class="w-full bg-[#1e293b] text-[#D6A84F] font-extrabold py-3 rounded-xl text-xs shadow">
-                        🔄 Cek Status Pilihan Pasangan Sekarang
-                    </button>
-                    <button type="button" onclick="cancelAndChangeChoice()" class="w-full bg-white text-gray-600 border border-gray-300 font-bold py-2.5 rounded-xl text-xs">
-                        ↩️ Ganti Pilihan Barang
-                    </button>
-                </div>
-            </div>
-
-            <!-- Tahap B: Layar Perbandingan Otomatis Pilihan Suami vs Pilihan Istri -->
-            <div id="reveal-matched-state" class="hidden space-y-4 reveal-bounce">
-                <div class="flex justify-between items-center border-b border-[#D6A84F]/30 pb-2.5">
-                    <span id="reveal-nominal-badge" class="text-[11px] font-extrabold bg-[#1e293b] text-[#D6A84F] px-3 py-1 rounded-full">Ronde 1 • Rp 100.000</span>
-                    <span id="reveal-round-time" class="text-xs font-extrabold text-gray-600">⏱ 0.0 detik</span>
-                </div>
-
-                <!-- Banner Status SEPAKAT / TIDAK SEPAKAT Otomatis -->
-                <div id="auto-match-banner" class="p-3.5 rounded-2xl text-white font-black text-sm shadow-md"></div>
-
-                <!-- Grid Berdampingan: Pilihan Suami vs Pilihan Istri -->
-                <div class="grid grid-cols-2 gap-3">
-                    <!-- Kotak Suami -->
-                    <div class="bg-white rounded-2xl p-3.5 border-2 border-[#D6A84F] shadow flex flex-col items-center">
-                        <span class="bg-[#1e293b] text-[#D6A84F] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full mb-2">🤵 Pilihan Suami</span>
-                        <img id="sync-husband-img" src="" class="w-20 h-20 object-contain my-1 item-png-shadow">
-                        <span id="sync-husband-code" class="text-[10px] font-black text-[#D6A84F] mt-1">PILIHAN A</span>
-                        <h4 id="sync-husband-name" class="text-xs font-extrabold text-[#1e293b] mt-0.5 leading-snug">-</h4>
-                    </div>
-
-                    <!-- Kotak Istri -->
-                    <div class="bg-white rounded-2xl p-3.5 border-2 border-[#D6A84F] shadow flex flex-col items-center">
-                        <span class="bg-[#1e293b] text-[#D6A84F] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full mb-2">👰 Pilihan Istri</span>
-                        <img id="sync-wife-img" src="" class="w-20 h-20 object-contain my-1 item-png-shadow">
-                        <span id="sync-wife-code" class="text-[10px] font-black text-[#D6A84F] mt-1">PILIHAN A</span>
-                        <h4 id="sync-wife-name" class="text-xs font-extrabold text-[#1e293b] mt-0.5 leading-snug">-</h4>
-                    </div>
-                </div>
-
-                <button type="button" id="btn-next-round" onclick="nextRoundOrFinish()" class="w-full bg-[#D6A84F] hover:bg-[#c29542] text-[#1e293b] font-black py-4 rounded-2xl text-sm shadow-lg pulse-gold transition">
-                    LANJUT RONDE BERIKUTNYA ➡
+            <!-- 2. Game Over Screen -->
+            <div id="screen-gameover" class="absolute inset-0 flex flex-col items-center justify-center bg-red-950/80 backdrop-blur-md z-50 hidden">
+                <div class="text-5xl mb-4">💥</div>
+                <h2 class="game-font text-lg text-red-400 text-center mb-6">YAH, GAGAL!</h2>
+                <button onclick="retryLevel()" class="game-font bg-white hover:bg-gray-200 text-red-900 py-4 px-8 rounded-xl shadow-[0_4px_0_rgb(156,163,175)] active:shadow-[0_0px_0_rgb(156,163,175)] active:translate-y-1 transition-all text-xs">
+                    COBA LAGI
                 </button>
             </div>
-        </section>
 
-        <!-- ========================================================================= -->
-        <!-- LAYAR 4: HASIL AKHIR, WAKTU TERCEPAT & PERINGKAT LEADERBOARD              -->
-        <!-- ========================================================================= -->
-        <section id="screen-result" class="hidden clean-card p-6 text-center space-y-5">
-            <div>
-                <span class="bg-[#D6A84F]/25 text-[#1e293b] border border-[#D6A84F] px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
-                    🏆 Skor Tersimpan di Leaderboard Admin
-                </span>
-                <h2 class="text-2xl font-black text-[#1e293b] mt-2" id="result-couple-title">👩‍❤️‍👨 Pasangan Royals</h2>
-                <p class="text-xs text-gray-600 font-semibold">Hasil Kekompakan & Kecepatan Finansial Kalian:</p>
-            </div>
-
-            <!-- Kartu Skor & Catatan Waktu -->
-            <div class="bg-gradient-to-b from-[#1e293b] to-[#0f172a] text-white p-6 rounded-3xl border-2 border-[#D6A84F] shadow-xl">
-                <p id="result-score-points" class="text-5xl font-black text-[#D6A84F]">100 Poin</p>
-                <p id="result-score-badge" class="text-sm font-extrabold text-white mt-2">🎉 5 dari 5 Ronde SEPAKAT!</p>
-                <div class="inline-flex items-center gap-2 bg-white/10 border border-[#D6A84F]/40 px-3.5 py-1.5 rounded-full text-xs font-extrabold text-amber-300 mt-3">
-                    <span>⚡ Total Waktu Kalian:</span>
-                    <span id="result-total-time">0.0 detik</span>
-                </div>
-                <p id="result-score-message" class="text-xs text-gray-300 mt-3 leading-relaxed"></p>
-            </div>
-
-            <!-- Rincian 5 Ronde Nominal -->
-            <div class="bg-white/90 rounded-2xl p-4 border border-[#D6A84F]/30 text-left space-y-2.5" id="result-rounds-summary"></div>
-
-            <div class="space-y-2.5 pt-1">
-                <button type="button" onclick="startGame(true)" class="w-full bg-[#D6A84F] hover:bg-[#c29542] text-[#1e293b] font-black py-3.5 rounded-2xl text-xs shadow-md transition">
-                    🔄 Main Ulang & Perbaiki Waktu
+            <!-- 3. Level Complete Screen -->
+            <div id="screen-levelcomplete" class="absolute inset-0 flex flex-col items-center justify-center bg-teal-900/80 backdrop-blur-md z-50 hidden">
+                <div class="text-5xl mb-4">🌟</div>
+                <h2 class="game-font text-lg text-teal-300 text-center mb-6">LEVEL SELESAI!</h2>
+                <button onclick="nextLevel()" class="game-font bg-white hover:bg-gray-200 text-teal-900 py-4 px-8 rounded-xl shadow-[0_4px_0_rgb(156,163,175)] active:shadow-[0_0px_0_rgb(156,163,175)] active:translate-y-1 transition-all text-xs">
+                    LANJUT
                 </button>
-                <a href="index.html" class="w-full bg-[#1e293b] text-[#D6A84F] font-extrabold py-3.5 rounded-2xl text-xs shadow-md block hover:bg-gray-800 transition">
-                    ⬅ Kembali ke Web Utama Peserta
-                </a>
             </div>
-        </section>
+            
+            <!-- 4. Victory Screen -->
+            <div id="screen-victory" class="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md z-50 hidden">
+                <div class="text-6xl mb-4">👑🦖</div>
+                <h2 class="game-font text-xl text-yellow-400 text-center mb-4 leading-relaxed">TAMAT!</h2>
+                <p class="text-center text-sm mb-6 px-6 text-slate-300">Luar biasa! Kamu menyelesaikan 100 level!</p>
+                <button onclick="resetGame()" class="game-font bg-purple-500 hover:bg-purple-400 text-white py-4 px-8 rounded-xl shadow-[0_4px_0_rgb(126,34,206)] active:shadow-[0_0px_0_rgb(126,34,206)] active:translate-y-1 transition-all text-xs">
+                    MAIN LAGI
+                </button>
+            </div>
+
+            <!-- 5. DOM Gameplay Area -->
+            <div id="game-dom" class="absolute inset-0 p-4 flex items-center justify-center w-full h-full text-slate-100 hidden z-20">
+                <!-- Injected via JS -->
+            </div>
+            
+            <!-- 6. Canvas Gameplay Area -->
+            <canvas id="game-canvas" width="400" height="400" class="absolute inset-0 w-full h-full hidden z-20"></canvas>
+
+        </div>
+        
+        <!-- Hint/Instruction Bar -->
+        <div id="game-instruction" class="mt-4 text-center text-teal-100/70 text-[10px] md:text-xs game-font min-h-[16px] px-2 leading-relaxed">
+            Selesaikan tantangan untuk melanjutkan!
+        </div>
 
     </main>
 
     <script>
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzITfynVAWS-4wo6VR1Whf0LWgks1sgAHm62_P8oH39ILjDkXupt9D3nxWJPCL90QL8/exec";
+        // ==========================================
+        // ROBUST STATE MANAGEMENT ENGINE
+        // This guarantees NO overlaps between levels
+        // ==========================================
+        const Engine = {
+            timers: [],
+            intervals: [],
+            listeners: [],
+            rafId: null,
 
-        // =========================================================================
-        // BANK SOAL 15 VARIASI (5 LEVEL NOMINAL x 3 PAKET SOAL SETARA ANTI-CONTEK)
-        // =========================================================================
-        const QUESTION_POOLS = [
-            // LEVEL 1: Rp 100.000 (3 Variasi Soal)
-            {
-                number: 1,
-                nominal: "Rp 100.000",
-                variants: [
-                    {
-                        variantLabel: "Paket A",
-                        question: "Jika malam ini kalian memegang uang tunai Rp 100.000 untuk langsung dihabiskan berdua, mana yang kalian pilih?",
-                        options: [
-                            { code: "A", name: "Paket Kuliner Malam Berdua", value: "Senilai Rp 100.000", desc: "Makan malam ayam/seafood spesial berdua", img: "https://img.icons8.com/3d-fluency/512/fried-chicken.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Poultry%20leg/3D/poultry_leg_3d.png" },
-                            { code: "B", name: "Paket Sembako & Dapur", value: "Senilai Rp 100.000", desc: "Beras 5 Kg & minyak goreng untuk stok rumah", img: "https://img.icons8.com/3d-fluency/512/shopping-cart-loaded.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Shopping%20cart/3D/shopping_cart_3d.png" },
-                            { code: "C", name: "2 Tiket Bioskop & Popcorn", value: "Senilai Rp 100.000", desc: "Nonton film favorit berdua di akhir pekan", img: "https://img.icons8.com/3d-fluency/512/popcorn.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Popcorn/3D/popcorn_3d.png" },
-                            { code: "D", name: "2 Cup Kopi Kekinian & Cake", value: "Senilai Rp 100.000", desc: "Nongkrong santai ngobrol berdua di kafe", img: "https://img.icons8.com/3d-fluency/512/takeaway-hot-drink.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Hot%20beverage/3D/hot_beverage_3d.png" }
-                        ]
-                    },
-                    {
-                        variantLabel: "Paket B",
-                        question: "Ada voucher belanja tunai Rp 100.000 yang harus langsung ditukar hari ini. Kalian pilih tukar dengan apa?",
-                        options: [
-                            { code: "A", name: "Bensin Full Tank & Cuci Motor/Mobil", value: "Senilai Rp 100.000", desc: "Kendaraan bersih dan siap dipakai kerja sepekan", img: "https://img.icons8.com/3d-fluency/512/gas-station.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Fuel%20pump/3D/fuel_pump_3d.png" },
-                            { code: "B", name: "Kuota Internet / Langganan Streaming", value: "Senilai Rp 100.000", desc: "Hiburan film & internet lancar sebulan di rumah", img: "https://img.icons8.com/3d-fluency/512/wi-fi-connected.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Mobile%20phone/3D/mobile_phone_3d.png" },
-                            { code: "C", name: "Buah Segar & Vitamin Keluarga", value: "Senilai Rp 100.000", desc: "Paket buah potong, susu & multivitamin sehat", img: "https://img.icons8.com/3d-fluency/512/strawberry.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Red%20apple/3D/red_apple_3d.png" },
-                            { code: "D", name: "Martabak Spesial & Camilan Malam", value: "Senilai Rp 100.000", desc: "Camilan manis-gurih dinikmati berdua di rumah", img: "https://img.icons8.com/3d-fluency/512/pancake.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Pancakes/3D/pancakes_3d.png" }
-                        ]
-                    },
-                    {
-                        variantLabel: "Paket C",
-                        question: "Jika kalian menemukan uang kejutan Rp 100.000 di saku jaket, sore ini langsung kalian pakai untuk apa?",
-                        options: [
-                            { code: "A", name: "Makan Bakso & Es Degan Berdua", value: "Senilai Rp 100.000", desc: "Kuliner hangat legendaris favorit pasangan", img: "https://img.icons8.com/3d-fluency/512/noodles.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Steaming%20bowl/3D/steaming_bowl_3d.png" },
-                            { code: "B", name: "Sabun, Deterjen & Kebutuhan Rumah", value: "Senilai Rp 100.000", desc: "Stok perlengkapan kebersihan rumah tangga", img: "https://img.icons8.com/3d-fluency/512/shopping-basket-2.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Lotion%20bottle/3D/lotion_bottle_3d.png" },
-                            { code: "C", name: "Buku Bacaan / E-Book Pengembangan Diri", value: "Senilai Rp 100.000", desc: "Tambah ilmu pernikahan & keuangan keluarga", img: "https://img.icons8.com/3d-fluency/512/book.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Books/3D/books_3d.png" },
-                            { code: "D", name: "Kotak Pizza Hangat untuk di Rumah", value: "Senilai Rp 100.000", desc: "Quality time santai sambil makan pizza berdua", img: "https://img.icons8.com/3d-fluency/512/pizza.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Pizza/3D/pizza_3d.png" }
-                        ]
-                    }
-                ]
+            setTimeout: (fn, delay) => {
+                let id = setTimeout(fn, delay);
+                Engine.timers.push(id);
+                return id;
             },
-
-            // LEVEL 2: Rp 1.000.000 (3 Variasi Soal)
-            {
-                number: 2,
-                nominal: "Rp 1.000.000",
-                variants: [
-                    {
-                        variantLabel: "Paket A",
-                        question: "Jika kalian memiliki uang tunai Rp 1.000.000 dan harus ditukar dengan 1 pilihan senilai Rp 1.000.000, apa pilihanmu?",
-                        options: [
-                            { code: "A", name: "Emas Mini / Logam Mulia", value: "Senilai Rp 1.000.000", desc: "Kepingan emas murni untuk tabungan masa depan", img: "https://img.icons8.com/3d-fluency/512/gold-bars.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Coin/3D/coin_3d.png" },
-                            { code: "B", name: "Sepasang Sepatu Sneakers Couple", value: "Senilai Rp 1.000.000", desc: "Sepatu jalan/olahraga baru yang nyaman", img: "https://img.icons8.com/3d-fluency/512/trainers.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Running%20shoe/3D/running_shoe_3d.png" },
-                            { code: "C", name: "Air Fryer & Alat Masak Modern", value: "Senilai Rp 1.000.000", desc: "Peralatan elektronik praktis untuk dapur rumah", img: "https://img.icons8.com/3d-fluency/512/cooking-pot.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Cooking/3D/cooking_3d.png" },
-                            { code: "D", name: "Staycation Hotel Bintang 4", value: "Senilai Rp 1.000.000", desc: "Voucher menginap 1 malam + sarapan berdua", img: "https://img.icons8.com/3d-fluency/512/bed.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Bed/3D/bed_3d.png" }
-                        ]
-                    },
-                    {
-                        variantLabel: "Paket B",
-                        question: "Kalian mendapat bonus Rp 1.000.000! Mana alokasi senilai Rp 1.000.000 yang paling ingin kalian wujudkan?",
-                        options: [
-                            { code: "A", name: "Top-Up Reksa Dana / Tabungan Darurat", value: "Senilai Rp 1.000.000", desc: "Perkuat dana cadangan keluarga", img: "https://img.icons8.com/3d-fluency/512/Combo-chart.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Chart%20increasing/3D/chart_increasing_3d.png" },
-                            { code: "B", name: "Romantic Fine Dining & Steak", value: "Senilai Rp 1.000.000", desc: "Makan malam romantis berdua di restoran mewah", img: "https://img.icons8.com/3d-fluency/512/steak.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Cut%20of%20meat/3D/cut_of_meat_3d.png" },
-                            { code: "C", name: "Vacuum Cleaner & Blender Rumah", value: "Senilai Rp 1.000.000", desc: "Bikin pekerjaan rumah tangga jauh lebih ringan", img: "https://img.icons8.com/3d-fluency/512/housekeeping.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Broom/3D/broom_3d.png" },
-                            { code: "D", name: "Paket Medical Check-Up & Spa", value: "Senilai Rp 1.000.000", desc: "Investasi kesehatan & relaksasi badan berdua", img: "https://img.icons8.com/3d-fluency/512/stethoscope.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Stethoscope/3D/stethoscope_3d.png" }
-                        ]
-                    },
-                    {
-                        variantLabel: "Paket C",
-                        question: "Ada hadiah doorprize senilai Rp 1.000.000! Dari 4 pilihan hadiah ini, mana yang kalian bawa pulang?",
-                        options: [
-                            { code: "A", name: "Jam Tangan Couple Elegan", value: "Senilai Rp 1.000.000", desc: "Aksesori serasi untuk dipakai ke acara resmi", img: "https://img.icons8.com/3d-fluency/512/watch.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Watch/3D/watch_3d.png" },
-                            { code: "B", name: "Voucher Belanja Bulanan Supermarket", value: "Senilai Rp 1.000.000", desc: "Stok kebutuhan dapur & rumah aman sebulan penuh", img: "https://img.icons8.com/3d-fluency/512/shopping-bag.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Shopping%20bags/3D/shopping_bags_3d.png" },
-                            { code: "C", name: "Dispenser Galon Bawah & Kompor", value: "Senilai Rp 1.000.000", desc: "Upgrade perlengkapan dapur agar makin nyaman", img: "https://img.icons8.com/3d-fluency/512/teapot.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Teapot/3D/teapot_3d.png" },
-                            { code: "D", name: "Road Trip Akhir Pekan ke Batu/Tretes", value: "Senilai Rp 1.000.000", desc: "Liburan singkat sejuk berdua melepas penat", img: "https://img.icons8.com/3d-fluency/512/camping-tent.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Camping/3D/camping_3d.png" }
-                        ]
-                    }
-                ]
+            setInterval: (fn, delay) => {
+                let id = setInterval(fn, delay);
+                Engine.intervals.push(id);
+                return id;
             },
-
-            // LEVEL 3: Rp 10.000.000 (3 Variasi Soal)
-            {
-                number: 3,
-                nominal: "Rp 10.000.000",
-                variants: [
-                    {
-                        variantLabel: "Paket A",
-                        question: "Jika kalian memiliki uang tunai Rp 10.000.000 hari ini, barang/aset senilai Rp 10.000.000 mana yang kalian ambil?",
-                        options: [
-                            { code: "A", name: "Smartphone / Laptop Kerja Baru", value: "Senilai Rp 10.000.000", desc: "Gadget spesifikasi tinggi untuk produktivitas", img: "https://img.icons8.com/3d-fluency/512/laptop.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Laptop/3D/laptop_3d.png" },
-                            { code: "B", name: "Emas Batangan Antam", value: "Senilai Rp 10.000.000", desc: "Aset emas batangan murni penyimpan nilai", img: "https://img.icons8.com/3d-fluency/512/money-bag.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Money%20bag/3D/money_bag_3d.png" },
-                            { code: "C", name: "Paket Liburan ke Bali Berdua", value: "Senilai Rp 10.000.000", desc: "Tiket pesawat PP, resort & liburan romantis", img: "https://img.icons8.com/3d-fluency/512/airplane-take-off.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Airplane/3D/airplane_3d.png" },
-                            { code: "D", name: "Smart TV 55\" & Kulkas 2 Pintu", value: "Senilai Rp 10.000.000", desc: "Upgrade elektronik ruang keluarga & dapur", img: "https://img.icons8.com/3d-fluency/512/retro-tv.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Television/3D/television_3d.png" }
-                        ]
-                    },
-                    {
-                        variantLabel: "Paket B",
-                        question: "Ada dana segar Rp 10.000.000 untuk keluarga kalian. Prioritas senilai Rp 10.000.000 mana yang kalian dahulukan?",
-                        options: [
-                            { code: "A", name: "Kasur King Size Orthopedic & AC Baru", value: "Senilai Rp 10.000.000", desc: "Kualitas tidur malam suami-istri makin nyenyak", img: "https://img.icons8.com/3d-fluency/512/sleeping-in-bed.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Bed/3D/bed_3d.png" },
-                            { code: "B", name: "Deposito / Dana Darurat Keluarga", value: "Senilai Rp 10.000.000", desc: "Simpanan aman berbunga untuk ketenangan hati", img: "https://img.icons8.com/3d-fluency/512/safe.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Locked/3D/locked_3d.png" },
-                            { code: "C", name: "Modal Usaha Sampingan / Online Shop", value: "Senilai Rp 10.000.000", desc: "Rintis bisnis kecil-kecilan penambah penghasilan", img: "https://img.icons8.com/3d-fluency/512/cash-register.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Briefcase/3D/briefcase_3d.png" },
-                            { code: "D", name: "Sepeda Listrik / Motor Bekas Harian", value: "Senilai Rp 10.000.000", desc: "Transportasi praktis & irit untuk mobilitas dekat", img: "https://img.icons8.com/3d-fluency/512/scooter.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Motor%20scooter/3D/motor_scooter_3d.png" }
-                        ]
-                    },
-                    {
-                        variantLabel: "Paket C",
-                        question: "Dengan uang Rp 10.000.000 di tangan, mana pilihan senilai Rp 10.000.000 yang paling pas untuk kalian saat ini?",
-                        options: [
-                            { code: "A", name: "Mesin Cuci Front Load & Sofa Ruang Tamu", value: "Senilai Rp 10.000.000", desc: "Rumah makin rapi, bersih, dan nyaman ditempati", img: "https://img.icons8.com/3d-fluency/512/armchair.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Couch%20and%20lamp/3D/couch_and_lamp_3d.png" },
-                            { code: "B", name: "Portofolio Saham Bluechip / Reksa Dana", value: "Senilai Rp 10.000.000", desc: "Investasi jangka menengah agar aset bertumbuh", img: "https://img.icons8.com/3d-fluency/512/ bull.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Chart%20increasing/3D/chart_increasing_3d.png" },
-                            { code: "C", name: "Honeymoon Kedua ke Singapura/Malaysia", value: "Senilai Rp 10.000.000", desc: "Penyegaran cinta & pengalaman jalan-jalan berdua", img: "https://img.icons8.com/3d-fluency/512/suitcase.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Luggage/3D/luggage_3d.png" },
-                            { code: "D", name: "Kursus Sertifikasi & Upgrade Skill", value: "Senilai Rp 10.000.000", desc: "Investasi leher ke atas untuk peningkatan karier", img: "https://img.icons8.com/3d-fluency/512/prize.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Trophy/3D/trophy_3d.png" }
-                        ]
-                    }
-                ]
+            addEventListener: (element, type, fn, options = false) => {
+                if (!element) return;
+                element.addEventListener(type, fn, options);
+                Engine.listeners.push({ element, type, fn, options });
             },
-
-            // LEVEL 4: Rp 100.000.000 (3 Variasi Soal)
-            {
-                number: 4,
-                nominal: "Rp 100.000.000",
-                variants: [
-                    {
-                        variantLabel: "Paket A",
-                        question: "Jika kalian memiliki uang tunai Rp 100.000.000, wujud barang/aset senilai Rp 100.000.000 mana yang menjadi prioritasmu?",
-                        options: [
-                            { code: "A", name: "1 Unit Mobil City Car Keluarga", value: "Senilai Rp 100.000.000", desc: "Kendaraan keluarga yang nyaman & bebas kehujanan", img: "https://img.icons8.com/3d-fluency/512/car.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Automobile/3D/automobile_3d.png" },
-                            { code: "B", name: "Renovasi Interior & Kitchen Set Rumah", value: "Senilai Rp 100.000.000", desc: "Percantik kamar tidur, ruang tamu & dapur", img: "https://img.icons8.com/3d-fluency/512/home.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/House%20with%20garden/3D/house_with_garden_3d.png" },
-                            { code: "C", name: "Modal Bisnis / Franchise Toko", value: "Senilai Rp 100.000.000", desc: "Buka usaha kuliner/minimarket penghasil cuan", img: "https://img.icons8.com/3d-fluency/512/shop.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Convenience%20store/3D/convenience_store_3d.png" },
-                            { code: "D", name: "Dana Pendidikan Anak & Emas", value: "Senilai Rp 100.000.000", desc: "Jaminan masa depan sekolah anak & dana darurat", img: "https://img.icons8.com/3d-fluency/512/graduation-cap.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Graduation%20cap/3D/graduation_cap_3d.png" }
-                        ]
-                    },
-                    {
-                        variantLabel: "Paket B",
-                        question: "Ada rejeki besar Rp 100.000.000! Keputusan finansial senilai Rp 100.000.000 mana yang langsung kalian eksekusi?",
-                        options: [
-                            { code: "A", name: "Beli Tanah Kavling Strategis", value: "Senilai Rp 100.000.000", desc: "Aset tanah yang harganya terus naik setiap tahun", img: "https://img.icons8.com/3d-fluency/512/location.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Round%20pushpin/3D/round_pushpin_3d.png" },
-                            { code: "B", name: "Lunasi KPR / Bebas Cicilan Utang", value: "Senilai Rp 100.000.000", desc: "Hidup tenang tanpa beban tagihan bulanan", img: "https://img.icons8.com/3d-fluency/512/key.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Key/3D/key_3d.png" },
-                            { code: "C", name: "Obligasi Negara (SBN) / Deposito", value: "Senilai Rp 100.000.000", desc: "Dapat kupon passive income cair tiap bulan", img: "https://img.icons8.com/3d-fluency/512/bank-building.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Bank/3D/bank_3d.png" },
-                            { code: "D", name: "Tour Wisata Jepang / Eropa Berdua", value: "Senilai Rp 100.000.000", desc: "Pengalaman liburan impian seumur hidup", img: "https://img.icons8.com/3d-fluency/512/camera.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Camera%20with%20flash/3D/camera_with_flash_3d.png" }
-                        ]
-                    },
-                    {
-                        variantLabel: "Paket C",
-                        question: "Jika kalian dipercaya mengelola dana Rp 100.000.000, aset mana yang paling sesuai dengan visi keluarga kalian?",
-                        options: [
-                            { code: "A", name: "100 Gram Logam Mulia Emas Murni", value: "Senilai Rp 100.000.000", desc: "Pelindung nilai kekayaan keluarga dari inflasi", img: "https://img.icons8.com/3d-fluency/512/treasure-chest.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Gem%20stone/3D/gem_stone_3d.png" },
-                            { code: "B", name: "Buka Usaha Kafe / Laundry Kiloan", value: "Senilai Rp 100.000.000", desc: "Mesin pencetak arus kas harian untuk keluarga", img: "https://img.icons8.com/3d-fluency/512/stall.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Shopping%20cart/3D/shopping_cart_3d.png" },
-                            { code: "C", name: "Upgrade Mobil Keluarga Lebih Lega", value: "Senilai Rp 100.000.000", desc: "Perjalanan mudik & pelayanan makin nyaman", img: "https://img.icons8.com/3d-fluency/512/suv.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Sport%20utility%20vehicle/3D/sport_utility_vehicle_3d.png" },
-                            { code: "D", name: "Beasiswa Studi Lanjut / Dana Sekolah", value: "Senilai Rp 100.000.000", desc: "Dana pendidikan terbaik untuk masa depan keluarga", img: "https://img.icons8.com/3d-fluency/512/diploma.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Scroll/3D/scroll_3d.png" }
-                        ]
-                    }
-                ]
-            },
-
-            // LEVEL 5: Rp 1.000.000.000 (3 Variasi Soal)
-            {
-                number: 5,
-                nominal: "Rp 1.000.000.000",
-                variants: [
-                    {
-                        variantLabel: "Paket A",
-                        question: "Pertanyaan Puncak! Jika kalian memiliki uang tunai Rp 1 Miliar, aset senilai Rp 1.000.000.000 mana yang kalian pilih?",
-                        options: [
-                            { code: "A", name: "Rumah Baru 2 Lantai Impian", value: "Senilai Rp 1.000.000.000", desc: "Hunian keluarga nyaman dengan taman asri", img: "https://img.icons8.com/3d-fluency/512/cottage.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/House/3D/house_3d.png" },
-                            { code: "B", name: "Kos-Kosan Produktif / Ruko Sewa", value: "Senilai Rp 1.000.000.000", desc: "Properti penghasil passive income bulanan", img: "https://img.icons8.com/3d-fluency/512/city-buildings.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Office%20building/3D/office_building_3d.png" },
-                            { code: "C", name: "Obligasi Negara & Saham Dividen", value: "Senilai Rp 1.000.000.000", desc: "Portofolio investasi cair dengan bagi hasil rutin", img: "https://img.icons8.com/3d-fluency/512/combo-chart.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Chart%20increasing/3D/chart_increasing_3d.png" },
-                            { code: "D", name: "SUV Mewah & Tur Keliling Dunia", value: "Senilai Rp 1.000.000.000", desc: "Mobil impian + pengalaman wisata berdua", img: "https://img.icons8.com/3d-fluency/512/globe.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Globe%20showing%20Asia-Australia/3D/globe_showing_asia-australia_3d.png" }
-                        ]
-                    },
-                    {
-                        variantLabel: "Paket B",
-                        question: "Ronde Penentuan Rp 1 Miliar! Jika dana Rp 1.000.000.000 siap dialokasikan hari ini, mana prioritas utama kalian?",
-                        options: [
-                            { code: "A", name: "Bangun Bisnis Keluarga & Cabang", value: "Senilai Rp 1.000.000.000", desc: "Membangun kerajaan bisnis keluarga yang membuka lapangan kerja", img: "https://img.icons8.com/3d-fluency/512/company.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Department%20store/3D/department_store_3d.png" },
-                            { code: "B", name: "Dana Pensiun Sejahtera & Taburan Kasih", value: "Senilai Rp 1.000.000.000", desc: "Financial freedom di masa tua & menjadi berkat", img: "https://img.icons8.com/3d-fluency/512/heart-with-pulse.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Sparkling%20heart/3D/sparkling_heart_3d.png" },
-                            { code: "C", name: "Villa Disewakan di Daerah Wisata", value: "Senilai Rp 1.000.000.000", desc: "Bisa untuk liburan keluarga sekaligus disewakan", img: "https://img.icons8.com/3d-fluency/512/beach.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Beach%20with%20umbrella/3D/beach_with_umbrella_3d.png" },
-                            { code: "D", name: "1 Kg Emas Batangan & Deposito Bank", value: "Senilai Rp 1.000.000.000", desc: "Aset likuid ekstra aman untuk warisan anak cucu", img: "https://img.icons8.com/3d-fluency/512/safe-ok.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Coin/3D/coin_3d.png" }
-                        ]
-                    },
-                    {
-                        variantLabel: "Paket C",
-                        question: "Tantangan Puncak Rp 1 Miliar! Kemana kalian sepakat menempatkan dana sebesar Rp 1.000.000.000 ini?",
-                        options: [
-                            { code: "A", name: "2 Unit Apartemen / Rumah Kontrakan", value: "Senilai Rp 1.000.000.000", desc: "Pendapatan sewa tahunan yang terus mengalir", img: "https://img.icons8.com/3d-fluency/512/ real-estate.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Houses/3D/houses_3d.png" },
-                            { code: "B", name: "Full Dana Pendidikan Anak Sampai Kuliah Luar Negeri", value: "Senilai Rp 1.000.000.000", desc: "Pendidikan terbaik hingga jenjang universitas", img: "https://img.icons8.com/3d-fluency/512/student-male.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Graduation%20cap/3D/graduation_cap_3d.png" },
-                            { code: "C", name: "Franchise Restoran / Minimarket Nasional", value: "Senilai Rp 1.000.000.000", desc: "Bisnis autopilot dengan sistem yang sudah terbukti", img: "https://img.icons8.com/3d-fluency/512/restaurant.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Fork%20and%20knife%20with%20plate/3D/fork_and_knife_with_plate_3d.png" },
-                            { code: "D", name: "Rumah Nyaman + Mobil Listrik Keluarga", value: "Senilai Rp 1.000.000.000", desc: "Paket lengkap tempat tinggal & kendaraan modern", img: "https://img.icons8.com/3d-fluency/512/electric-vehicle.png", fallbackImg: "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Automobile/3D/automobile_3d.png" }
-                        ]
-                    }
-                ]
-            }
-        ];
-
-        // State Permainan & Sinkronisasi Pasangan
-        let playerRole = 'Suami';
-        let husbandName = '';
-        let wifeName = '';
-        let coupleId = '';
-        let coupleNames = 'Pasangan Royals';
-
-        let activeQuestionsForCouple = [];
-        let currentRoundIdx = 0;
-        let selectedOptionObj = null;
-        let roundHistory = [];
-
-        // Stopwatch Kecepatan Berpikir (Hanya menghitung saat memilih soal, tidak menghitung waktu tunggu sinyal)
-        let roundStartTimestamp = 0;
-        let accumulatedDecisionMs = 0;
-        let currentRoundDecisionSec = 0;
-        let timerInterval = null;
-        let syncPollingInterval = null;
-        let isRoundResolved = false;
-
-        // =========================================================================
-        // 1. SINKRONISASI AKUN LOGIN DARI WEB UTAMA PESERTA (URL & LOCALSTORAGE)
-        // =========================================================================
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlHusband = urlParams.get('husband');
-            const urlWife = urlParams.get('wife');
-
-            if (urlHusband && urlWife) {
-                husbandName = urlHusband.trim();
-                wifeName = urlWife.trim();
-                coupleId = buildCleanCoupleId(husbandName, wifeName);
-                localStorage.setItem('cwo_active_session', JSON.stringify({
-                    husband: husbandName,
-                    wife: wifeName,
-                    coupleId: coupleId
-                }));
-            } else {
-                try {
-                    const sessionStr = localStorage.getItem('cwo_active_session');
-                    if (sessionStr) {
-                        const session = JSON.parse(sessionStr);
-                        if (session.husband && session.wife) {
-                            husbandName = session.husband.trim();
-                            wifeName = session.wife.trim();
-                            coupleId = buildCleanCoupleId(husbandName, wifeName);
-                        }
-                    }
-                } catch (e) {}
-            }
-
-            if (husbandName && wifeName) {
-                document.getElementById('input-husband-name').value = husbandName;
-                document.getElementById('input-wife-name').value = wifeName;
-                updateCoupleIdentityFromInputs();
-            }
-        });
-
-        function buildCleanCoupleId(h, w) {
-            const cleanH = String(h || '').trim().toLowerCase().replace(/\s+/g, '');
-            const cleanW = String(w || '').trim().toLowerCase().replace(/\s+/g, '');
-            return `${cleanH}_${cleanW}`;
-        }
-
-        function updateCoupleIdentityFromInputs() {
-            const h = document.getElementById('input-husband-name').value.trim();
-            const w = document.getElementById('input-wife-name').value.trim();
-            husbandName = h;
-            wifeName = w;
-            coupleId = buildCleanCoupleId(h, w);
-            coupleNames = (h && w) ? `${h} & ${w}` : 'Pasangan Royals';
-
-            document.getElementById('header-couple-name').innerText = `👩‍❤️‍👨 ${coupleNames}`;
-            document.getElementById('display-room-code').innerText = (h && w) ? coupleId : 'Isi nama Suami & Istri';
-
-            if (h && w) {
-                localStorage.setItem('cwo_active_session', JSON.stringify({
-                    husband: h,
-                    wife: w,
-                    coupleId: coupleId
-                }));
-            }
-        }
-
-        // =========================================================================
-        // 2. GENERATOR SOAL UNIK PER PASANGAN (SAMA UNTUK SUAMI-ISTRI, BEDA ANTAR PASANGAN)
-        // =========================================================================
-        function getDeterministicHash(str) {
-            let hash = 2166136261;
-            for (let i = 0; i < str.length; i++) {
-                hash ^= str.charCodeAt(i);
-                hash = Math.imul(hash, 16777619);
-            }
-            return Math.abs(hash);
-        }
-
-        function generateCoupleSpecificQuestions(cId) {
-            const cleanSeed = String(cId || 'default_couple').toLowerCase().trim();
-            return QUESTION_POOLS.map((pool, roundIndex) => {
-                // Pilih salah satu dari 3 paket variasi soal berdasarkan hash coupleId + nomor ronde
-                const hashVal = getDeterministicHash(`${cleanSeed}_round_${roundIndex}`);
-                const variantIndex = hashVal % pool.variants.length;
-                const chosenVariant = pool.variants[variantIndex];
-
-                return {
-                    number: pool.number,
-                    nominal: pool.nominal,
-                    variantLabel: chosenVariant.variantLabel,
-                    question: chosenVariant.question,
-                    options: chosenVariant.options
+            startRAF: (fn) => {
+                Engine.cancelRAF();
+                const loop = (t) => {
+                    fn(t);
+                    Engine.rafId = requestAnimationFrame(loop);
                 };
+                Engine.rafId = requestAnimationFrame(loop);
+            },
+            cancelRAF: () => {
+                if (Engine.rafId !== null) {
+                    cancelAnimationFrame(Engine.rafId);
+                    Engine.rafId = null;
+                }
+            },
+            cleanup: () => {
+                Engine.timers.forEach(clearTimeout); Engine.timers = [];
+                Engine.intervals.forEach(clearInterval); Engine.intervals = [];
+                Engine.listeners.forEach(l => l.element.removeEventListener(l.type, l.fn, l.options)); Engine.listeners = [];
+                Engine.cancelRAF();
+                
+                // Reset DOM elements
+                const domArea = document.getElementById('game-dom');
+                const cvsArea = document.getElementById('game-canvas');
+                domArea.innerHTML = '';
+                domArea.classList.add('hidden');
+                cvsArea.classList.add('hidden');
+                
+                // Clear Canvas
+                const ctx = cvsArea.getContext('2d');
+                ctx.clearRect(0, 0, cvsArea.width, cvsArea.height);
+            }
+        };
+
+        const MAX_LEVEL = 100;
+        let currentLevel = 1;
+        let currentGameType = -1; // 0 to 8
+        
+        // DOM Elements
+        const UI = {
+            menu: document.getElementById('screen-menu'),
+            gameOver: document.getElementById('screen-gameover'),
+            levelComplete: document.getElementById('screen-levelcomplete'),
+            victory: document.getElementById('screen-victory'),
+            domArea: document.getElementById('game-dom'),
+            cvsArea: document.getElementById('game-canvas'),
+            levelDisplay: document.getElementById('level-display'),
+            progressBar: document.getElementById('progress-bar'),
+            instruction: document.getElementById('game-instruction')
+        };
+
+        const hideAllScreens = () => {
+            UI.menu.classList.add('hidden');
+            UI.gameOver.classList.add('hidden');
+            UI.levelComplete.classList.add('hidden');
+            UI.victory.classList.add('hidden');
+        };
+
+        const updateProgressUI = () => {
+            UI.levelDisplay.innerText = `LEVEL ${currentLevel}/${MAX_LEVEL}`;
+            UI.progressBar.style.width = `${(currentLevel / MAX_LEVEL) * 100}%`;
+        };
+
+        function startGame() {
+            currentLevel = 1;
+            startCurrentLevel();
+        }
+
+        function resetGame() {
+            currentLevel = 1;
+            Engine.cleanup();
+            hideAllScreens();
+            UI.menu.classList.remove('hidden');
+            updateProgressUI();
+            UI.instruction.innerText = "Siap untuk mulai?";
+        }
+
+        function startCurrentLevel() {
+            Engine.cleanup(); // CRITICAL: Wipe all previous state
+            hideAllScreens();
+            updateProgressUI();
+            
+            // 9 Rotating Games
+            currentGameType = (currentLevel - 1) % 9; 
+            
+            switch(currentGameType) {
+                case 0: initMemoryGame(); break;
+                case 1: initMathGame(); break;
+                case 2: initFlappyGame(); break;
+                case 3: initSortingGame(); break;
+                case 4: initCatchGame(); break;
+                case 5: initSimonGame(); break;
+                case 6: initWordGame(); break;
+                case 7: initPatternGame(); break;
+                case 8: initThreadGame(); break;
+            }
+        }
+
+        function triggerWin() {
+            Engine.cleanup(); 
+            Engine.setTimeout(() => {
+                if (currentLevel >= MAX_LEVEL) {
+                    hideAllScreens();
+                    UI.victory.classList.remove('hidden');
+                } else {
+                    UI.levelComplete.classList.remove('hidden');
+                }
+            }, 300);
+        }
+
+        function triggerGameOver() {
+            Engine.cleanup();
+            Engine.setTimeout(() => {
+                UI.gameOver.classList.remove('hidden');
+            }, 300);
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            startCurrentLevel();
+        }
+
+        function retryLevel() {
+            startCurrentLevel();
+        }
+
+        // Helpers
+        function getPointerPos(canvas, evt) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+            const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+            return {
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+
+        // ==========================================
+        // GAME 0: MEMORY MATCH
+        // ==========================================
+        let memState = { flipped: false, lock: false, first: null, second: null, matched: 0, total: 0 };
+
+        function initMemoryGame() {
+            UI.domArea.classList.remove('hidden');
+            UI.instruction.innerText = "Temukan kata yang sama!";
+            
+            let pairsCount = currentLevel < 20 ? 3 : (currentLevel < 60 ? 4 : 5);
+            memState = { flipped: false, lock: false, first: null, second: null, matched: 0, total: pairsCount };
+
+            const words = ['Sura', 'Baya', 'Tugu', 'Pahlawan', 'TKA', 'Dino'];
+            let gameWords = words.slice(0, pairsCount);
+            let deck = [...gameWords, ...gameWords].sort(() => 0.5 - Math.random());
+
+            let cols = pairsCount <= 3 ? 'grid-cols-3' : (pairsCount === 4 ? 'grid-cols-4' : 'grid-cols-5');
+            
+            let html = `<div class="grid ${cols} gap-2 w-full max-w-[320px] mx-auto perspective" id="mem-grid">`;
+            deck.forEach((word, i) => {
+                html += `
+                <div class="relative w-full aspect-[3/4] cursor-pointer" data-word="${word}" id="mem-card-${i}">
+                    <div class="card-inner absolute w-full h-full transform-style-3d shadow-md rounded-lg">
+                        <div class="absolute w-full h-full bg-white/20 rounded-lg backface-hidden flex items-center justify-center text-xl border border-white/30 backdrop-blur-sm">❓</div>
+                        <div class="absolute w-full h-full bg-teal-500/80 rounded-lg backface-hidden flex items-center justify-center text-[10px] md:text-sm font-bold rotate-y-180 border border-teal-300 break-all p-1 text-center">${word}</div>
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+            UI.domArea.innerHTML = html;
+
+            deck.forEach((_, i) => {
+                let card = document.getElementById(`mem-card-${i}`);
+                Engine.addEventListener(card, 'click', () => handleMemClick(card));
             });
         }
 
-        function selectRole(role) {
-            playerRole = role;
-            const btnS = document.getElementById('role-btn-Suami');
-            const btnI = document.getElementById('role-btn-Istri');
-            if (role === 'Suami') {
-                btnS.className = "py-3 px-4 rounded-2xl font-extrabold text-xs border-2 border-[#D6A84F] bg-[#1e293b] text-[#D6A84F] shadow-md transition flex flex-col items-center gap-1";
-                btnI.className = "py-3 px-4 rounded-2xl font-extrabold text-xs border-2 border-gray-300 bg-white text-[#1e293b] transition flex flex-col items-center gap-1";
-            } else {
-                btnI.className = "py-3 px-4 rounded-2xl font-extrabold text-xs border-2 border-[#D6A84F] bg-[#1e293b] text-[#D6A84F] shadow-md transition flex flex-col items-center gap-1";
-                btnS.className = "py-3 px-4 rounded-2xl font-extrabold text-xs border-2 border-gray-300 bg-white text-[#1e293b] transition flex flex-col items-center gap-1";
-            }
-        }
+        function handleMemClick(card) {
+            if (memState.lock) return;
+            const inner = card.querySelector('.card-inner');
+            if (inner.style.transform === 'rotateY(180deg)') return;
 
-        async function startGame(isReplay = false) {
-            updateCoupleIdentityFromInputs();
-            if (!husbandName || !wifeName) {
-                Swal.fire({
-                    title: 'Lengkapi Nama Pasangan',
-                    text: 'Pastikan Nama Suami dan Nama Istri diisi sama persis di kedua HP agar jawaban kalian tersinkron otomatis.',
-                    icon: 'warning',
-                    confirmButtonColor: '#D6A84F'
-                });
+            inner.style.transform = 'rotateY(180deg)';
+
+            if (!memState.flipped) {
+                memState.flipped = true;
+                memState.first = card;
                 return;
             }
 
-            // Bangkitkan 5 soal yang 100% identik antara HP Suami & HP Istri, namun berbeda dengan pasangan lain
-            activeQuestionsForCouple = generateCoupleSpecificQuestions(coupleId);
-            currentRoundIdx = 0;
-            roundHistory = [];
-            accumulatedDecisionMs = 0;
+            memState.second = card;
+            memState.lock = true;
 
-            if (isReplay) {
-                // Bersihkan room lama di server jika main ulang
-                fetch(GAS_WEB_APP_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({ action: 'submitGameChoice', coupleId: coupleId, reset: 'true' })
-                }).catch(() => {});
-            }
-
-            document.getElementById('screen-intro').classList.add('hidden');
-            document.getElementById('screen-result').classList.add('hidden');
-            renderQuestionScreen();
-        }
-
-        function startLiveDecisionTimer() {
-            stopLiveDecisionTimer();
-            roundStartTimestamp = Date.now();
-            timerInterval = setInterval(() => {
-                const elapsedMs = accumulatedDecisionMs + (Date.now() - roundStartTimestamp);
-                document.getElementById('live-timer-display').innerText = (elapsedMs / 1000).toFixed(1) + 's';
-            }, 100);
-        }
-
-        function stopLiveDecisionTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
+            if (memState.first.dataset.word === memState.second.dataset.word) {
+                memState.matched++;
+                Engine.setTimeout(() => {
+                    memState.flipped = false;
+                    memState.lock = false;
+                    if (memState.matched === memState.total) triggerWin();
+                }, 500);
+            } else {
+                Engine.setTimeout(() => {
+                    memState.first.querySelector('.card-inner').style.transform = 'rotateY(0deg)';
+                    memState.second.querySelector('.card-inner').style.transform = 'rotateY(0deg)';
+                    memState.flipped = false;
+                    memState.lock = false;
+                }, 800);
             }
         }
 
-        function renderQuestionScreen() {
-            if (syncPollingInterval) clearInterval(syncPollingInterval);
-            isRoundResolved = false;
+        // ==========================================
+        // GAME 1: MATH QUIZ (Area, Volume, Algebra)
+        // ==========================================
+        function initMathGame() {
+            UI.domArea.classList.remove('hidden');
+            UI.instruction.innerText = "Pilih jawaban yang benar!";
 
-            const qData = activeQuestionsForCouple[currentRoundIdx];
-            document.getElementById('screen-reveal').classList.add('hidden');
-            document.getElementById('screen-question').classList.remove('hidden');
+            let qType = Math.floor(Math.random() * 3); // 0: Area, 1: Vol, 2: Alg
+            let qText = "";
+            let answer = 0;
 
-            document.getElementById('badge-role-active').innerText = playerRole === 'Suami' ? '🤵 HP Suami' : '👰 HP Istri';
-            document.getElementById('question-step-text').innerText = `Ronde ${qData.number} / ${activeQuestionsForCouple.length}`;
-            document.getElementById('question-variant-badge').innerText = `🎲 ${qData.variantLabel} • Room ${husbandName.charAt(0).toUpperCase()}&${wifeName.charAt(0).toUpperCase()}`;
-            document.getElementById('cash-nominal-display').innerText = qData.nominal;
-            document.getElementById('cash-question-subtitle').innerText = qData.question;
+            if (qType === 0 || currentLevel < 15) {
+                // Area Square/Rect
+                let w = Math.floor(Math.random() * 10) + 2;
+                let h = Math.floor(Math.random() * 10) + 2;
+                qText = `Luas persegi panjang: p=${w}, l=${h} ?`;
+                answer = w * h;
+            } else if (qType === 1 && currentLevel >= 15) {
+                // Volume Cube
+                let s = Math.floor(Math.random() * 6) + 2;
+                qText = `Volume kubus: sisi=${s} ?`;
+                answer = s * s * s;
+            } else {
+                // Simple algebra (Scale)
+                let x = Math.floor(Math.random() * 10) + 1;
+                let add = Math.floor(Math.random() * 20) + 1;
+                let res = x + add;
+                qText = `Jika X + ${add} = ${res}, X = ?`;
+                answer = x;
+            }
 
-            // Render titik progres
-            const dotsEl = document.getElementById('progress-dots');
-            dotsEl.innerHTML = activeQuestionsForCouple.map((_, idx) => {
-                if (idx < currentRoundIdx) {
-                    const wasMatch = roundHistory[idx] && roundHistory[idx].matched;
-                    return `<span class="w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold ${wasMatch ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}">${wasMatch ? '✓' : '✕'}</span>`;
-                }
-                if (idx === currentRoundIdx) {
-                    return `<span class="w-5 h-5 rounded-full bg-[#D6A84F] text-[#1e293b] text-[10px] font-black flex items-center justify-center shadow">${idx + 1}</span>`;
-                }
-                return `<span class="w-5 h-5 rounded-full bg-gray-300 text-gray-600 text-[10px] font-bold flex items-center justify-center">${idx + 1}</span>`;
-            }).join('');
+            let options = [answer];
+            while (options.length < 4) {
+                let wrong = answer + (Math.floor(Math.random() * 21) - 10);
+                if (!options.includes(wrong) && wrong > 0) options.push(wrong);
+            }
+            options.sort(() => 0.5 - Math.random());
 
-            // Render 4 Kartu Barang PNG
-            const gridEl = document.getElementById('choices-grid');
-            gridEl.innerHTML = qData.options.map((opt, oIdx) => `
-                <div onclick="pickOption(${oIdx})" class="item-option-card p-3.5 flex flex-col items-center text-center justify-between relative">
-                    <span class="self-start bg-[#1e293b] text-[#D6A84F] text-[10px] font-black px-2.5 py-0.5 rounded-full">
-                        Pilihan ${opt.code}
-                    </span>
-                    <img src="${opt.img}" onerror="this.onerror=null; this.src='${opt.fallbackImg}';" alt="${opt.name}" class="w-24 h-24 object-contain my-2 item-png-shadow">
-                    <div>
-                        <h4 class="text-xs font-extrabold text-[#1e293b] leading-snug">${opt.name}</h4>
-                        <span class="inline-block bg-[#D6A84F]/20 text-[#1e293b] text-[9px] font-extrabold px-2 py-0.5 rounded-md mt-1">${opt.value}</span>
-                        <p class="text-[10px] text-gray-500 font-medium mt-1 leading-tight">${opt.desc}</p>
+            let html = `
+                <div class="flex flex-col items-center w-full max-w-[320px] text-center">
+                    <div class="text-xl md:text-2xl text-teal-200 mb-8 font-bold leading-relaxed px-4 py-6 bg-black/30 rounded-xl border border-white/10 shadow-inner w-full">
+                        ${qText}
                     </div>
-                </div>
-            `).join('');
+                    <div class="grid grid-cols-2 gap-3 w-full">
+            `;
+            options.forEach((opt, i) => {
+                html += `<button id="math-btn-${i}" class="game-font w-full bg-white/10 hover:bg-white/20 py-4 rounded-xl border border-white/20 active:scale-95 transition-all text-sm md:text-base backdrop-blur-sm">${opt}</button>`;
+            });
+            html += `</div></div>`;
+            UI.domArea.innerHTML = html;
 
-            startLiveDecisionTimer();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // =========================================================================
-        // 3. KIRIM PILIHAN KE SERVER & PANTAU PILIHAN PASANGAN REAL-TIME
-        // =========================================================================
-        async function pickOption(optionIdx) {
-            stopLiveDecisionTimer();
-            const roundElapsedMs = Date.now() - roundStartTimestamp;
-            accumulatedDecisionMs += roundElapsedMs;
-            currentRoundDecisionSec = Number((roundElapsedMs / 1000).toFixed(1));
-
-            const qData = activeQuestionsForCouple[currentRoundIdx];
-            selectedOptionObj = qData.options[optionIdx];
-
-            document.getElementById('screen-question').classList.add('hidden');
-            document.getElementById('screen-reveal').classList.remove('hidden');
-            document.getElementById('reveal-waiting-state').classList.remove('hidden');
-            document.getElementById('reveal-matched-state').classList.add('hidden');
-
-            document.getElementById('my-waiting-role').innerText = playerRole;
-            document.getElementById('my-waiting-title').innerText = `${selectedOptionObj.code}. ${selectedOptionObj.name}`;
-            const waitImg = document.getElementById('my-waiting-img');
-            waitImg.onerror = function() { this.onerror = null; this.src = selectedOptionObj.fallbackImg; };
-            waitImg.src = selectedOptionObj.img;
-
-            const partnerLabel = playerRole === 'Suami' ? `Istri (${wifeName})` : `Suami (${husbandName})`;
-            document.getElementById('waiting-partner-text').innerHTML = `Menunggu <b>${partnerLabel}</b> memilih jawaban Ronde ${qData.number} di HP-nya... Begitu ia memilih, layar ini otomatis terbuka!`;
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            // Kirim pilihan ke server GAS
-            const choicePayload = {
-                code: selectedOptionObj.code,
-                name: selectedOptionObj.name,
-                img: selectedOptionObj.img,
-                fallbackImg: selectedOptionObj.fallbackImg,
-                sec: currentRoundDecisionSec
-            };
-
-            try {
-                const res = await fetch(GAS_WEB_APP_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        action: 'submitGameChoice',
-                        coupleId: coupleId,
-                        role: playerRole,
-                        roundIdx: String(currentRoundIdx),
-                        choiceData: JSON.stringify(choicePayload)
-                    })
-                }).then(r => r.json());
-
-                if (res && res.room) {
-                    checkAndResolveRoomState(res.room);
-                }
-            } catch (e) {}
-
-            // Jalankan polling setiap 1.8 detik sampai pasangan memilih
-            if (!isRoundResolved) {
-                syncPollingInterval = setInterval(forceCheckPartnerNow, 1800);
-            }
-        }
-
-        async function forceCheckPartnerNow() {
-            if (isRoundResolved) return;
-            try {
-                const room = await fetch(`${GAS_WEB_APP_URL}?action=getGameSync&coupleId=${encodeURIComponent(coupleId)}&t=${Date.now()}`).then(r => r.json());
-                checkAndResolveRoomState(room);
-            } catch (e) {}
-        }
-
-        function checkAndResolveRoomState(room) {
-            if (isRoundResolved || !room) return;
-            const rKey = String(currentRoundIdx);
-            const hChoice = room.husbandChoices ? room.husbandChoices[rKey] : null;
-            const wChoice = room.wifeChoices ? room.wifeChoices[rKey] : null;
-
-            if (hChoice && hChoice.code && wChoice && wChoice.code) {
-                isRoundResolved = true;
-                if (syncPollingInterval) {
-                    clearInterval(syncPollingInterval);
-                    syncPollingInterval = null;
-                }
-                displayAutoMatchedComparison(hChoice, wChoice);
-            }
-        }
-
-        function displayAutoMatchedComparison(hChoice, wChoice) {
-            const qData = activeQuestionsForCouple[currentRoundIdx];
-            const isMatch = (hChoice.code === wChoice.code);
-
-            document.getElementById('reveal-waiting-state').classList.add('hidden');
-            document.getElementById('reveal-matched-state').classList.remove('hidden');
-
-            document.getElementById('reveal-nominal-badge').innerText = `Ronde ${qData.number} • ${qData.nominal}`;
-            document.getElementById('reveal-round-time').innerText = `⏱ ${currentRoundDecisionSec} detik`;
-
-            // Isi Kartu Pilihan Suami
-            const hImg = document.getElementById('sync-husband-img');
-            hImg.onerror = function() { this.onerror = null; this.src = hChoice.fallbackImg || ''; };
-            hImg.src = hChoice.img;
-            document.getElementById('sync-husband-code').innerText = `PILIHAN ${hChoice.code}`;
-            document.getElementById('sync-husband-name').innerText = hChoice.name;
-
-            // Isi Kartu Pilihan Istri
-            const wImg = document.getElementById('sync-wife-img');
-            wImg.onerror = function() { this.onerror = null; this.src = wChoice.fallbackImg || ''; };
-            wImg.src = wChoice.img;
-            document.getElementById('sync-wife-code').innerText = `PILIHAN ${wChoice.code}`;
-            document.getElementById('sync-wife-name').innerText = wChoice.name;
-
-            const banner = document.getElementById('auto-match-banner');
-            if (isMatch) {
-                banner.className = "p-3.5 rounded-2xl bg-emerald-600 text-white font-black text-sm shadow-md";
-                banner.innerHTML = `🎉 SEPAKAT! Kalian kompak memilih "${hChoice.name}" (+20 Poin)`;
-                playSoundEffect('success');
-                if (typeof confetti === 'function') {
-                    confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
-                }
-            } else {
-                banner.className = "p-3.5 rounded-2xl bg-rose-600 text-white font-black text-sm shadow-md";
-                banner.innerHTML = `🤭 BELUM SEPAKAT! Suami pilih ${hChoice.code}, Istri pilih ${wChoice.code}`;
-                playSoundEffect('info');
-            }
-
-            // Simpan ke riwayat ronde
-            roundHistory[currentRoundIdx] = {
-                number: qData.number,
-                nominal: qData.nominal,
-                husbandPick: `${hChoice.code} (${hChoice.name})`,
-                wifePick: `${wChoice.code} (${wChoice.name})`,
-                pickedImg: playerRole === 'Suami' ? hChoice.img : wChoice.img,
-                fallbackImg: playerRole === 'Suami' ? hChoice.fallbackImg : wChoice.fallbackImg,
-                matched: isMatch
-            };
-
-            const nextBtn = document.getElementById('btn-next-round');
-            nextBtn.innerText = currentRoundIdx < activeQuestionsForCouple.length - 1
-                ? `LANJUT RONDE ${currentRoundIdx + 2} ➡`
-                : `LIHAT SKOR AKHIR & LEADERBOARD 🏆`;
-        }
-
-        function cancelAndChangeChoice() {
-            if (syncPollingInterval) clearInterval(syncPollingInterval);
-            // Kurangi kembali waktu ronde ini agar adil
-            accumulatedDecisionMs = Math.max(0, accumulatedDecisionMs - (currentRoundDecisionSec * 1000));
-            selectedOptionObj = null;
-            renderQuestionScreen();
-        }
-
-        function nextRoundOrFinish() {
-            currentRoundIdx++;
-            if (currentRoundIdx < activeQuestionsForCouple.length) {
-                renderQuestionScreen();
-            } else {
-                showFinalScoreScreen();
-            }
-        }
-
-        // =========================================================================
-        // 4. LAYAR SKOR AKHIR & KIRIM OTOMATIS KE LEADERBOARD ADMIN
-        // =========================================================================
-        async function showFinalScoreScreen() {
-            stopLiveDecisionTimer();
-            if (syncPollingInterval) clearInterval(syncPollingInterval);
-
-            document.getElementById('screen-question').classList.add('hidden');
-            document.getElementById('screen-reveal').classList.add('hidden');
-            document.getElementById('screen-result').classList.remove('hidden');
-
-            const totalMatch = roundHistory.filter(r => r && r.matched).length;
-            const totalScore = totalMatch * 20; // Maksimal 100 Poin (5 x 20)
-            const totalDurationSec = Number((accumulatedDecisionMs / 1000).toFixed(1));
-
-            document.getElementById('result-couple-title').innerText = `👩‍❤️‍👨 ${coupleNames}`;
-            document.getElementById('result-score-points').innerText = `${totalScore} Poin`;
-            document.getElementById('result-score-badge').innerText = `${totalMatch} dari ${activeQuestionsForCouple.length} Ronde SEPAKAT!`;
-            document.getElementById('result-total-time').innerText = `${totalDurationSec} detik`;
-
-            let msg = "";
-            if (totalMatch === 5) {
-                msg = "Luar biasa! Kalian adalah Pasangan Sehati Sejiwa! Visi dan prioritas pengelolaan uang kalian dari Rp 100 Ribu hingga Rp 1 Miliar sangat selaras.";
-                if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
-            } else if (totalMatch >= 3) {
-                msg = "Sangat Kompak! Kalian memiliki fondasi kesepakatan finansial yang kuat, dan perbedaan kecil justru membuat kalian saling melengkapi.";
-                if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
-            } else {
-                msg = "Unik & Saling Melengkapi! Kalian punya sudut pandang prioritas yang beragam—inilah pentingnya komunikasi terbuka saat menyusun anggaran keluarga bersama!";
-            }
-            document.getElementById('result-score-message').innerText = msg;
-
-            const summaryEl = document.getElementById('result-rounds-summary');
-            summaryEl.innerHTML = `<p class="text-xs font-extrabold text-[#1e293b] mb-2">📋 Rekap Jawaban Suami vs Istri:</p>` +
-                roundHistory.map(r => `
-                    <div class="flex items-center justify-between gap-2 bg-[#F7F1E3]/70 p-2.5 rounded-xl border border-[#D6A84F]/30">
-                        <div class="flex items-center gap-2.5 truncate">
-                            <img src="${r.pickedImg}" onerror="this.onerror=null; this.src='${r.fallbackImg}';" class="w-9 h-9 object-contain shrink-0">
-                            <div class="truncate">
-                                <p class="text-[10px] font-extrabold text-[#D6A84F]">Ronde ${r.number} • ${r.nominal}</p>
-                                <p class="text-[11px] font-extrabold text-[#1e293b] truncate">🤵 ${r.husbandPick}</p>
-                                <p class="text-[11px] font-bold text-gray-600 truncate">👰 ${r.wifePick}</p>
-                            </div>
-                        </div>
-                        <span class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold ${r.matched ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-700 border border-rose-300'}">
-                            ${r.matched ? '👩‍❤️‍👨 +20' : '🤭 0'}
-                        </span>
-                    </div>
-                `).join('');
-
-            // Kirim Skor & Waktu Tercepat ke Leaderboard Spreadsheet
-            const detailsSummary = roundHistory.map(r => `R${r.number}:${r.matched ? 'Sepakat' : 'Beda'}`).join(', ');
-            try {
-                await fetch(GAS_WEB_APP_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        action: 'saveGameScore',
-                        coupleId: coupleId,
-                        names: coupleNames,
-                        score: String(totalScore),
-                        matchedCount: String(totalMatch),
-                        durationSec: String(totalDurationSec),
-                        details: detailsSummary
-                    })
+            options.forEach((opt, i) => {
+                let btn = document.getElementById(`math-btn-${i}`);
+                Engine.addEventListener(btn, 'click', () => {
+                    if (opt === answer) triggerWin();
+                    else triggerGameOver();
                 });
-            } catch (e) {}
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
         }
 
-        // Generator Efek Suara Web Audio API
-        function playSoundEffect(type) {
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContext) return;
-                const ctx = new AudioContext();
-                const now = ctx.currentTime;
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
+        // ==========================================
+        // GAME 2: FLAPPY DINO
+        // ==========================================
+        let flappy = {};
+        function initFlappyGame() {
+            UI.cvsArea.classList.remove('hidden');
+            UI.instruction.innerText = "Sentuh layar/Spasi untuk melompat!";
+            
+            const cvs = UI.cvsArea;
+            const ctx = cvs.getContext('2d');
+            cvs.width = 400; cvs.height = 400;
 
-                if (type === 'success') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(523.25, now);
-                    osc.frequency.setValueAtTime(659.25, now + 0.12);
-                    osc.frequency.setValueAtTime(783.99, now + 0.24);
-                    gain.gain.setValueAtTime(0.25, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(now);
-                    osc.stop(now + 0.6);
-                } else if (type === 'info') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, now);
-                    osc.frequency.setValueAtTime(185, now + 0.15);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(now);
-                    osc.stop(now + 0.45);
+            let diff = 1 + (currentLevel * 0.02);
+            flappy = {
+                dino: { x: 50, y: 200, w: 24, h: 24, v: 0, g: 0.6, jump: -8 },
+                pipes: [],
+                frames: 0,
+                score: 0,
+                target: 4 + Math.floor(currentLevel/10),
+                speed: 3 * diff
+            };
+
+            const doJump = (e) => {
+                if(e) e.preventDefault();
+                flappy.dino.v = flappy.dino.jump;
+            };
+
+            Engine.addEventListener(window, 'keydown', (e) => { if(e.code === 'Space') doJump(e); });
+            Engine.addEventListener(cvs, 'mousedown', doJump);
+            Engine.addEventListener(cvs, 'touchstart', doJump, {passive: false});
+
+            Engine.startRAF(() => {
+                ctx.clearRect(0,0,400,400);
+                flappy.frames++;
+                let d = flappy.dino;
+
+                // Physics
+                d.v += d.g;
+                d.y += d.v;
+                if (d.y + d.h > 400 || d.y < 0) return triggerGameOver();
+
+                // Draw Dino
+                ctx.font = '24px Arial'; ctx.fillText('🦖', d.x-4, d.y+20);
+
+                // Pipes
+                if (flappy.frames % Math.max(60, Math.floor(100 - diff*10)) === 0) {
+                    let gap = Math.max(90, 150 - (currentLevel));
+                    let top = Math.random() * (400 - gap - 40) + 20;
+                    flappy.pipes.push({ x: 400, y: 0, w: 40, h: top, passed: false });
+                    flappy.pipes.push({ x: 400, y: top + gap, w: 40, h: 400 - top - gap, passed: true });
                 }
-            } catch (e) {}
+
+                ctx.fillStyle = '#14b8a6';
+                for (let i = 0; i < flappy.pipes.length; i++) {
+                    let p = flappy.pipes[i];
+                    p.x -= flappy.speed;
+                    ctx.fillRect(p.x, p.y, p.w, p.h);
+                    
+                    // Collision
+                    if (d.x < p.x + p.w && d.x + d.w > p.x && d.y < p.y + p.h && d.y + d.h > p.y) return triggerGameOver();
+                    
+                    // Score
+                    if (!p.passed && p.x + p.w < d.x) {
+                        p.passed = true;
+                        flappy.score++;
+                        if (flappy.score >= flappy.target) return triggerWin();
+                    }
+                }
+                
+                // Cleanup pipes
+                if(flappy.pipes.length > 0 && flappy.pipes[0].x < -50) flappy.pipes.shift();
+
+                // UI
+                ctx.fillStyle = 'white'; ctx.font = '14px "Press Start 2P"';
+                ctx.fillText(`${flappy.score}/${flappy.target}`, 10, 30);
+            });
+        }
+
+        // ==========================================
+        // GAME 3: SORTING LOGIC
+        // ==========================================
+        let sortState = { seq: [], current: 0 };
+        function initSortingGame() {
+            UI.domArea.classList.remove('hidden');
+            UI.instruction.innerText = "Klik dari yang TERKECIL ke TERBESAR!";
+            
+            let count = Math.min(4 + Math.floor(currentLevel / 15), 8);
+            let nums = [];
+            while(nums.length < count) {
+                let n = Math.floor(Math.random() * 100) - (currentLevel > 40 ? 50 : 0);
+                if (!nums.includes(n)) nums.push(n);
+            }
+            sortState.seq = [...nums].sort((a,b) => a-b);
+            sortState.current = 0;
+
+            let html = `<div class="relative w-full h-full max-w-[320px] max-h-[320px] mx-auto">`;
+            nums.forEach((n, i) => {
+                let t = Math.floor(Math.random() * 70) + 10;
+                let l = Math.floor(Math.random() * 70) + 10;
+                html += `<div id="sort-btn-${i}" class="absolute flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-teal-400 to-blue-500 border-2 border-white/30 shadow-lg font-bold cursor-pointer transition-transform hover:scale-110 active:scale-95 text-sm" style="top: ${t}%; left: ${l}%;">${n}</div>`;
+            });
+            html += `</div>`;
+            UI.domArea.innerHTML = html;
+
+            nums.forEach((n, i) => {
+                let btn = document.getElementById(`sort-btn-${i}`);
+                Engine.addEventListener(btn, 'click', () => {
+                    if (n === sortState.seq[sortState.current]) {
+                        sortState.current++;
+                        btn.classList.add('bubble-pop');
+                        if (sortState.current === count) triggerWin();
+                    } else {
+                        btn.classList.add('bg-red-500');
+                        triggerGameOver();
+                    }
+                });
+            });
+        }
+
+        // ==========================================
+        // GAME 4: CATCH FALLING OBJECTS
+        // ==========================================
+        function initCatchGame() {
+            UI.cvsArea.classList.remove('hidden');
+            UI.instruction.innerText = "Geser Dino tangkap daging 🍖, hindari meteor ☄️!";
+            
+            const cvs = UI.cvsArea;
+            const ctx = cvs.getContext('2d');
+            cvs.width = 400; cvs.height = 400;
+
+            let state = {
+                dino: { x: 180, y: 350, w: 40, h: 40 },
+                objs: [],
+                score: 0,
+                target: 5 + Math.floor(currentLevel/15),
+                frames: 0
+            };
+
+            const moveDino = (e) => {
+                e.preventDefault();
+                let pos = getPointerPos(cvs, e);
+                state.dino.x = Math.max(0, Math.min(400 - state.dino.w, pos.x - state.dino.w/2));
+            };
+            
+            Engine.addEventListener(cvs, 'mousemove', moveDino);
+            Engine.addEventListener(cvs, 'touchmove', moveDino, {passive: false});
+
+            Engine.startRAF(() => {
+                ctx.clearRect(0,0,400,400);
+                state.frames++;
+                
+                // Draw Dino
+                ctx.font = '40px Arial'; ctx.fillText('🦖', state.dino.x, state.dino.y + 35);
+
+                // Spawn
+                let spawnRate = Math.max(30, 60 - currentLevel);
+                if (state.frames % spawnRate === 0) {
+                    let isGood = Math.random() > 0.3; // 70% chance good
+                    state.objs.push({
+                        x: Math.random() * 360, y: -20, w: 30, h: 30,
+                        good: isGood, speed: 2 + Math.random() * (currentLevel*0.05 + 1)
+                    });
+                }
+
+                for (let i = state.objs.length - 1; i >= 0; i--) {
+                    let o = state.objs[i];
+                    o.y += o.speed;
+                    
+                    ctx.font = '30px Arial';
+                    ctx.fillText(o.good ? '🍖' : '☄️', o.x, o.y + 25);
+
+                    // Collision
+                    if (o.y + o.h > state.dino.y && o.y < state.dino.y + state.dino.h &&
+                        o.x + o.w > state.dino.x && o.x < state.dino.x + state.dino.w) {
+                        
+                        if (o.good) {
+                            state.score++;
+                            state.objs.splice(i, 1);
+                            if (state.score >= state.target) return triggerWin();
+                        } else {
+                            return triggerGameOver();
+                        }
+                    } else if (o.y > 400) {
+                        if(o.good) return triggerGameOver(); // Missed good item
+                        state.objs.splice(i, 1);
+                    }
+                }
+
+                ctx.fillStyle = 'white'; ctx.font = '14px "Press Start 2P"';
+                ctx.fillText(`Skor: ${state.score}/${state.target}`, 10, 30);
+            });
+        }
+
+        // ==========================================
+        // GAME 5: SIMON SAYS
+        // ==========================================
+        let simonState = { seq: [], step: 0, accepting: false };
+        function initSimonGame() {
+            UI.domArea.classList.remove('hidden');
+            UI.instruction.innerText = "Ingat dan ulangi urutan warnanya!";
+            
+            let len = Math.min(3 + Math.floor(currentLevel / 10), 8);
+            simonState = { seq: [], step: 0, accepting: false };
+            for(let i=0; i<len; i++) simonState.seq.push(Math.floor(Math.random() * 4));
+
+            let html = `
+                <div class="grid grid-cols-2 gap-4 w-full max-w-[240px] mx-auto p-4 bg-black/20 rounded-full aspect-square">
+                    <div id="simon-0" class="simon-btn bg-red-500 rounded-tl-full cursor-pointer shadow-inner opacity-80 border-t border-l border-white/20"></div>
+                    <div id="simon-1" class="simon-btn bg-blue-500 rounded-tr-full cursor-pointer shadow-inner opacity-80 border-t border-r border-white/20"></div>
+                    <div id="simon-2" class="simon-btn bg-yellow-400 rounded-bl-full cursor-pointer shadow-inner opacity-80 border-b border-l border-white/20"></div>
+                    <div id="simon-3" class="simon-btn bg-green-500 rounded-br-full cursor-pointer shadow-inner opacity-80 border-b border-r border-white/20"></div>
+                </div>
+            `;
+            UI.domArea.innerHTML = html;
+
+            [0,1,2,3].forEach(id => {
+                let btn = document.getElementById(`simon-${id}`);
+                Engine.addEventListener(btn, 'click', () => {
+                    if (!simonState.accepting) return;
+                    btn.classList.add('simon-active');
+                    Engine.setTimeout(() => btn.classList.remove('simon-active'), 150);
+
+                    if (id === simonState.seq[simonState.step]) {
+                        simonState.step++;
+                        if (simonState.step === simonState.seq.length) triggerWin();
+                    } else {
+                        triggerGameOver();
+                    }
+                });
+            });
+
+            // Play sequence
+            Engine.setTimeout(() => playSimonSeq(0), 800);
+        }
+
+        function playSimonSeq(idx) {
+            if (idx >= simonState.seq.length) {
+                simonState.accepting = true;
+                return;
+            }
+            let btn = document.getElementById(`simon-${simonState.seq[idx]}`);
+            btn.classList.add('simon-active');
+            Engine.setTimeout(() => {
+                btn.classList.remove('simon-active');
+                Engine.setTimeout(() => playSimonSeq(idx+1), 200);
+            }, 400 - Math.min(200, currentLevel*2));
+        }
+
+        // ==========================================
+        // GAME 6: WORD SCRAMBLE
+        // ==========================================
+        let wordState = { target: "", current: "", btns: [] };
+        function initWordGame() {
+            UI.domArea.classList.remove('hidden');
+            UI.instruction.innerText = "Susun huruf menjadi kata!";
+            
+            const words = ['SURABAYA', 'PAHLAWAN', 'KUBUS', 'MATEMATIKA', 'EDUKASI', 'DINO', 'INTERNET'];
+            wordState.target = words[Math.floor(Math.random() * words.length)];
+            let letters = wordState.target.split('').sort(() => 0.5 - Math.random());
+            wordState.current = "";
+            
+            let html = `
+                <div class="flex flex-col items-center w-full max-w-[320px]">
+                    <div id="word-display" class="h-12 w-full bg-black/40 rounded-xl border border-white/20 mb-6 flex items-center justify-center text-xl font-bold tracking-widest text-teal-200 shadow-inner">_</div>
+                    <div class="flex flex-wrap justify-center gap-2" id="word-letters">
+            `;
+            letters.forEach((l, i) => {
+                html += `<button id="word-btn-${i}" class="w-10 h-10 md:w-12 md:h-12 bg-white/10 border border-white/20 rounded-lg font-bold text-lg hover:bg-white/30 active:scale-95 transition-all">${l}</button>`;
+            });
+            html += `</div></div>`;
+            UI.domArea.innerHTML = html;
+            
+            const display = document.getElementById('word-display');
+            
+            letters.forEach((l, i) => {
+                let btn = document.getElementById(`word-btn-${i}`);
+                Engine.addEventListener(btn, 'click', () => {
+                    btn.classList.add('invisible');
+                    wordState.current += l;
+                    display.innerText = wordState.current;
+                    
+                    if (wordState.current.length === wordState.target.length) {
+                        if (wordState.current === wordState.target) triggerWin();
+                        else triggerGameOver();
+                    }
+                });
+            });
+        }
+
+        // ==========================================
+        // GAME 7: PATTERN MATCH
+        // ==========================================
+        let patternState = { active: [], step: 0, accepting: false };
+        function initPatternGame() {
+            UI.domArea.classList.remove('hidden');
+            UI.instruction.innerText = "Ingat pola kotaknya!";
+            
+            let count = Math.min(3 + Math.floor(currentLevel/10), 9);
+            let pool = [0,1,2,3,4,5,6,7,8].sort(() => 0.5 - Math.random());
+            patternState.active = pool.slice(0, count);
+            patternState.step = 0;
+            patternState.accepting = false;
+
+            let html = `<div class="grid grid-cols-3 gap-2 w-full max-w-[240px] mx-auto p-2 bg-black/20 rounded-xl aspect-square border border-white/10">`;
+            for(let i=0; i<9; i++) {
+                html += `<div id="pat-${i}" class="bg-white/10 rounded-lg cursor-pointer transition-colors duration-300"></div>`;
+            }
+            html += `</div>`;
+            UI.domArea.innerHTML = html;
+
+            // Show pattern
+            patternState.active.forEach(id => {
+                document.getElementById(`pat-${id}`).classList.replace('bg-white/10', 'bg-teal-400');
+            });
+
+            Engine.setTimeout(() => {
+                // Hide pattern
+                patternState.active.forEach(id => {
+                    document.getElementById(`pat-${id}`).classList.replace('bg-teal-400', 'bg-white/10');
+                });
+                patternState.accepting = true;
+                UI.instruction.innerText = "Klik kotak yang menyala tadi!";
+            }, Math.max(800, 2500 - currentLevel*20));
+
+            for(let i=0; i<9; i++) {
+                let btn = document.getElementById(`pat-${i}`);
+                Engine.addEventListener(btn, 'click', () => {
+                    if(!patternState.accepting) return;
+                    if (patternState.active.includes(i)) {
+                        btn.classList.replace('bg-white/10', 'bg-teal-400');
+                        btn.style.pointerEvents = 'none'; // disable further clicks
+                        patternState.step++;
+                        if (patternState.step === count) triggerWin();
+                    } else {
+                        btn.classList.replace('bg-white/10', 'bg-red-500');
+                        triggerGameOver();
+                    }
+                });
+            }
+        }
+
+        // ==========================================
+        // GAME 8: THREAD PUZZLE (UNTANGLE)
+        // ==========================================
+        function initThreadGame() {
+            UI.cvsArea.classList.remove('hidden');
+            UI.instruction.innerText = "Geser titik agar garis tidak menyilang!";
+            
+            const cvs = UI.cvsArea;
+            const ctx = cvs.getContext('2d');
+            cvs.width = 400; cvs.height = 400;
+
+            let n = currentLevel < 30 ? 4 : (currentLevel < 70 ? 5 : 6);
+            let state = {
+                nodes: [], edges: [], dragging: -1
+            };
+
+            // Generate nodes in circle to ensure planar graph, then scramble
+            let r = 120;
+            for(let i=0; i<n; i++) {
+                let angle = (i/n) * Math.PI * 2;
+                state.nodes.push({ x: 200 + Math.cos(angle)*r, y: 200 + Math.sin(angle)*r, r: 15 });
+            }
+            // Polygon edges
+            for(let i=0; i<n; i++) state.edges.push([i, (i+1)%n]);
+            // Add internal non-crossing diagonals
+            if (n === 4) state.edges.push([0, 2]);
+            if (n === 5) { state.edges.push([0, 2]); state.edges.push([0, 3]); }
+            if (n === 6) { state.edges.push([0, 2]); state.edges.push([0, 3]); state.edges.push([0, 4]); }
+
+            // Scramble positions
+            state.nodes.forEach(node => {
+                node.x = 50 + Math.random() * 300;
+                node.y = 50 + Math.random() * 300;
+            });
+
+            // Line intersection math
+            const ccw = (A,B,C) => (C.y-A.y)*(B.x-A.x) > (B.y-A.y)*(C.x-A.x);
+            const intersect = (A,B,C,D) => ccw(A,C,D) !== ccw(B,C,D) && ccw(A,B,C) !== ccw(A,B,D);
+            const countIntersections = () => {
+                let count = 0;
+                for(let i=0; i<state.edges.length; i++) {
+                    for(let j=i+1; j<state.edges.length; j++) {
+                        let e1 = state.edges[i], e2 = state.edges[j];
+                        // ignore sharing nodes
+                        if(e1[0]===e2[0] || e1[0]===e2[1] || e1[1]===e2[0] || e1[1]===e2[1]) continue;
+                        let A = state.nodes[e1[0]], B = state.nodes[e1[1]];
+                        let C = state.nodes[e2[0]], D = state.nodes[e2[1]];
+                        if(intersect(A,B,C,D)) count++;
+                    }
+                }
+                return count;
+            };
+
+            const draw = () => {
+                ctx.clearRect(0,0,400,400);
+                let cross = countIntersections();
+                
+                // Edges
+                ctx.lineWidth = 3;
+                state.edges.forEach(e => {
+                    let A = state.nodes[e[0]], B = state.nodes[e[1]];
+                    ctx.strokeStyle = cross > 0 ? 'rgba(255,255,255,0.4)' : '#2dd4bf'; // teal-400
+                    ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
+                });
+
+                // Nodes
+                state.nodes.forEach((n, i) => {
+                    ctx.fillStyle = i === state.dragging ? '#facc15' : '#14b8a6'; // yellow-400 : teal-500
+                    ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fill();
+                    ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+                });
+
+                if(cross === 0 && state.dragging === -1) {
+                    Engine.setTimeout(() => triggerWin(), 200);
+                }
+            };
+
+            const getTouch = (e) => getPointerPos(cvs, e);
+            
+            Engine.addEventListener(cvs, 'mousedown', (e) => {
+                let p = getTouch(e);
+                state.dragging = state.nodes.findIndex(n => Math.hypot(n.x-p.x, n.y-p.y) < n.r + 10);
+            });
+            Engine.addEventListener(cvs, 'touchstart', (e) => {
+                e.preventDefault();
+                let p = getTouch(e);
+                state.dragging = state.nodes.findIndex(n => Math.hypot(n.x-p.x, n.y-p.y) < n.r + 20);
+            }, {passive: false});
+
+            const move = (e) => {
+                if(state.dragging === -1) return;
+                e.preventDefault();
+                let p = getTouch(e);
+                state.nodes[state.dragging].x = Math.max(15, Math.min(385, p.x));
+                state.nodes[state.dragging].y = Math.max(15, Math.min(385, p.y));
+            };
+            Engine.addEventListener(cvs, 'mousemove', move);
+            Engine.addEventListener(cvs, 'touchmove', move, {passive: false});
+
+            const up = () => { state.dragging = -1; };
+            Engine.addEventListener(cvs, 'mouseup', up);
+            Engine.addEventListener(cvs, 'touchend', up);
+            Engine.addEventListener(cvs, 'mouseleave', up);
+
+            Engine.startRAF(() => draw());
         }
     </script>
 </body>
