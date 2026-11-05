@@ -465,17 +465,72 @@
 
                 <!-- Layar Monitor Gambar Slide yang Sedang Aktif di Peserta -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center bg-[#0f172a]/90 p-4 rounded-2xl border border-[#D6A84F]/30">
-                    <!-- Gambar Utama Slide Aktif (2 Kolom) -->
+                    <!-- Gambar Utama Slide Aktif + Kanvas Coretan & Highlight (2 Kolom) -->
                     <div class="lg:col-span-2 flex flex-col items-center justify-center relative">
-                        <div class="w-full max-h-[380px] aspect-video bg-black/80 rounded-xl overflow-hidden border-2 border-[#D6A84F]/60 flex items-center justify-center shadow-xl">
-                            <img id="speaker-active-slide-img" src="" alt="Preview Slide Aktif" class="w-full h-full object-contain hidden cursor-pointer" onclick="openSpeakerSlideFullscreen()">
+                        <!-- Info Pintasan Keyboard / Wireless Pointer -->
+                        <div class="w-full flex flex-wrap justify-between items-center gap-2 mb-2 px-1">
+                            <span class="text-[11px] font-extrabold text-emerald-400 flex items-center gap-1.5">
+                                ⌨️ Keyboard / Wireless Pointer Aktif: Tekan Panah ⬅ Kiri / Kanan ➡ untuk ganti slide
+                            </span>
+                            <span id="annot-mode-badge" class="bg-slate-800 text-gray-300 border border-white/15 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">
+                                Mode: 🖱️ Navigasi Normal
+                            </span>
+                        </div>
+
+                        <!-- Layar Slide dengan Lapisan Kanvas Coretan & Laser -->
+                        <div id="speaker-slide-stage" class="relative w-full max-h-[400px] aspect-video bg-black rounded-xl overflow-hidden border-2 border-[#D6A84F]/70 flex items-center justify-center shadow-2xl select-none">
+                            <img id="speaker-active-slide-img" src="" alt="Preview Slide Aktif" class="w-full h-full object-contain hidden pointer-events-none select-none">
+                            <canvas id="speaker-annot-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-10" style="touch-action: none;"></canvas>
+                            <div id="speaker-laser-dot" class="hidden absolute w-4 h-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-600 border-2 border-white shadow-[0_0_16px_6px_rgba(239,68,68,0.95)] pointer-events-none z-20"></div>
                             <p id="speaker-slide-empty" class="text-xs text-gray-400 font-bold p-6 text-center">Belum ada gambar slide di-upload ke Sheet Slides, atau sedang memuat slide...</p>
                         </div>
-                        <div class="flex items-center gap-2 mt-2.5">
-                            <button type="button" onclick="openSpeakerSlideFullscreen()" class="bg-white/10 hover:bg-white/20 text-[#D6A84F] text-xs font-extrabold px-3.5 py-1.5 rounded-lg border border-[#D6A84F]/40 transition">
-                                ⛶ Perbesar Slide ke Layar Penuh
+
+                        <!-- Toolbar Alat Presentasi: Coretan (Pen), Highlight (Stabilo), Laser & Warna -->
+                        <div class="w-full bg-[#0f172a] border border-[#D6A84F]/40 rounded-xl p-2.5 mt-2.5 flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <button type="button" id="tool-btn-none" onclick="setSpeakerAnnotTool('none')" class="px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold bg-[#D6A84F] text-[#0f172a] transition">
+                                    🖱️ Pointer
+                                </button>
+                                <button type="button" id="tool-btn-laser" onclick="setSpeakerAnnotTool('laser')" class="px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold bg-slate-800 text-gray-200 hover:bg-slate-700 transition">
+                                    🔴 Laser
+                                </button>
+                                <button type="button" id="tool-btn-pen" onclick="setSpeakerAnnotTool('pen')" class="px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold bg-slate-800 text-gray-200 hover:bg-slate-700 transition">
+                                    🖊️ Coretan Pena
+                                </button>
+                                <button type="button" id="tool-btn-highlight" onclick="setSpeakerAnnotTool('highlight')" class="px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold bg-slate-800 text-gray-200 hover:bg-slate-700 transition">
+                                    🖍️ Highlight Stabilo
+                                </button>
+                            </div>
+
+                            <!-- Pilihan Warna Coretan / Highlight -->
+                            <div class="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-lg border border-white/10">
+                                <span class="text-[10px] font-bold text-gray-400 mr-1">Warna:</span>
+                                <button type="button" onclick="setSpeakerAnnotColor('#ef4444')" id="color-btn-#ef4444" class="w-5 h-5 rounded-full bg-red-500 ring-2 ring-white scale-110 transition" title="Merah"></button>
+                                <button type="button" onclick="setSpeakerAnnotColor('#facc15')" id="color-btn-#facc15" class="w-5 h-5 rounded-full bg-yellow-400 opacity-70 hover:opacity-100 transition" title="Kuning Stabilo"></button>
+                                <button type="button" onclick="setSpeakerAnnotColor('#22c55e')" id="color-btn-#22c55e" class="w-5 h-5 rounded-full bg-green-500 opacity-70 hover:opacity-100 transition" title="Hijau"></button>
+                                <button type="button" onclick="setSpeakerAnnotColor('#38bdf8')" id="color-btn-#38bdf8" class="w-5 h-5 rounded-full bg-sky-400 opacity-70 hover:opacity-100 transition" title="Biru"></button>
+                            </div>
+
+                            <!-- Undo & Hapus Coretan -->
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="undoSpeakerAnnotation()" class="px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-400/30 transition">
+                                    ↩️ Undo
+                                </button>
+                                <button type="button" onclick="clearCurrentSlideAnnotations()" class="px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold bg-red-900/70 hover:bg-red-700 text-red-100 border border-red-500/40 transition">
+                                    🗑️ Bersihkan
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Baris Tombol Presentasikan Proyektor -->
+                        <div class="flex flex-wrap items-center justify-center gap-2 mt-3">
+                            <button type="button" onclick="openSpeakerPresentationModal()" class="bg-gradient-to-r from-[#D6A84F] to-amber-500 hover:opacity-95 text-[#0f172a] text-xs font-black px-4 py-2 rounded-xl shadow-lg transition flex items-center gap-1.5">
+                                🎬 Presentasikan (Duplikat / Extended)
                             </button>
-                            <button type="button" onclick="fetchAdminSlidesData(true)" class="bg-blue-600/80 hover:bg-blue-600 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-lg transition">
+                            <button type="button" id="btn-close-ext-projector" onclick="closeExtendedProjectorWindow()" class="hidden bg-red-600 hover:bg-red-500 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow transition">
+                                ✕ Tutup Layar Proyektor
+                            </button>
+                            <button type="button" onclick="fetchAdminSlidesData(true)" class="bg-blue-600/80 hover:bg-blue-600 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl transition">
                                 🔄 Muat Ulang Gambar Slide
                             </button>
                         </div>
@@ -1693,36 +1748,610 @@ function formatDurationText(sec) {
             const boxAdmin = document.getElementById('admin-slide-quick-buttons');
             const boxSpeaker = document.getElementById('speaker-slide-quick-buttons');
             if (boxAdmin) boxAdmin.innerHTML = btnsAdminHtml;
-            if (boxSpeaker) boxSpeaker.innerHTML = btnsSpeakerHtml;
+            // Otomatis perbarui gambar di Layar Proyektor Extended & Mode Duplikat saat slide berubah
+            syncExtendedProjectorSlide(currentImgUrl, current, total);
         }
 
-        function openSpeakerSlideFullscreen() {
-            const current = adminState.activeSlideIndex || 0;
-            const hasUploadedSlides = Array.isArray(adminState.slidesList) && adminState.slidesList.length > 0;
-            if (!hasUploadedSlides || !adminState.slidesList[current]) return;
+        // =========================================================================
+        // SISTEM PRESENTASI SPEAKER (PROYEKTOR, CORETAN/HIGHLIGHT & KEYBOARD PANAH)
+        // =========================================================================
+        let extProjectorWin = null;
+        let duplicateFullscreenActive = false;
 
-            const imgUrl = formatDriveUrl(adminState.slidesList[current]);
+        // State Alat Coretan & Highlight per Slide
+        let speakerAnnotTool = 'none'; // 'none' | 'laser' | 'pen' | 'highlight'
+        let speakerAnnotColor = '#ef4444';
+        let slideAnnotationsMap = {}; // Menyimpan coretan per nomor slide: { 0: [stroke1, ...], 1: [...] }
+        let isDrawingAnnot = false;
+        let currentStroke = null;
+
+        function openSpeakerPresentationModal() {
+            const hasUploadedSlides = Array.isArray(adminState.slidesList) && adminState.slidesList.length > 0;
+            if (!hasUploadedSlides) {
+                Swal.fire('Belum Ada Slide', 'Silakan upload gambar slide terlebih dahulu di tab Upload Slide.', 'warning');
+                return;
+            }
+
             Swal.fire({
-                title: `<span style="color:#D6A84F; font-size:14px; font-weight:800;">Slide Presentasi ${current + 1} / ${adminState.slidesList.length}</span>`,
-                imageUrl: imgUrl,
-                width: '92%',
-                background: '#0f172a',
-                showCancelButton: true,
-                confirmButtonText: 'Slide Selanjutnya ➡',
-                cancelButtonText: '⬅ Slide Sebelumnya',
-                confirmButtonColor: '#D6A84F',
-                cancelButtonColor: '#334155',
-                showCloseButton: true
-            }).then((res) => {
-                if (res.isConfirmed) {
-                    changeLiveSlide(1);
-                    setTimeout(openSpeakerSlideFullscreen, 150);
-                } else if (res.dismiss === Swal.DismissReason.cancel) {
-                    changeLiveSlide(-1);
-                    setTimeout(openSpeakerSlideFullscreen, 150);
+                title: '<span style="color:#D6A84F; font-size:18px; font-weight:800;">🎬 Pilih Mode Tampilan Proyektor</span>',
+                html: `
+                    <div style="text-align:left; font-size:13px; color:#1e293b; line-height:1.5;">
+                        <p style="margin-bottom:12px; font-weight:600;">Pilih bagaimana slide & coretan ditampilkan ke layar Proyektor/TV:</p>
+                        
+                        <div onclick="startExtendedPresentation()" style="cursor:pointer; background:#0f172a; color:#f8fafc; padding:14px; border-radius:14px; border:2px solid #D6A84F; margin-bottom:10px; transition:0.2s;">
+                            <div style="font-weight:800; color:#D6A84F; font-size:14px; margin-bottom:4px;">🖥️ 1. Mode Extended (Seperti PowerPoint Presenter View)</div>
+                            <div style="font-size:11.5px; color:#cbd5e1;">
+                                • <b>Layar Proyektor:</b> Menampilkan <b>Fullscreen Slide + Coretan/Laser Live</b>.<br>
+                                • <b>Layar Laptop Anda:</b> Tetap menampilkan <b>Web Admin & Speaker Remote</b>.<br>
+                                <span style="color:#fbbf24; font-weight:700;">💡 Pastikan proyektor di Windows disetel ke "Extend" (Tekan Win + P &rarr; Extend).</span>
+                            </div>
+                        </div>
+
+                        <div onclick="startDuplicatePresentation()" style="cursor:pointer; background:#ffffff; color:#1e293b; padding:14px; border-radius:14px; border:2px solid #94a3b8; transition:0.2s;">
+                            <div style="font-weight:800; color:#0f172a; font-size:14px; margin-bottom:4px;">💻 2. Mode Duplikat (Fullscreen di Layar Ini)</div>
+                            <div style="font-size:11.5px; color:#475569;">
+                                • Menampilkan slide layar penuh beserta toolbar coretan langsung di layar laptop ini.
+                            </div>
+                        </div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                background: '#F7F1E3',
+                width: '520px'
+            });
+        }
+
+        // MODE 1: EXTENDED PROJECTOR WINDOW (Dengan Sinkronisasi Coretan & Kanvas Presisi)
+        async function startExtendedPresentation() {
+            Swal.close();
+            const total = getEffectiveTotalSlides();
+            const current = Math.min(Math.max(0, adminState.activeSlideIndex || 0), total - 1);
+            const currentImgUrl = formatDriveUrl(adminState.slidesList[current] || '');
+
+            let winFeatures = 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no';
+            try {
+                if ('getScreenDetails' in window) {
+                    const screenDetails = await window.getScreenDetails();
+                    const secondaryScreen = screenDetails.screens.find(s => s !== screenDetails.currentScreen) || screenDetails.screens[1];
+                    if (secondaryScreen) {
+                        winFeatures = `left=${secondaryScreen.availLeft},top=${secondaryScreen.availTop},width=${secondaryScreen.availWidth},height=${secondaryScreen.availHeight},menubar=no,toolbar=no,location=no,status=no,fullscreen=yes`;
+                    }
+                } else if (window.screen && window.screen.availWidth) {
+                    winFeatures = `left=${window.screen.availWidth},top=0,width=1280,height=720,menubar=no,toolbar=no,location=no,status=no`;
+                }
+            } catch (e) {
+                winFeatures = `left=${window.screen.availWidth || 100},top=0,width=1280,height=720,menubar=no,toolbar=no,location=no,status=no`;
+            }
+
+            if (!extProjectorWin || extProjectorWin.closed) {
+                extProjectorWin = window.open('', 'CWOExtendedProjector', winFeatures);
+            } else {
+                extProjectorWin.focus();
+            }
+
+            if (!extProjectorWin) {
+                Swal.fire('Pop-up Diblokir Browser', 'Izinkan Pop-up di pojok kanan atas browser Anda agar jendela proyektor bisa terbuka.', 'warning');
+                return;
+            }
+
+            extProjectorWin.document.open();
+            extProjectorWin.document.write(`
+                <!DOCTYPE html>
+                <html lang="id">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Layar Proyektor Slide - CWO Season VI</title>
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+                        body {
+                            background: #000000;
+                            width: 100vw;
+                            height: 100vh;
+                            overflow: hidden;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            position: relative;
+                            font-family: sans-serif;
+                        }
+                        #proj-img {
+                            width: 100vw;
+                            height: 100vh;
+                            object-fit: contain;
+                            transition: opacity 0.15s ease-in-out;
+                            pointer-events: none;
+                        }
+                        #proj-annot-canvas {
+                            position: absolute;
+                            inset: 0;
+                            width: 100vw;
+                            height: 100vh;
+                            pointer-events: none;
+                            z-index: 10;
+                        }
+                        #proj-laser {
+                            position: absolute;
+                            width: 18px;
+                            height: 18px;
+                            transform: translate(-50%, -50%);
+                            border-radius: 9999px;
+                            background: #ef4444;
+                            border: 2.5px solid #ffffff;
+                            box-shadow: 0 0 20px 8px rgba(239, 68, 68, 0.95);
+                            pointer-events: none;
+                            z-index: 20;
+                            display: none;
+                        }
+                        #fs-helper-bar {
+                            position: fixed;
+                            top: 16px;
+                            right: 16px;
+                            z-index: 50;
+                            display: flex;
+                            gap: 8px;
+                            background: rgba(15, 23, 42, 0.9);
+                            border: 1px solid #D6A84F;
+                            padding: 8px 14px;
+                            border-radius: 12px;
+                        }
+                        body:fullscreen #fs-helper-bar, body:-webkit-full-screen #fs-helper-bar {
+                            opacity: 0;
+                            pointer-events: none;
+                        }
+                        .btn-fs {
+                            background: #D6A84F;
+                            color: #0f172a;
+                            border: none;
+                            padding: 6px 12px;
+                            border-radius: 8px;
+                            font-weight: 800;
+                            font-size: 12px;
+                            cursor: pointer;
+                        }
+                    </style>
+                </head>
+                <body ondblclick="toggleProjFs()">
+                    <div id="fs-helper-bar">
+                        <span style="font-size:12px; color:#f8fafc; display:flex; align-items:center;">💡 Geser ke layar Proyektor lalu klik:</span>
+                        <button class="btn-fs" onclick="toggleProjFs()">⛶ Layar Penuh (Fullscreen)</button>
+                    </div>
+                    <img id="proj-img" src="${currentImgUrl}" alt="Slide Proyektor">
+                    <canvas id="proj-annot-canvas"></canvas>
+                    <div id="proj-laser"></div>
+                    <script>
+                        function toggleProjFs() {
+                            if (!document.fullscreenElement) {
+                                document.documentElement.requestFullscreen().catch(() => {});
+                            } else {
+                                document.exitFullscreen().catch(() => {});
+                            }
+                        }
+                        window.addEventListener('resize', () => {
+                            if (window.opener && typeof window.opener.redrawAllSlideCanvases === 'function') {
+                                window.opener.redrawAllSlideCanvases();
+                            }
+                        });
+                        window.addEventListener('keydown', (e) => {
+                            if (['ArrowRight', 'PageDown', ' '].includes(e.key)) {
+                                e.preventDefault();
+                                if (window.opener) window.opener.changeLiveSlide(1);
+                            } else if (['ArrowLeft', 'PageUp'].includes(e.key)) {
+                                e.preventDefault();
+                                if (window.opener) window.opener.changeLiveSlide(-1);
+                            } else if (e.key.toLowerCase() === 'f') {
+                                toggleProjFs();
+                            }
+                        });
+                    <\/script>
+                </body>
+                </html>
+            `);
+            extProjectorWin.document.close();
+
+            const projImgEl = extProjectorWin.document.getElementById('proj-img');
+            if (projImgEl) {
+                projImgEl.onload = () => redrawAllSlideCanvases();
+            }
+            setTimeout(redrawAllSlideCanvases, 250);
+
+            const btnClose = document.getElementById('btn-close-ext-projector');
+            if (btnClose) btnClose.classList.remove('hidden');
+
+            const checkClosed = setInterval(() => {
+                if (!extProjectorWin || extProjectorWin.closed) {
+                    clearInterval(checkClosed);
+                    if (btnClose) btnClose.classList.add('hidden');
+                }
+            }, 1500);
+        }
+
+        function closeExtendedProjectorWindow() {
+            if (extProjectorWin && !extProjectorWin.closed) {
+                extProjectorWin.close();
+            }
+            extProjectorWin = null;
+            const btnClose = document.getElementById('btn-close-ext-projector');
+            if (btnClose) btnClose.classList.add('hidden');
+        }
+
+        // MODE 2: DUPLIKAT FULLSCREEN (Dilengkapi Toolbar Coretan & Highlight Melayang)
+        function startDuplicatePresentation() {
+            Swal.close();
+            let dupModal = document.getElementById('duplicate-slide-fs-modal');
+            if (!dupModal) {
+                dupModal = document.createElement('div');
+                dupModal.id = 'duplicate-slide-fs-modal';
+                dupModal.className = 'fixed inset-0 z-[260] bg-black flex flex-col justify-between select-none';
+                dupModal.innerHTML = `
+                    <div id="dup-fs-stage" class="flex-1 flex items-center justify-center overflow-hidden relative w-full h-full">
+                        <img id="dup-fs-slide-img" src="" class="w-full h-full object-contain pointer-events-none" alt="Slide Fullscreen">
+                        <canvas id="dup-fs-annot-canvas" class="absolute inset-0 w-full h-full z-10" style="touch-action: none;"></canvas>
+                        <div id="dup-fs-laser-dot" class="hidden absolute w-5 h-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-600 border-2 border-white shadow-[0_0_20px_8px_rgba(239,68,68,0.95)] pointer-events-none z-20"></div>
+                    </div>
+                    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 flex flex-wrap items-center gap-2 bg-[#0f172a]/90 border border-[#D6A84F]/60 px-4 py-2 rounded-2xl backdrop-blur-md transition opacity-35 hover:opacity-100 shadow-2xl">
+                        <button type="button" onclick="changeLiveSlide(-1)" class="bg-gray-700 hover:bg-gray-600 text-white text-xs font-extrabold px-3 py-1.5 rounded-lg">⬅ Prev</button>
+                        <span id="dup-fs-slide-counter" class="text-xs font-black text-[#D6A84F] px-2">Slide 1</span>
+                        <button type="button" onclick="changeLiveSlide(1)" class="bg-[#D6A84F] text-[#0f172a] text-xs font-extrabold px-3 py-1.5 rounded-lg">Next ➡</button>
+                        <span class="text-gray-600">|</span>
+                        <button type="button" onclick="setSpeakerAnnotTool('none')" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg">🖱️</button>
+                        <button type="button" onclick="setSpeakerAnnotTool('laser')" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg">🔴 Laser</button>
+                        <button type="button" onclick="setSpeakerAnnotTool('pen')" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg">🖊️ Pena</button>
+                        <button type="button" onclick="setSpeakerAnnotTool('highlight')" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg">🖍️ Stabilo</button>
+                        <button type="button" onclick="clearCurrentSlideAnnotations()" class="bg-red-900/80 hover:bg-red-700 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg">🗑️</button>
+                        <button type="button" onclick="closeDuplicatePresentation()" class="bg-red-600 text-white text-xs font-extrabold px-3 py-1.5 rounded-lg ml-1">✕ Keluar</button>
+                    </div>
+                `;
+                document.body.appendChild(dupModal);
+                bindAnnotationEventsToStage('dup-fs-stage', 'dup-fs-slide-img', 'dup-fs-annot-canvas');
+            }
+
+            duplicateFullscreenActive = true;
+            dupModal.classList.remove('hidden');
+            renderLiveSlideControllerUI();
+
+            if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
+            setTimeout(redrawAllSlideCanvases, 200);
+        }
+
+        function closeDuplicatePresentation() {
+            duplicateFullscreenActive = false;
+            const dupModal = document.getElementById('duplicate-slide-fs-modal');
+            if (dupModal) dupModal.classList.add('hidden');
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(() => {});
+            }
+        }
+
+        function syncExtendedProjectorSlide(imgUrl, currentIdx, totalSlides) {
+            if (extProjectorWin && !extProjectorWin.closed) {
+                const projImg = extProjectorWin.document.getElementById('proj-img');
+                if (projImg && imgUrl) {
+                    if (projImg.src !== imgUrl) {
+                        projImg.style.opacity = '0.2';
+                        setTimeout(() => {
+                            projImg.src = imgUrl;
+                            projImg.style.opacity = '1';
+                            setTimeout(redrawAllSlideCanvases, 80);
+                        }, 100);
+                    } else {
+                        redrawAllSlideCanvases();
+                    }
+                }
+            }
+
+            if (duplicateFullscreenActive) {
+                const dupImg = document.getElementById('dup-fs-slide-img');
+                const dupCounter = document.getElementById('dup-fs-slide-counter');
+                if (dupImg && imgUrl) {
+                    dupImg.src = imgUrl;
+                    dupImg.onload = () => redrawAllSlideCanvases();
+                }
+                if (dupCounter) dupCounter.innerText = `Slide ${currentIdx + 1} / ${totalSlides}`;
+            }
+
+            setTimeout(redrawAllSlideCanvases, 60);
+        }
+
+        // =========================================================================
+        // MESIN CORETAN (PEN), STABILO (HIGHLIGHT) & LASER REAL-TIME PRESISI TINGGI
+        // =========================================================================
+        function getRenderedSlideBox(stageEl, imgEl) {
+            const rect = stageEl.getBoundingClientRect();
+            const boxW = rect.width || 1;
+            const boxH = rect.height || 1;
+            if (!imgEl || !imgEl.naturalWidth || !imgEl.naturalHeight) {
+                return { left: 0, top: 0, width: boxW, height: boxH, stageRect: rect };
+            }
+            const imgRatio = imgEl.naturalWidth / imgEl.naturalHeight;
+            const boxRatio = boxW / boxH;
+            let renderW, renderH, left, top;
+            if (imgRatio > boxRatio) {
+                renderW = boxW;
+                renderH = boxW / imgRatio;
+                left = 0;
+                top = (boxH - renderH) / 2;
+            } else {
+                renderH = boxH;
+                renderW = boxH * imgRatio;
+                top = 0;
+                left = (boxW - renderW) / 2;
+            }
+            return { left, top, width: renderW, height: renderH, stageRect: rect };
+        }
+
+        function setSpeakerAnnotTool(tool) {
+            speakerAnnotTool = tool;
+            ['none', 'laser', 'pen', 'highlight'].forEach(t => {
+                const btn = document.getElementById('tool-btn-' + t);
+                if (!btn) return;
+                btn.className = (t === tool)
+                    ? "px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold bg-[#D6A84F] text-[#0f172a] shadow transition"
+                    : "px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold bg-slate-800 text-gray-200 hover:bg-slate-700 transition";
+            });
+
+            // Jika memilih Highlight, otomatis sarankan warna Kuning Stabilo jika masih merah
+            if (tool === 'highlight' && speakerAnnotColor === '#ef4444') {
+                setSpeakerAnnotColor('#facc15');
+            }
+
+            const badge = document.getElementById('annot-mode-badge');
+            const labels = {
+                none: 'Mode: 🖱️ Navigasi Normal',
+                laser: 'Mode: 🔴 Laser Pointer Aktif',
+                pen: 'Mode: 🖊️ Coretan Pena Aktif',
+                highlight: 'Mode: 🖍️ Highlight Stabilo Aktif'
+            };
+            if (badge) badge.innerText = labels[tool] || labels.none;
+
+            ['speaker-annot-canvas', 'dup-fs-annot-canvas'].forEach(cid => {
+                const c = document.getElementById(cid);
+                if (!c) return;
+                if (tool === 'none') {
+                    c.classList.add('pointer-events-none');
+                    c.style.cursor = 'default';
+                } else {
+                    c.classList.remove('pointer-events-none');
+                    c.style.cursor = (tool === 'laser') ? 'none' : 'crosshair';
+                }
+            });
+
+            if (tool !== 'laser') hideAllLaserDots();
+        }
+
+        function setSpeakerAnnotColor(hex) {
+            speakerAnnotColor = hex;
+            ['#ef4444', '#facc15', '#22c55e', '#38bdf8'].forEach(c => {
+                const btn = document.getElementById('color-btn-' + c);
+                if (!btn) return;
+                if (c === hex) {
+                    btn.classList.add('ring-2', 'ring-white', 'scale-110');
+                    btn.classList.remove('opacity-70');
+                } else {
+                    btn.classList.remove('ring-2', 'ring-white', 'scale-110');
+                    btn.classList.add('opacity-70');
                 }
             });
         }
+
+        function getCurrentSlideStrokeList() {
+            const idx = adminState.activeSlideIndex || 0;
+            if (!slideAnnotationsMap[idx]) slideAnnotationsMap[idx] = [];
+            return slideAnnotationsMap[idx];
+        }
+
+        function undoSpeakerAnnotation() {
+            const list = getCurrentSlideStrokeList();
+            if (list.length > 0) {
+                list.pop();
+                redrawAllSlideCanvases();
+            }
+        }
+
+        function clearCurrentSlideAnnotations() {
+            const idx = adminState.activeSlideIndex || 0;
+            slideAnnotationsMap[idx] = [];
+            redrawAllSlideCanvases();
+        }
+
+        function renderStrokesOnTargetCanvas(canvasEl, stageEl, imgEl, strokes) {
+            if (!canvasEl || !stageEl) return;
+            const rect = stageEl.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+
+            if (canvasEl.width !== Math.round(rect.width) || canvasEl.height !== Math.round(rect.height)) {
+                canvasEl.width = Math.round(rect.width);
+                canvasEl.height = Math.round(rect.height);
+            }
+
+            const ctx = canvasEl.getContext('2d');
+            ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+            if (!strokes || strokes.length === 0) return;
+
+            const box = getRenderedSlideBox(stageEl, imgEl);
+
+            strokes.forEach(st => {
+                if (!st.points || st.points.length === 0) return;
+                ctx.save();
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = st.color;
+
+                if (st.tool === 'highlight') {
+                    ctx.globalAlpha = 0.38;
+                    ctx.lineWidth = Math.max(14, box.height * 0.042);
+                } else {
+                    ctx.globalAlpha = 0.95;
+                    ctx.lineWidth = Math.max(3, box.height * 0.009);
+                }
+
+                ctx.beginPath();
+                st.points.forEach((pt, i) => {
+                    const px = box.left + pt.nx * box.width;
+                    const py = box.top + pt.ny * box.height;
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                });
+                if (st.points.length === 1) {
+                    const p0 = st.points[0];
+                    ctx.lineTo(box.left + p0.nx * box.width + 0.5, box.top + p0.ny * box.height + 0.5);
+                }
+                ctx.stroke();
+                ctx.restore();
+            });
+        }
+
+        function redrawAllSlideCanvases() {
+            const strokes = getCurrentSlideStrokeList();
+
+            // 1. Kanvas di Speaker Remote (Laptop)
+            renderStrokesOnTargetCanvas(
+                document.getElementById('speaker-annot-canvas'),
+                document.getElementById('speaker-slide-stage'),
+                document.getElementById('speaker-active-slide-img'),
+                strokes
+            );
+
+            // 2. Kanvas di Modal Mode Duplikat (Jika Aktif)
+            if (duplicateFullscreenActive) {
+                renderStrokesOnTargetCanvas(
+                    document.getElementById('dup-fs-annot-canvas'),
+                    document.getElementById('dup-fs-stage'),
+                    document.getElementById('dup-fs-slide-img'),
+                    strokes
+                );
+            }
+
+            // 3. Kanvas di Jendela Proyektor Extended (Jika Aktif)
+            if (extProjectorWin && !extProjectorWin.closed) {
+                const projCanvas = extProjectorWin.document.getElementById('proj-annot-canvas');
+                const projBody = extProjectorWin.document.body;
+                const projImg = extProjectorWin.document.getElementById('proj-img');
+                renderStrokesOnTargetCanvas(projCanvas, projBody, projImg, strokes);
+            }
+        }
+
+        function updateAllLaserDots(nx, ny) {
+            const targets = [
+                { dot: document.getElementById('speaker-laser-dot'), stage: document.getElementById('speaker-slide-stage'), img: document.getElementById('speaker-active-slide-img') },
+                { dot: document.getElementById('dup-fs-laser-dot'), stage: document.getElementById('dup-fs-stage'), img: document.getElementById('dup-fs-slide-img') }
+            ];
+            if (extProjectorWin && !extProjectorWin.closed) {
+                targets.push({
+                    dot: extProjectorWin.document.getElementById('proj-laser'),
+                    stage: extProjectorWin.document.body,
+                    img: extProjectorWin.document.getElementById('proj-img'),
+                    isProj: true
+                });
+            }
+
+            targets.forEach(t => {
+                if (!t.dot || !t.stage) return;
+                const box = getRenderedSlideBox(t.stage, t.img);
+                const px = box.left + nx * box.width;
+                const py = box.top + ny * box.height;
+                t.dot.style.left = px + 'px';
+                t.dot.style.top = py + 'px';
+                if (t.isProj) t.dot.style.display = 'block';
+                else t.dot.classList.remove('hidden');
+            });
+        }
+
+        function hideAllLaserDots() {
+            ['speaker-laser-dot', 'dup-fs-laser-dot'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+            if (extProjectorWin && !extProjectorWin.closed) {
+                const pLaser = extProjectorWin.document.getElementById('proj-laser');
+                if (pLaser) pLaser.style.display = 'none';
+            }
+        }
+
+        function bindAnnotationEventsToStage(stageId, imgId, canvasId) {
+            const stageEl = document.getElementById(stageId);
+            const imgEl = document.getElementById(imgId);
+            const canvasEl = document.getElementById(canvasId);
+            if (!stageEl || !canvasEl) return;
+
+            const getNormCoords = (e) => {
+                const box = getRenderedSlideBox(stageEl, imgEl);
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const nx = Math.min(1, Math.max(0, (clientX - box.stageRect.left - box.left) / (box.width || 1)));
+                const ny = Math.min(1, Math.max(0, (clientY - box.stageRect.top - box.top) / (box.height || 1)));
+                return { nx, ny };
+            };
+
+            canvasEl.addEventListener('pointerdown', (e) => {
+                if (speakerAnnotTool === 'none') return;
+                const pt = getNormCoords(e);
+                if (speakerAnnotTool === 'laser') {
+                    updateAllLaserDots(pt.nx, pt.ny);
+                    return;
+                }
+                isDrawingAnnot = true;
+                currentStroke = {
+                    tool: speakerAnnotTool,
+                    color: speakerAnnotColor,
+                    points: [pt]
+                };
+                getCurrentSlideStrokeList().push(currentStroke);
+                redrawAllSlideCanvases();
+            });
+
+            canvasEl.addEventListener('pointermove', (e) => {
+                if (speakerAnnotTool === 'none') return;
+                const pt = getNormCoords(e);
+                if (speakerAnnotTool === 'laser') {
+                    updateAllLaserDots(pt.nx, pt.ny);
+                    return;
+                }
+                if (!isDrawingAnnot || !currentStroke) return;
+                currentStroke.points.push(pt);
+                redrawAllSlideCanvases();
+            });
+
+            const stopDraw = () => {
+                isDrawingAnnot = false;
+                currentStroke = null;
+            };
+            canvasEl.addEventListener('pointerup', stopDraw);
+            canvasEl.addEventListener('pointerleave', () => {
+                stopDraw();
+                if (speakerAnnotTool === 'laser') hideAllLaserDots();
+            });
+        }
+
+        // Aktifkan kanvas coretan pada Speaker Remote & gambar ulang saat ukuran layar berubah
+        bindAnnotationEventsToStage('speaker-slide-stage', 'speaker-active-slide-img', 'speaker-annot-canvas');
+        window.addEventListener('resize', redrawAllSlideCanvases);
+        const spMainImg = document.getElementById('speaker-active-slide-img');
+        if (spMainImg) spMainImg.addEventListener('load', redrawAllSlideCanvases);
+
+        // =========================================================================
+        // DUKUNGAN TOMBOL PANAH KEYBOARD & WIRELESS PRESENTER (KANAN / KIRI)
+        // =========================================================================
+        window.addEventListener('keydown', (e) => {
+            // Jangan ganggu jika sedang mengetik di kolom pencarian atau input angka
+            const activeTag = (document.activeElement && document.activeElement.tagName) ? document.activeElement.tagName.toUpperCase() : '';
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag)) return;
+
+            // Cek apakah sedang membuka Tab Speaker atau Mode Duplikat Fullscreen
+            const speakerPanel = document.getElementById('panel-speaker');
+            const isSpeakerTabVisible = speakerPanel && !speakerPanel.classList.contains('hidden');
+            if (!isSpeakerTabVisible && !duplicateFullscreenActive) return;
+
+            if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+                e.preventDefault();
+                changeLiveSlide(1);
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                changeLiveSlide(-1);
+            }
+        });
 
         function changeLiveSlide(delta) {
             const total = getEffectiveTotalSlides();
