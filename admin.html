@@ -54,6 +54,18 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
+		
+		<!-- Jam Real-time WIB & Pintasan dari Portal Speaker -->
+            <div class="bg-[#0f172a]/80 px-3 py-2 rounded-xl border gold-border text-xs font-extrabold text-[#F7F1E3]">
+                ⏱ <span id="speakerClock">--:--:--</span> WIB
+            </div>
+            <a href="https://roy4ls.github.io/cwo6/" target="_blank" class="bg-gradient-to-r from-emerald-500 to-green-600 hover:opacity-95 text-white text-xs font-extrabold px-3 py-2 rounded-xl shadow transition flex items-center gap-1">
+                📱 Web Peserta
+            </a>
+            <button type="button" onclick="openDeskinModal()" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-95 text-white text-xs font-extrabold px-3 py-2 rounded-xl shadow transition flex items-center gap-1">
+                💻 Share Layar (Deskin)
+            </button>
+			
             <!-- Indikator & Tombol Cepat Saklar Alarm -->
             <button type="button" id="header-alarm-btn" onclick="toggleBreakAlarm()" class="bg-gray-700/80 hover:bg-gray-600 text-gray-200 text-xs font-extrabold px-3.5 py-2 rounded-xl border border-white/15 transition flex items-center gap-1.5 shadow">
                 🔔 Alarm Istirahat: <span id="header-alarm-status">OFF</span>
@@ -139,6 +151,9 @@
             </button>
 			<button type="button" onclick="switchAdminTab('leaderboard')" id="admintab-leaderboard" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
                 🏆 Leaderboard Game (<span id="stat-leaderboard">0</span>)
+            </button>
+			<button type="button" onclick="switchAdminTab('speaker')" id="admintab-speaker" class="flex-1 min-w-[165px] py-2.5 px-3 rounded-xl text-xs font-extrabold text-gray-200 hover:bg-white/10 transition">
+                🎙️ Mode Speaker & Slide
             </button>
         </div>
 
@@ -309,6 +324,37 @@
                         ⚡ Refresh Cache Slide & Rundown Sekarang
                     </button>
                 </div>
+				
+				<!-- Kartu 3: Remote Kendali Live Slide Peserta (Di Tab Admin) -->
+                <div class="glass-card p-5 rounded-2xl space-y-3 border-2 border-[#D6A84F]/60">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">🎯 Kendali Live Slide Peserta</h2>
+                        <span class="bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full animate-pulse">● LIVE SYNC</span>
+                    </div>
+                    <p class="text-xs text-gray-300">Pilih nomor slide di bawah untuk memindahkan fokus tampilan slide di seluruh HP peserta secara otomatis.</p>
+                    
+					<div class="w-full aspect-video bg-black/80 rounded-xl overflow-hidden border border-[#D6A84F]/50 flex items-center justify-center">
+                        <img id="admin-active-slide-img" src="" alt="Slide Aktif" class="w-full h-full object-contain hidden">
+                        <span id="admin-slide-empty" class="text-[11px] text-gray-400 font-bold">Memuat gambar slide...</span>
+                    </div>
+					
+                    <div class="flex items-center justify-between gap-2 bg-[#0f172a]/90 p-3 rounded-xl border border-white/10">
+                        <button type="button" onclick="changeLiveSlide(-1)" class="bg-gray-700 hover:bg-gray-600 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs transition">⬅ Prev</button>
+                        <div class="text-center">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase">Slide Aktif di HP Peserta</p>
+                            <p id="admin-live-slide-indicator" class="text-lg font-black text-[#D6A84F]">Slide 1</p>
+                        </div>
+                        <button type="button" onclick="changeLiveSlide(1)" class="bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] font-extrabold px-4 py-2.5 rounded-xl text-xs transition">Next ➡</button>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-2 pt-1">
+                        <label class="text-[11px] font-bold text-gray-300">Jumlah Slide Manual Anda:</label>
+                        <input type="number" id="input-total-manual-slides" min="1" max="50" value="10" onchange="updateManualSlideTotal(this.value)" class="w-20 bg-[#0f172a] border border-[#D6A84F]/50 rounded-lg px-2.5 py-1 text-xs font-extrabold text-center text-[#D6A84F]">
+                    </div>
+
+                    <div id="admin-slide-quick-buttons" class="flex flex-wrap gap-1.5 pt-1"></div>
+                </div>
+				
             </div>
         </section>
 
@@ -388,6 +434,109 @@
             </div>
         </section>
 
+<!-- ========================================================================= -->
+        <!-- TAB 7: MODE SPEAKER LIVE DASHBOARD + REMOTE KENDALI SLIDE PESERTA         -->
+        <!-- ========================================================================= -->
+        <section id="panel-speaker" class="hidden space-y-5">
+            <!-- Panel Remote Kendali Slide Khusus Speaker + Layar Pratinjau Gambar Slide -->
+            <div class="glass-card p-4 md:p-5 rounded-2xl border-2 border-[#D6A84F]/60 space-y-4">
+                <div class="flex flex-wrap justify-between items-center gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-red-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full animate-pulse">● LIVE REMOTE</span>
+                            <h2 class="text-base md:text-xl font-extrabold text-[#D6A84F]">🎯 Kendali Slide Layar Peserta (Speaker Remote)</h2>
+                        </div>
+                        <p class="text-xs text-gray-300 mt-0.5">Tekan tombol di bawah atau klik gambar thumbnail untuk memindahkan slide di HP seluruh peserta.</p>
+                    </div>
+
+                    <div class="flex items-center gap-2.5">
+                        <button type="button" onclick="changeLiveSlide(-1)" class="bg-gray-700 hover:bg-gray-600 text-white font-extrabold px-5 py-3 rounded-xl text-xs md:text-sm shadow transition">
+                            ⬅ Slide Sebelumnya
+                        </button>
+                        <div class="bg-[#0f172a] border border-[#D6A84F] px-4 py-2 rounded-xl text-center min-w-[110px]">
+                            <span class="text-[9px] text-gray-400 font-bold uppercase block">Tampil di Peserta</span>
+                            <span id="speaker-live-slide-indicator" class="text-base md:text-lg font-black text-[#D6A84F]">Slide 1</span>
+                        </div>
+                        <button type="button" onclick="changeLiveSlide(1)" class="bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] font-extrabold px-5 py-3 rounded-xl text-xs md:text-sm shadow transition">
+                            Slide Selanjutnya ➡
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Layar Monitor Gambar Slide yang Sedang Aktif di Peserta -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center bg-[#0f172a]/90 p-4 rounded-2xl border border-[#D6A84F]/30">
+                    <!-- Gambar Utama Slide Aktif (2 Kolom) -->
+                    <div class="lg:col-span-2 flex flex-col items-center justify-center relative">
+                        <div class="w-full max-h-[380px] aspect-video bg-black/80 rounded-xl overflow-hidden border-2 border-[#D6A84F]/60 flex items-center justify-center shadow-xl">
+                            <img id="speaker-active-slide-img" src="" alt="Preview Slide Aktif" class="w-full h-full object-contain hidden cursor-pointer" onclick="openSpeakerSlideFullscreen()">
+                            <p id="speaker-slide-empty" class="text-xs text-gray-400 font-bold p-6 text-center">Belum ada gambar slide di-upload ke Sheet Slides, atau sedang memuat slide...</p>
+                        </div>
+                        <div class="flex items-center gap-2 mt-2.5">
+                            <button type="button" onclick="openSpeakerSlideFullscreen()" class="bg-white/10 hover:bg-white/20 text-[#D6A84F] text-xs font-extrabold px-3.5 py-1.5 rounded-lg border border-[#D6A84F]/40 transition">
+                                ⛶ Perbesar Slide ke Layar Penuh
+                            </button>
+                            <button type="button" onclick="fetchAdminSlidesData(true)" class="bg-blue-600/80 hover:bg-blue-600 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-lg transition">
+                                🔄 Muat Ulang Gambar Slide
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Daftar Thumbnail Semua Slide + Tombol Tarik Fokus (1 Kolom) -->
+                    <div class="flex flex-col justify-between h-full space-y-3">
+                        <div>
+                            <p class="text-xs font-extrabold text-[#D6A84F] mb-2 uppercase tracking-wider">📑 Pilih Cepat Halaman Slide:</p>
+                            <div id="speaker-slide-quick-buttons" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2 max-h-[290px] overflow-y-auto pr-1"></div>
+                        </div>
+                        <button type="button" onclick="forceSyncCurrentSlide()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold py-3 px-4 rounded-xl shadow-lg transition">
+                            🎯 Tarik Fokus Peserta ke Slide Ini
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bar Kontrol Filter Tampilan Speaker (Split View / Fokus Q&A / Fokus Feedback) -->
+            <div class="glass-card p-3.5 rounded-2xl flex flex-wrap justify-between items-center gap-3">
+                <div class="bg-[#0f172a]/80 p-1 rounded-xl border gold-border flex gap-1">
+                    <button type="button" id="sp-tab-split" onclick="changeSpeakerTabMode('split')" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-[#D6A84F] text-[#0f172a] transition">Split View</button>
+                    <button type="button" id="sp-tab-qna" onclick="changeSpeakerTabMode('qna')" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold text-gray-200 hover:text-white transition">Fokus Q&A</button>
+                    <button type="button" id="sp-tab-fb" onclick="changeSpeakerTabMode('fb')" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold text-gray-200 hover:text-white transition">Fokus Feedback</button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="toggleHideAnsweredAdmin()" id="btn-speaker-filter-answered" class="bg-gray-700/80 hover:bg-gray-600 text-xs font-bold px-3.5 py-2 rounded-xl border border-white/15 transition">
+                        👁 Sembunyikan Terjawab
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid Utama Speaker (Teks Ukuran Besar untuk Panggung) -->
+            <div id="speaker-main-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Kolom 1 Speaker: Live Q&A -->
+                <div id="speaker-panel-qna" class="glass-card rounded-2xl border gold-border p-5 flex flex-col h-[540px]">
+                    <div class="flex justify-between items-center mb-4 pb-3 border-b border-white/10 shrink-0">
+                        <div>
+                            <h3 class="text-lg md:text-xl font-extrabold text-[#D6A84F]">❓ Live Anonymous Q&A</h3>
+                            <p class="text-xs text-gray-300">Ketuk pertanyaan untuk memperbesar di layar.</p>
+                        </div>
+                        <span id="speaker-qna-count" class="bg-[#D6A84F]/25 text-[#D6A84F] border border-[#D6A84F]/50 px-3 py-1 rounded-full text-xs font-extrabold">0 Pertanyaan</span>
+                    </div>
+                    <div id="speaker-qna-list" class="space-y-3 overflow-y-auto flex-1 pr-1"></div>
+                </div>
+
+                <!-- Kolom 2 Speaker: Live Feedback -->
+                <div id="speaker-panel-fb" class="glass-card rounded-2xl border gold-border p-5 flex flex-col h-[540px]">
+                    <div class="flex justify-between items-center mb-4 pb-3 border-b border-white/10 shrink-0">
+                        <div>
+                            <h3 class="text-lg md:text-xl font-extrabold text-[#D6A84F]">💬 Live Event Feedback</h3>
+                            <p class="text-xs text-gray-300">Kesan & pesan langsung dari pasangan peserta.</p>
+                        </div>
+                        <span id="speaker-fb-count" class="bg-[#D6A84F]/25 text-[#D6A84F] border border-[#D6A84F]/50 px-3 py-1 rounded-full text-xs font-extrabold">0 Feedback</span>
+                    </div>
+                    <div id="speaker-fb-list" class="space-y-3 overflow-y-auto flex-1 pr-1"></div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- MODAL SLIDESHOW PROYEKTOR FULLSCREEN (EVENT & PHOTOBOOTH, AUTO FADE 3 DETIK) -->
@@ -434,7 +583,9 @@
             photobooths: [],
             qna: [],
             feedback: [],
-			leaderboard: [] // <-- TAMBAHKAN INI
+			leaderboard: [],
+            activeSlideIndex: 0,
+            totalManualSlides: Number(localStorage.getItem('cwo_total_manual_slides') || 10)
         };
 
         let answeredIds = [];
@@ -466,7 +617,7 @@
 
         // Navigasi 5 Tab Admin
         function switchAdminTab(tabName) {
-            ['eventphotos', 'photobooth', 'qnafb', 'controls', 'attendance', 'leaderboard'].forEach(t => {
+            ['eventphotos', 'photobooth', 'qnafb', 'controls', 'attendance', 'leaderboard', 'speaker'].forEach(t => {
                 const panel = document.getElementById('panel-' + t);
                 const btn = document.getElementById('admintab-' + t);
                 if (!panel || !btn) return;
@@ -493,6 +644,9 @@
                     const data = dashRes.value;
                     adminState.alarmActive = !!data.alarmActive;
                     adminState.slidesCount = data.slidesCount || 0;
+					if (typeof data.activeSlideIndex !== 'undefined') {
+                        adminState.activeSlideIndex = Number(data.activeSlideIndex) || 0;
+                    }
                     adminState.rundownCount = data.rundownCount || 0;
                     adminState.logins = Array.isArray(data.logins) ? data.logins : [];
                     adminState.tokenCounts = data.tokenCounts || {};
@@ -516,6 +670,7 @@
                 renderAdminQnAAndFeedback();
                 renderAdminAttendance();
 				renderAdminLeaderboard();
+				renderLiveSlideControllerUI();
 
                 if (manual) {
                     Swal.fire({ title: 'Data Diperbarui!', icon: 'success', timer: 1000, showConfirmButton: false, background: '#F7F1E3' });
@@ -618,6 +773,9 @@
                     </div>
                 `).join('');
             }
+			
+			renderSpeakerTabLists();
+			
         }
 
         function toggleAdminAnswered(id) {
@@ -1056,6 +1214,7 @@ function formatDurationText(sec) {
             btn.disabled = false;
             fileInput.value = '';
             fetchAdminAllData(false);
+			fetchAdminSlidesData(false);
             Swal.fire('Upload Berhasil!', `Semua gambar telah tersimpan di Sheet ${target} dan Cache Server otomatis diperbarui.`, 'success');
         }
 
@@ -1326,6 +1485,284 @@ function formatDurationText(sec) {
                 listContainer.innerHTML = '';
             }
         }
+		
+		// =========================================================================
+        // FITUR GABUNGAN PORTAL SPEAKER & REMOTE KENDALI LIVE SLIDE PESERTA
+        // =========================================================================
+        function updateSpeakerClock() {
+            const el = document.getElementById('speakerClock');
+            if (el) el.innerText = new Date().toLocaleTimeString('id-ID');
+        }
+        updateSpeakerClock();
+        setInterval(updateSpeakerClock, 1000);
+
+        function openDeskinModal() {
+            Swal.fire({
+                title: '<span style="color:#D6A84F; font-weight:800;">Aplikasi Deskin (Share Layar)</span>',
+                html: `
+                    <p style="font-size:13px; color:#1e293b; margin-bottom:16px;">Pilih tautan unduhan sesuai perangkat yang ingin Anda hubungkan:</p>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <a href="https://drive.google.com/file/d/1Xs-eeaOwTG2Z36KAqwVqxNOY5JY77LY4/view?usp=sharing" target="_blank" style="background:#1e293b; color:#D6A84F; padding: 12px; border-radius: 10px; font-weight: 800; text-decoration: none; font-size: 14px;">
+                            🤖 Unduh Deskin untuk HP Android
+                        </a>
+                        <a href="https://drive.google.com/file/d/1Zp0cfToZGGq1NLwHf8ZPOMzHugx9Fv5z/view?usp=drive_link" target="_blank" style="background:#D6A84F; color:#1e293b; padding: 12px; border-radius: 10px; font-weight: 800; text-decoration: none; font-size: 14px;">
+                            💻 Unduh Deskin untuk PC / Komputer
+                        </a>
+                    </div>
+                `,
+                showCloseButton: true,
+                showConfirmButton: false,
+                background: '#F7F1E3',
+                width: '450px'
+            });
+        }
+
+        function changeSpeakerTabMode(mode) {
+            const mainGrid = document.getElementById('speaker-main-grid');
+            const pQna = document.getElementById('speaker-panel-qna');
+            const pFb = document.getElementById('speaker-panel-fb');
+
+            ['split', 'qna', 'fb'].forEach(m => {
+                const btn = document.getElementById('sp-tab-' + m);
+                if (!btn) return;
+                btn.className = (m === mode)
+                    ? "px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-[#D6A84F] text-[#0f172a] shadow transition"
+                    : "px-3.5 py-1.5 rounded-lg text-xs font-extrabold text-gray-200 hover:text-white transition";
+            });
+
+            if (mode === 'split') {
+                mainGrid.className = "grid grid-cols-1 md:grid-cols-2 gap-5";
+                pQna.classList.remove('hidden');
+                pFb.classList.remove('hidden');
+            } else if (mode === 'qna') {
+                mainGrid.className = "grid grid-cols-1 gap-5 max-w-5xl mx-auto w-full";
+                pQna.classList.remove('hidden');
+                pFb.classList.add('hidden');
+            } else if (mode === 'fb') {
+                mainGrid.className = "grid grid-cols-1 gap-5 max-w-5xl mx-auto w-full";
+                pQna.classList.add('hidden');
+                pFb.classList.remove('hidden');
+            }
+        }
+
+        function renderSpeakerTabLists() {
+            const qnaListEl = document.getElementById('speaker-qna-list');
+            const fbListEl = document.getElementById('speaker-fb-list');
+            if (!qnaListEl || !fbListEl) return;
+
+            const filteredQna = (adminState.qna || []).filter(item => !hideAnsweredAdmin || !answeredIds.includes(item.id));
+            const allFb = adminState.feedback || [];
+
+            document.getElementById('speaker-qna-count').innerText = `${filteredQna.length} Pertanyaan`;
+            document.getElementById('speaker-fb-count').innerText = `${allFb.length} Feedback`;
+
+            const spBtnFilter = document.getElementById('btn-speaker-filter-answered');
+            if (spBtnFilter) {
+                spBtnFilter.innerText = hideAnsweredAdmin ? "👁 Tampilkan Semua" : "👁 Sembunyikan Terjawab";
+                spBtnFilter.className = hideAnsweredAdmin
+                    ? "bg-[#D6A84F] text-[#0f172a] text-xs font-extrabold px-3.5 py-2 rounded-xl transition"
+                    : "bg-gray-700/80 hover:bg-gray-600 text-xs font-bold px-3.5 py-2 rounded-xl border border-white/15 transition";
+            }
+
+            if (filteredQna.length === 0) {
+                qnaListEl.innerHTML = `<div class="text-center py-12 text-gray-400 text-sm font-bold">Belum ada pertanyaan Q&A.</div>`;
+            } else {
+                qnaListEl.innerHTML = filteredQna.map((item, idx) => {
+                    const isDone = answeredIds.includes(item.id);
+                    return `
+                        <div class="p-4 md:p-5 rounded-2xl border transition flex flex-col justify-between gap-2.5 ${isDone ? 'bg-[#0f172a]/40 border-gray-700 opacity-50' : 'bg-[#0f172a]/85 border-[#D6A84F]/60 shadow-lg'}">
+                            <div class="flex justify-between items-center flex-wrap gap-2">
+                                <span class="text-xs font-extrabold text-[#D6A84F]">ANONIM • ${escapeHtml(item.time)} WIB</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick="openAdminSpotlightQna(${idx})" class="bg-[#D6A84F]/25 hover:bg-[#D6A84F]/40 text-[#D6A84F] px-3 py-1 rounded-lg text-xs font-bold">🔍 Sorot</button>
+                                    <button type="button" onclick="toggleAdminAnswered(${item.id})" class="px-3 py-1 rounded-lg text-xs font-bold ${isDone ? 'bg-emerald-800 text-emerald-200' : 'bg-gray-700 hover:bg-emerald-700 text-white'}">
+                                        ${isDone ? '✔ Terjawab' : 'Tandai Selesai'}
+                                    </button>
+                                </div>
+                            </div>
+                            <p onclick="openAdminSpotlightQna(${idx})" class="cursor-pointer text-base md:text-xl font-bold text-white leading-relaxed break-words">${escapeHtml(item.question)}</p>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            if (allFb.length === 0) {
+                fbListEl.innerHTML = `<div class="text-center py-12 text-gray-400 text-sm font-bold">Belum ada feedback yang masuk.</div>`;
+            } else {
+                fbListEl.innerHTML = allFb.map((item, idx) => `
+                    <div onclick="openAdminSpotlightFb(${idx})" class="cursor-pointer p-4 md:p-5 rounded-2xl bg-[#0f172a]/85 border border-white/15 hover:border-[#D6A84F]/60 transition shadow-md">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-xs md:text-sm font-extrabold text-[#D6A84F] uppercase">👩‍❤️‍👨 ${escapeHtml(item.names)}</span>
+                            <span class="text-xs text-gray-300 font-semibold">${escapeHtml(item.time)} WIB</span>
+                        </div>
+                        <p class="text-sm md:text-lg text-gray-100 font-medium leading-relaxed break-words">${escapeHtml(item.feedback)}</p>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Fungsi Remote Kendali Slide (Berlaku untuk Tab Admin & Tab Speaker)
+        // =========================================================================
+        // PENARIKAN GAMBAR SLIDE & REMOTE KENDALI SLIDE (ADMIN + SPEAKER)
+        // =========================================================================
+        adminState.slidesList = [];
+
+        async function fetchAdminSlidesData(showToast = false) {
+            try {
+                const res = await fetch(`${GAS_WEB_APP_URL}?action=getSlides&t=${Date.now()}`);
+                const list = await res.json();
+                if (Array.isArray(list)) {
+                    adminState.slidesList = list;
+                    if (list.length > 0) {
+                        adminState.slidesCount = list.length;
+                    }
+                    renderLiveSlideControllerUI();
+                    if (showToast) {
+                        Swal.fire({ title: `${list.length} Slide Dimuat!`, icon: 'success', timer: 1000, showConfirmButton: false, background: '#F7F1E3' });
+                    }
+                }
+            } catch (err) {
+                console.error("Gagal memuat daftar gambar slide:", err);
+            }
+        }
+
+        function getEffectiveTotalSlides() {
+            if (Array.isArray(adminState.slidesList) && adminState.slidesList.length > 0) {
+                return adminState.slidesList.length;
+            }
+            return adminState.slidesCount > 0 ? adminState.slidesCount : (adminState.totalManualSlides || 10);
+        }
+
+        function updateManualSlideTotal(val) {
+            const num = Math.max(1, Number(val) || 1);
+            adminState.totalManualSlides = num;
+            localStorage.setItem('cwo_total_manual_slides', String(num));
+            renderLiveSlideControllerUI();
+        }
+
+        function renderLiveSlideControllerUI() {
+            const total = getEffectiveTotalSlides();
+            const current = Math.min(Math.max(0, adminState.activeSlideIndex || 0), total - 1);
+            const hasUploadedSlides = Array.isArray(adminState.slidesList) && adminState.slidesList.length > 0;
+            const currentImgUrl = hasUploadedSlides ? formatDriveUrl(adminState.slidesList[current]) : '';
+
+            const indAdmin = document.getElementById('admin-live-slide-indicator');
+            const indSpeaker = document.getElementById('speaker-live-slide-indicator');
+            const inputTotal = document.getElementById('input-total-manual-slides');
+
+            if (indAdmin) indAdmin.innerText = `Slide ${current + 1} / ${total}`;
+            if (indSpeaker) indSpeaker.innerText = `Slide ${current + 1} / ${total}`;
+            if (inputTotal) inputTotal.value = total;
+
+            // Tampilkan Gambar Slide Aktif di Monitor Speaker & Admin
+            ['speaker', 'admin'].forEach(prefix => {
+                const imgEl = document.getElementById(`${prefix}-active-slide-img`);
+                const emptyEl = document.getElementById(`${prefix}-slide-empty`);
+                if (!imgEl || !emptyEl) return;
+                if (currentImgUrl) {
+                    imgEl.src = currentImgUrl;
+                    imgEl.classList.remove('hidden');
+                    emptyEl.classList.add('hidden');
+                } else {
+                    imgEl.classList.add('hidden');
+                    emptyEl.classList.remove('hidden');
+                }
+            });
+
+            // Buat Tombol Pilih Cepat beserta Thumbnail Gambar Slide
+            let btnsSpeakerHtml = '';
+            let btnsAdminHtml = '';
+            for (let i = 0; i < total; i++) {
+                const isActive = (i === current);
+                const thumbUrl = hasUploadedSlides && adminState.slidesList[i] ? formatDriveUrl(adminState.slidesList[i]) : '';
+
+                btnsSpeakerHtml += `
+                    <button type="button" onclick="setLiveSlideIndex(${i})" class="p-1.5 rounded-xl border text-left transition flex flex-col gap-1 ${isActive ? 'bg-[#D6A84F] text-[#0f172a] border-white shadow-lg ring-2 ring-[#D6A84F]' : 'bg-[#0f172a] text-gray-200 border-white/15 hover:border-[#D6A84F]'}">
+                        ${thumbUrl ? `<img src="${thumbUrl}" class="w-full h-16 object-cover rounded-lg bg-black">` : ''}
+                        <span class="text-[11px] font-extrabold px-1">${isActive ? '🟢 ' : ''}Slide ${i + 1}</span>
+                    </button>
+                `;
+
+                btnsAdminHtml += `
+                    <button type="button" onclick="setLiveSlideIndex(${i})" class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition ${isActive ? 'bg-[#D6A84F] text-[#0f172a] shadow-md scale-105' : 'bg-[#0f172a] text-gray-300 border border-white/15 hover:border-[#D6A84F]'}">
+                        Slide ${i + 1}
+                    </button>
+                `;
+            }
+
+            const boxAdmin = document.getElementById('admin-slide-quick-buttons');
+            const boxSpeaker = document.getElementById('speaker-slide-quick-buttons');
+            if (boxAdmin) boxAdmin.innerHTML = btnsAdminHtml;
+            if (boxSpeaker) boxSpeaker.innerHTML = btnsSpeakerHtml;
+        }
+
+        function openSpeakerSlideFullscreen() {
+            const current = adminState.activeSlideIndex || 0;
+            const hasUploadedSlides = Array.isArray(adminState.slidesList) && adminState.slidesList.length > 0;
+            if (!hasUploadedSlides || !adminState.slidesList[current]) return;
+
+            const imgUrl = formatDriveUrl(adminState.slidesList[current]);
+            Swal.fire({
+                title: `<span style="color:#D6A84F; font-size:14px; font-weight:800;">Slide Presentasi ${current + 1} / ${adminState.slidesList.length}</span>`,
+                imageUrl: imgUrl,
+                width: '92%',
+                background: '#0f172a',
+                showCancelButton: true,
+                confirmButtonText: 'Slide Selanjutnya ➡',
+                cancelButtonText: '⬅ Slide Sebelumnya',
+                confirmButtonColor: '#D6A84F',
+                cancelButtonColor: '#334155',
+                showCloseButton: true
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    changeLiveSlide(1);
+                    setTimeout(openSpeakerSlideFullscreen, 150);
+                } else if (res.dismiss === Swal.DismissReason.cancel) {
+                    changeLiveSlide(-1);
+                    setTimeout(openSpeakerSlideFullscreen, 150);
+                }
+            });
+        }
+
+        function changeLiveSlide(delta) {
+            const total = getEffectiveTotalSlides();
+            const nextIdx = Math.min(Math.max(0, (adminState.activeSlideIndex || 0) + delta), total - 1);
+            setLiveSlideIndex(nextIdx);
+        }
+
+        async function setLiveSlideIndex(targetIdx) {
+            adminState.activeSlideIndex = Number(targetIdx) || 0;
+            renderLiveSlideControllerUI();
+
+            try {
+                await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        'action': 'setActiveSlide',
+                        'slideIndex': String(adminState.activeSlideIndex)
+                    })
+                });
+            } catch (e) {
+                console.error("Gagal menyiarkan slide aktif:", e);
+            }
+        }
+
+        function forceSyncCurrentSlide() {
+            setLiveSlideIndex(adminState.activeSlideIndex);
+            Swal.fire({
+                title: `🎯 Fokus Ditarik ke Slide ${adminState.activeSlideIndex + 1}!`,
+                text: 'Seluruh layar HP peserta sedang diarahkan ke slide ini.',
+                icon: 'success',
+                timer: 1300,
+                showConfirmButton: false,
+                background: '#F7F1E3'
+            });
+        }
+
+        // Muat gambar slide otomatis saat portal dibuka
+        fetchAdminSlidesData(false);
+        renderLiveSlideControllerUI();
 		
     </script>
 	
