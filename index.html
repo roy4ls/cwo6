@@ -455,7 +455,7 @@
                 </div>
             </div>
 
-<!-- KOTAK VIDEO TUTORIAL & TUGAS PRA-WORKSHOP -->
+<!-- 👇 KOTAK VIDEO TUTORIAL & TUGAS WORKSHOP (DEFAULT TERTUTUP + VIDEO MINIMIZE) 👇 -->
             <div id="section-video-tutorial" class="clean-card mb-4 border-2 border-[#D6A84F]/40 overflow-hidden">
                 <button type="button" onclick="toggleCardCollapse('body-tutorial', 'chev-tutorial')" class="w-full p-4 px-5 flex justify-between items-center text-left hover:bg-black/[0.02] transition">
                     <div class="flex items-center gap-2.5">
@@ -465,57 +465,59 @@
                             <p id="conf-tutorial-sub-title" class="text-[10px] text-amber-700 font-bold">📌 Wajib ditonton & diisi sebelum sesi dimulai</p>
                         </div>
                     </div>
+                    <!-- Panah menghadap ke bawah (tertutup saat awal dibuka) -->
                     <span id="chev-tutorial" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center shrink-0">▼</span>
                 </button>
 
-                <!-- Default tertutup (hidden) -->
-                <div id="body-tutorial" class="hidden px-4 pb-5 pt-3 border-t border-[#D6A84F]/20 space-y-4">
+                <!-- Kotak isi default tertutup (class "hidden") -->
+                <div id="body-tutorial" class="hidden px-4 pb-5 pt-3.5 border-t border-[#D6A84F]/20 space-y-4">
                     
+                    <!-- Bagian Atas: Judul di Tengah & Tombol Besar Memenuhi Kotak -->
                     <div class="bg-white/85 p-3.5 rounded-2xl border-2 border-[#D6A84F]/45 shadow-sm">
                         <p id="conf-video-title" class="text-xs font-extrabold text-[#1e293b] text-center mb-2.5">
                             ▶️ Panduan Pengisian Aplikasi CekKeuanganKu
                         </p>
 
-                        <!-- Tombol Besar untuk Membuka/Menampilkan Video -->
+                        <!-- Tombol Utama Besar & Memenuhi Lebar Kotak (Full Width) -->
                         <button type="button" id="btn-minimize-video-box" onclick="toggleMinimizeTutorialVideo()" class="w-full bg-gradient-to-r from-[#D6A84F] to-[#c29542] hover:opacity-95 text-[#1e293b] py-3.5 px-4 rounded-xl text-xs md:text-sm font-black uppercase tracking-wide shadow-md active:scale-[0.99] transition flex items-center justify-center gap-2 border border-[#1e293b]/15">
                             <span class="text-base leading-none">▶️</span>
                             <span>Tampilkan Video Tutorial</span>
                         </button>
 
-                        <!-- Wadah Video (Default Ter-Minimize / Hidden) -->
+                        <!-- Wadah Video Default Ter-Minimize (Muncul Saat Tombol Di Atas Diklik) -->
                         <div id="tutorial-video-collapsible" class="hidden transition-all duration-300 mt-3 pt-3 border-t border-[#D6A84F]/25">
                             
-                            <!-- Tombol Perbesar / Fullscreen -->
+                            <!-- Tombol Fullscreen Lebar di Atas Video -->
                             <button type="button" onclick="toggleTutorialVideoFullscreen()" class="w-full mb-3 bg-[#1e293b] hover:bg-gray-800 text-[#D6A84F] py-2.5 px-4 rounded-xl text-xs font-extrabold shadow active:scale-[0.99] transition flex items-center justify-center gap-1.5">
                                 <span>⛶</span>
                                 <span>Perbesar Video Layar Penuh (Fullscreen)</span>
                             </button>
 
-                            <!-- Kotak Pembungkus Rasio 9:16 Tegak -->
-                            <div id="tutorial-video-wrapper" class="relative w-full max-w-[310px] mx-auto aspect-[9/16] rounded-2xl overflow-hidden bg-black border-2 border-[#D6A84F]/60 shadow-lg flex flex-col justify-center">
+                            <div id="tutorial-video-wrapper" class="relative w-full max-w-[290px] mx-auto aspect-[9/16] rounded-2xl overflow-hidden bg-[#0f172a] border-2 border-[#D6A84F]/60 shadow-lg flex flex-col justify-center">
                                 
                                 <!-- Tombol Keluar saat Fullscreen -->
                                 <button type="button" id="btn-exit-video-fs" onclick="toggleTutorialVideoFullscreen()" class="hidden absolute top-3 left-3 z-30 bg-red-600/95 text-white px-3.5 py-1.5 rounded-full text-xs font-extrabold shadow-lg border border-white/30 items-center gap-1.5">
                                     🗕 Minimize / Keluar Fullscreen
                                 </button>
 
-                                <!-- Iframe YouTube (Dimuat saat tombol Tampilkan Video diklik) -->
+                                <!-- Pelindung Pojok Kanan Atas Iframe -->
+                                <div class="absolute top-0 right-0 w-14 h-14 z-20"></div>
+
                                 <iframe 
                                     id="tutorial-video-iframe"
+                                    src="https://drive.google.com/file/d/1IYfUVKZtLr0rPK-n8ksTwnq7wQspFXap/preview" 
                                     class="w-full h-full border-0"
-                                    src="" 
-                                    data-video-src="https://www.youtube.com/embed/tcdaCGdzPag?si=zULZ-DoIjXVzV5Xt&playsinline=1&rel=0"
-                                    title="YouTube video player" 
-                                    frameborder="0" 
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
-                                    referrerpolicy="origin-when-cross-origin" 
+                                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture" 
                                     allowfullscreen>
                                 </iframe>
                             </div>
+                            <p class="text-[10px] text-center text-gray-500 font-semibold mt-2">
+                                💡 Ketuk sekali pada layar video saat berputar untuk menyembunyikan tombol navigasi.
+                            </p>
                         </div>
                     </div>
 
-                    <!-- Kotak Tugas & Note -->
+                    <!-- Kotak Estetik: Tugas Sebelum Workshop & Note -->
                     <div class="bg-white/90 rounded-2xl p-4 border-2 border-[#D6A84F]/40 shadow-sm space-y-3">
                         <div class="flex items-center justify-between border-b border-[#D6A84F]/25 pb-2">
                             <div class="flex items-center gap-2">
@@ -1275,11 +1277,9 @@
             judulBagianTutorial: "Video Tutorial & Tugas Pra-Workshop",
             subjudulBagianTutorial: "📌 Wajib ditonton & diisi sebelum sesi dimulai",
             judulVideoTutorial: "Panduan Pengisian Aplikasi CekKeuanganKu",
-            
-            // 👇 MASUKKAN LINK EMBED YOUTUBE ANDA DENGAN TAMBAHAN &playsinline=1 DI BELAKANGNYA 👇
-            linkIframeGoogleDrive: "https://www.youtube.com/embed/tcdaCGdzPag?si=zULZ-DoIjXVzV5Xt&playsinline=1",
-            orientasiVideo: "portrait", // Mengunci ukuran penuh 9:16 (tegak)
-
+            // Cukup tempel link Google Drive biasa (/view atau /preview otomatis dikenali):
+            linkIframeGoogleDrive: "https://drive.google.com/file/d/1IYfUVKZtLr0rPK-n8ksTwnq7wQspFXap/view?usp=sharing",
+            orientasiVideo: "portrait", // Isi "portrait" untuk video HP tegak (9:16), atau "landscape" untuk video mendatar (16:9)
             judulKotakTugas: "Tugas sebelum Workshop:",
             badgeTugas: "Penting",
             poinTugas1Utama: "Isi Anggaran",
@@ -1820,54 +1820,28 @@ function toggleTutorialVideoFullscreen() {
 function formatGoogleDriveVideoPreviewUrl(rawUrl) {
             if (!rawUrl) return "";
             const clean = String(rawUrl).trim();
-
-            // Jika link sudah berupa /embed/ dari YouTube, gunakan apa adanya (pastikan ada playsinline=1)
-            if (clean.includes("youtube.com/embed/")) {
-                return clean.includes("playsinline=") 
-                    ? clean 
-                    : clean + (clean.includes("?") ? "&playsinline=1" : "?playsinline=1");
+            const match = clean.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || clean.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return `https://drive.google.com/file/d/${match[1]}/preview`;
             }
-
-            // Cadangan jika menggunakan link biasa
-            const ytMatch = clean.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/))([a-zA-Z0-9_-]{11})/);
-            if (ytMatch && ytMatch[1]) {
-                return `https://www.youtube.com/embed/${ytMatch[1]}?playsinline=1&rel=0`;
-            }
-
-            // Cadangan Google Drive
-            const driveMatch = clean.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || clean.match(/[?&]id=([a-zA-Z0-9_-]{11})/);
-            if (driveMatch && driveMatch[1]) {
-                return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
-            }
-
             return clean;
         }
 
         function toggleMinimizeTutorialVideo() {
             const box = document.getElementById('tutorial-video-collapsible');
             const btn = document.getElementById('btn-minimize-video-box');
-            const iframe = document.getElementById('tutorial-video-iframe');
             if (!box || !btn) return;
 
             if (box.classList.contains('hidden')) {
-                // 1. Tampilkan kotak video terlebih dahulu agar memiliki ukuran 9:16 yang valid
                 box.classList.remove('hidden');
                 btn.innerHTML = '<span>🗕</span> <span>Sembunyikan / Minimize Video</span>';
                 btn.className = 'w-full bg-white border-2 border-[#D6A84F] text-[#1e293b] py-3 px-4 rounded-xl text-xs md:text-sm font-extrabold uppercase tracking-wide shadow-sm active:scale-[0.99] transition flex items-center justify-center gap-2';
-
-                // 2. Baru muat URL YouTube setelah kotak terbuka (mencegah Error 153)
-                if (iframe) {
-                    const targetSrc = iframe.getAttribute('data-video-src') || formatGoogleDriveVideoPreviewUrl(KONFIGURASI_SEMINAR.linkIframeGoogleDrive);
-                    if (!iframe.getAttribute('src') || iframe.getAttribute('src') === '') {
-                        setTimeout(() => {
-                            iframe.src = targetSrc;
-                        }, 80);
-                    }
-                }
             } else {
-                // Kosongkan src saat di-minimize agar suara berhenti & siap dimuat ulang dengan bersih
-                if (iframe) {
-                    iframe.src = '';
+                // Hentikan suara video saat di-minimize
+                const iframe = document.getElementById('tutorial-video-iframe');
+                if (iframe && iframe.src) {
+                    const currentSrc = iframe.src;
+                    iframe.src = currentSrc;
                 }
                 box.classList.add('hidden');
                 btn.innerHTML = '<span class="text-base leading-none">▶️</span> <span>Tampilkan Video Tutorial</span>';
@@ -2021,7 +1995,7 @@ function formatGoogleDriveVideoPreviewUrl(rawUrl) {
                 const iframeEl = document.getElementById('tutorial-video-iframe');
                 const wrapperEl = document.getElementById('tutorial-video-wrapper');
                 if (iframeEl && C.linkIframeGoogleDrive) {
-                    iframeEl.setAttribute('data-video-src', formatGoogleDriveVideoPreviewUrl(C.linkIframeGoogleDrive));
+                    iframeEl.src = formatGoogleDriveVideoPreviewUrl(C.linkIframeGoogleDrive);
                 }
                 if (wrapperEl) {
                     if (C.orientasiVideo === 'landscape') {
@@ -4995,6 +4969,47 @@ function openSepakatGame() {
                 } catch (e) {}
             }, 30000); 
         }
+		
+		// =========================================================================
+        // SINKRONISASI LIVE SLIDE DARI ADMIN / SPEAKER KE LAYAR PESERTA
+        // =========================================================================
+        let lastAdminSlideSyncTs = 0;
+
+        async function syncLiveSlideFromAdmin() {
+            const urlEndpoint = (typeof GAS_WEB_APP_URL !== 'undefined') ? GAS_WEB_APP_URL : ((typeof scriptURL !== 'undefined') ? scriptURL : '');
+            if (!urlEndpoint) return;
+
+            try {
+                const res = await fetch(`${urlEndpoint}?action=getActiveSlide&t=${Date.now()}`);
+                const data = await res.json();
+                if (!data || typeof data.activeSlideIndex === 'undefined') return;
+
+                const targetIdx = Number(data.activeSlideIndex) || 0;
+                const serverTs = Number(data.syncTimestamp) || 0;
+
+                // Hanya pindahkan slide peserta ketika Admin/Speaker menekan tombol ganti slide / tarik fokus
+                if (serverTs > 0 && serverTs !== lastAdminSlideSyncTs) {
+                    lastAdminSlideSyncTs = serverTs;
+
+                    if (Array.isArray(slidesListData) && targetIdx >= 0 && targetIdx < slidesListData.length) {
+                        currentSlideIndex = targetIdx;
+                        if (typeof renderActiveSlide === 'function') {
+                            renderActiveSlide();
+                        } else if (typeof changeSlide === 'function') {
+                            changeSlide(0);
+                        } else {
+                            const imgEl = document.getElementById('active-slide-img');
+                            if (imgEl) imgEl.src = slidesListData[currentSlideIndex];
+                        }
+                    }
+                }
+            } catch (err) {}
+        }
+
+        // Cek instruksi slide aktif dari Admin/Speaker setiap 3 detik
+        setInterval(syncLiveSlideFromAdmin, 3000);
+		
+		
     </script>
 	
 	
