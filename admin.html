@@ -363,7 +363,50 @@
 
                     <div id="admin-slide-quick-buttons" class="flex flex-wrap gap-1.5 pt-1 max-h-[180px] overflow-y-auto pr-1"></div>
                 </div>
-				
+
+                <!-- Kartu 4: Kontrol ON/OFF Game Ice Breaker "SEPAKAT" -->
+                <div class="glass-card p-5 rounded-2xl space-y-3 border border-[#D6A84F]/50">
+                    <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">🎮 Kontrol Akses Game "SEPAKAT" (Ice Breaker)</h2>
+                    <p class="text-xs text-gray-300">Aktifkan hanya saat sesi <b>Ice Breaker</b> berlangsung, dan matikan saat sesi materi dimulai agar peserta fokus.</p>
+                    <div class="flex items-center justify-between bg-[#0f172a]/90 p-3.5 rounded-xl border border-white/15">
+                        <div>
+                            <p class="text-[11px] font-bold text-gray-300">Status Game di Web Peserta:</p>
+                            <p id="admin-game-status-text" class="text-sm font-extrabold text-emerald-400">🟢 AKTIF (Bisa Dimainkan)</p>
+                        </div>
+                        <button type="button" id="btn-admin-toggle-game" onclick="toggleGameSepakatStatus()" class="bg-red-600 hover:bg-red-500 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow transition">
+                            🔒 Matikan Game
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Kartu 5: Pengaturan Link & ON/OFF Menu Survey (Google Form) -->
+                <div class="glass-card p-5 rounded-2xl space-y-3.5 border-2 border-[#D6A84F]/60">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">📋 Kontrol Menu Survey (Google Form)</h2>
+                        <span id="admin-survey-badge" class="bg-gray-700 text-gray-300 text-[10px] font-black px-2.5 py-1 rounded-full">NONAKTIF (OFF)</span>
+                    </div>
+                    <p class="text-xs text-gray-300">Anda bisa menempelkan link Google Form dari pembicara kapan saja di bawah ini (atau mengisi sel <b>B2</b> pada sheet <i>AdminControl</i> di Spreadsheet).</p>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-200">Tautan / Link Google Form Pembicara:</label>
+                        <div class="flex gap-2">
+                            <input type="url" id="admin-survey-url-input" placeholder="https://docs.google.com/forms/d/e/.../viewform" class="flex-1 bg-[#0f172a] border border-[#D6A84F]/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                            <button type="button" onclick="saveAdminSurveyUrl()" class="bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] font-extrabold px-4 py-2 rounded-xl text-xs shadow shrink-0 transition">
+                                💾 Simpan Link
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-[#0f172a]/90 p-3.5 rounded-xl border border-white/15">
+                        <div>
+                            <p class="text-[11px] font-bold text-gray-300">Status Kotak Survey di HP Peserta:</p>
+                            <p id="admin-survey-status-text" class="text-sm font-extrabold text-red-400">🔴 NONAKTIF (Terkunci di Peserta)</p>
+                        </div>
+                        <button type="button" id="btn-admin-toggle-survey" onclick="toggleAdminSurveyStatus()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow transition">
+                            🟢 Aktifkan Survey (ON)
+                        </button>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -677,6 +720,9 @@
 			leaderboard: [],
             activeSlideIndex: 0,
 			slidesEnabled: true,
+			gameEnabled: true,
+            surveyEnabled: false,
+            surveyUrl: '',
             totalManualSlides: Number(localStorage.getItem('cwo_total_manual_slides') || 10)
         };
 
@@ -742,6 +788,15 @@
 					if (typeof data.slidesEnabled !== 'undefined') {
                         adminState.slidesEnabled = !!data.slidesEnabled;
                     }
+					if (typeof data.gameEnabled !== 'undefined') {
+                        adminState.gameEnabled = !!data.gameEnabled;
+                    }
+                    if (typeof data.surveyEnabled !== 'undefined') {
+                        adminState.surveyEnabled = !!data.surveyEnabled;
+                    }
+                    if (typeof data.surveyUrl !== 'undefined') {
+                        adminState.surveyUrl = data.surveyUrl || '';
+                    }
                     adminState.rundownCount = data.rundownCount || 0;
                     adminState.logins = Array.isArray(data.logins) ? data.logins : [];
                     adminState.tokenCounts = data.tokenCounts || {};
@@ -766,6 +821,7 @@
                 renderAdminAttendance();
 				renderAdminLeaderboard();
 				renderLiveSlideControllerUI();
+				updateGameAndSurveyAdminUI();
 
                 if (manual) {
                     Swal.fire({ title: 'Data Diperbarui!', icon: 'success', timer: 1000, showConfirmButton: false, background: '#F7F1E3' });
@@ -1889,6 +1945,148 @@ function formatDurationText(sec) {
             }
         }
 
+
+function updateGameAndSurveyAdminUI() {
+            // 1. Update UI Status Game Sepakat
+            const txtGame = document.getElementById('admin-game-status-text');
+            const btnGame = document.getElementById('btn-admin-toggle-game');
+            if (txtGame && btnGame) {
+                if (adminState.gameEnabled) {
+                    txtGame.innerText = '🟢 AKTIF (Bisa Dimainkan Peserta)';
+                    txtGame.className = 'text-sm font-extrabold text-emerald-400';
+                    btnGame.innerText = '🔒 Matikan Game (OFF)';
+                    btnGame.className = 'bg-red-600 hover:bg-red-500 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow transition';
+                } else {
+                    txtGame.innerText = '🔴 NONAKTIF (Dikunci di HP Peserta)';
+                    txtGame.className = 'text-sm font-extrabold text-red-400';
+                    btnGame.innerText = '🟢 Aktifkan Game (ON)';
+                    btnGame.className = 'bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow transition';
+                }
+            }
+
+            // 2. Update UI Status Survey Google Form
+            const inputSurvey = document.getElementById('admin-survey-url-input');
+            const txtSurvey = document.getElementById('admin-survey-status-text');
+            const btnSurvey = document.getElementById('btn-admin-toggle-survey');
+            const badgeSurvey = document.getElementById('admin-survey-badge');
+
+            if (inputSurvey && document.activeElement !== inputSurvey) {
+                inputSurvey.value = adminState.surveyUrl || '';
+            }
+
+            if (txtSurvey && btnSurvey && badgeSurvey) {
+                if (adminState.surveyEnabled) {
+                    txtSurvey.innerText = '🟢 AKTIF (Tampil di HP Peserta)';
+                    txtSurvey.className = 'text-sm font-extrabold text-emerald-400';
+                    btnSurvey.innerText = '🔒 Matikan Survey (OFF)';
+                    btnSurvey.className = 'bg-red-600 hover:bg-red-500 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow transition';
+                    badgeSurvey.innerText = '● AKTIF (ON)';
+                    badgeSurvey.className = 'bg-emerald-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full animate-pulse';
+                } else {
+                    txtSurvey.innerText = '🔴 NONAKTIF (Terkunci di Peserta)';
+                    txtSurvey.className = 'text-sm font-extrabold text-red-400';
+                    btnSurvey.innerText = '🟢 Aktifkan Survey (ON)';
+                    btnSurvey.className = 'bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow transition';
+                    badgeSurvey.innerText = 'NONAKTIF (OFF)';
+                    badgeSurvey.className = 'bg-gray-700 text-gray-300 text-[10px] font-black px-2.5 py-1 rounded-full';
+                }
+            }
+        }
+
+        async function toggleGameSepakatStatus() {
+            const nextEnabled = !adminState.gameEnabled;
+            adminState.gameEnabled = nextEnabled;
+            updateGameAndSurveyAdminUI();
+
+            try {
+                await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        'action': 'toggleGameSepakat',
+                        'state': nextEnabled ? 'ON' : 'OFF'
+                    })
+                });
+                Swal.fire({
+                    title: nextEnabled ? '🎮 Game "SEPAKAT" Diaktifkan!' : '🔒 Game "SEPAKAT" Dinonaktifkan!',
+                    text: nextEnabled
+                        ? 'Peserta sekarang dapat membuka dan memainkan Game Ice Breaker SEPAKAT.'
+                        : 'Game SEPAKAT di layar HP peserta telah dikunci sementara.',
+                    icon: nextEnabled ? 'success' : 'warning',
+                    timer: 1600,
+                    showConfirmButton: false,
+                    background: '#F7F1E3'
+                });
+            } catch (err) {
+                Swal.fire('Error', 'Gagal mengubah status Game Sepakat.', 'error');
+            }
+        }
+
+        async function saveAdminSurveyUrl() {
+            const inputEl = document.getElementById('admin-survey-url-input');
+            const rawUrl = (inputEl ? inputEl.value : '').trim();
+            adminState.surveyUrl = rawUrl;
+
+            try {
+                await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        'action': 'updateSurveyConfig',
+                        'surveyUrl': rawUrl
+                    })
+                });
+                Swal.fire({
+                    title: '💾 Link Survey Tersimpan!',
+                    text: rawUrl ? 'Tautan Google Form berhasil disimpan ke Server & Spreadsheet.' : 'Tautan survey dikosongkan.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    background: '#F7F1E3'
+                });
+            } catch (err) {
+                Swal.fire('Error', 'Gagal menyimpan link survey.', 'error');
+            }
+        }
+
+        async function toggleAdminSurveyStatus() {
+            const inputEl = document.getElementById('admin-survey-url-input');
+            const currentUrl = (inputEl && inputEl.value.trim()) ? inputEl.value.trim() : (adminState.surveyUrl || '');
+
+            if (!adminState.surveyEnabled && !currentUrl) {
+                Swal.fire('Link Survey Kosong', 'Masukkan dan simpan terlebih dahulu link Google Form sebelum mengaktifkan Survey ke peserta.', 'warning');
+                return;
+            }
+
+            const nextEnabled = !adminState.surveyEnabled;
+            adminState.surveyEnabled = nextEnabled;
+            adminState.surveyUrl = currentUrl;
+            updateGameAndSurveyAdminUI();
+
+            try {
+                await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        'action': 'updateSurveyConfig',
+                        'surveyUrl': currentUrl,
+                        'state': nextEnabled ? 'ON' : 'OFF'
+                    })
+                });
+                Swal.fire({
+                    title: nextEnabled ? '🟢 Menu Survey Diaktifkan!' : '🔴 Menu Survey Dinonaktifkan!',
+                    text: nextEnabled
+                        ? 'Peserta sekarang dapat mengisi Google Form langsung dari web maupun membukanya di tab baru.'
+                        : 'Menu Survey di web peserta telah ditutup sementara.',
+                    icon: nextEnabled ? 'success' : 'warning',
+                    timer: 1600,
+                    showConfirmButton: false,
+                    background: '#F7F1E3'
+                });
+            } catch (err) {
+                Swal.fire('Error', 'Gagal mengubah status Survey.', 'error');
+            }
+        }
         // =========================================================================
         // SISTEM PRESENTASI SPEAKER (PROYEKTOR, CORETAN/HIGHLIGHT & KEYBOARD PANAH)
         // =========================================================================
