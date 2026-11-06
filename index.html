@@ -899,6 +899,55 @@
                 </div>
             </div>
 
+
+<!-- ========================================================================= -->
+            <!-- SURVEY & EVALUASI SESI (COLLAPSIBLE - DEFAULT TERTUTUP) -->
+            <!-- ========================================================================= -->
+            <div id="section-survey" class="clean-card mb-4 border-2 border-[#D6A84F]/40 overflow-hidden">
+                <button type="button" onclick="toggleCardCollapse('body-survey', 'chev-survey')" class="w-full p-4 px-5 flex justify-between items-center text-left hover:bg-black/[0.02] transition">
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-lg">📋</span>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-extrabold text-[15px] text-[#1e293b]">Survey & Evaluasi Sesi</h3>
+                                <span id="participant-survey-badge" class="bg-gray-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full">MENUNGGU</span>
+                            </div>
+                            <p class="text-[10px] text-gray-500 font-semibold">Isi langsung di web atau buka di tab baru</p>
+                        </div>
+                    </div>
+                    <span id="chev-survey" class="collapse-chevron text-xs font-extrabold bg-[#1e293b] text-[#D6A84F] w-7 h-7 rounded-full flex items-center justify-center shrink-0">▼</span>
+                </button>
+
+                <div id="body-survey" class="hidden px-5 pb-5 pt-2 border-t border-[#D6A84F]/20 space-y-3">
+                    <!-- Tampilan Saat Survey Masih Dimatikan (OFF) oleh Admin -->
+                    <div id="survey-locked-view" class="bg-[#1e293b] text-center p-6 rounded-2xl border border-[#D6A84F]/50">
+                        <div class="text-3xl mb-2">🔒</div>
+                        <h4 class="text-xs md:text-sm font-extrabold text-[#D6A84F] uppercase tracking-wider">Menu Survey Belum Dibuka</h4>
+                        <p class="text-[11px] text-gray-300 mt-1 leading-relaxed">
+                            Formulir survey dari pembicara sedang dinonaktifkan sementara dan akan otomatis tampil di sini saat sesi pengisian survey dimulai.
+                        </p>
+                    </div>
+
+                    <!-- Tampilan Saat Survey Diaktifkan (ON) oleh Admin -->
+                    <div id="survey-active-view" class="hidden space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 bg-[#1e293b] p-3 rounded-xl border border-[#D6A84F]/50">
+                            <span class="text-[11px] font-bold text-[#F7F1E3]">💡 Isi formulir di bawah atau buka layar penuh:</span>
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <a id="btn-survey-new-tab" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 sm:flex-initial text-center bg-gradient-to-r from-[#D6A84F] to-[#c29542] text-[#1e293b] font-black text-xs px-3.5 py-2 rounded-xl shadow hover:opacity-95 transition">
+                                    ↗ Buka di Tab Baru
+                                </a>
+                                <button type="button" onclick="reloadParticipantSurveyIframe()" class="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-3 py-2 rounded-xl border border-white/20 transition">
+                                    🔄 Muat Ulang
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="w-full bg-white rounded-2xl overflow-hidden border-2 border-[#D6A84F]/60 shadow-inner">
+                            <iframe id="participant-survey-iframe" src="" class="w-full h-[540px] border-0" loading="lazy">Memuat Google Form...</iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
 <!-- ========================================================================= -->
             <!-- 10. KOTAK ICE BREAKER GAME: "SEPAKAT" (COLLAPSIBLE - DEFAULT TERTUTUP)    -->
             <!-- ========================================================================= -->
@@ -4971,17 +5020,129 @@ function openSepakatGame() {
         }
 		
 		// =========================================================================
-        // SINKRONISASI LIVE SLIDE & KUNCI ON/OFF SLIDE DARI ADMIN / SPEAKER
+        // SINKRONISASI LIVE SLIDE, KUNCI GAME SEPAKAT & KOTAK MENU SURVEY GOOGLE FORM
         // =========================================================================
         let lastAdminSlideSyncTs = 0;
         let isParticipantSlidesEnabled = true;
+        let isGameSepakatEnabled = true;
+        let isParticipantSurveyEnabled = false;
+        let activeParticipantSurveyUrl = '';
 
+        // 1. Konversi Link Google Form agar Nyaman Diisi di Dalam Iframe Web
+        function formatGoogleFormEmbedUrl(rawUrl) {
+            if (!rawUrl) return '';
+            const clean = String(rawUrl).trim();
+            if (clean.includes('docs.google.com/forms') && !clean.includes('embedded=true')) {
+                return clean + (clean.includes('?') ? '&embedded=true' : '?embedded=true');
+            }
+            return clean;
+        }
+
+        function reloadParticipantSurveyIframe() {
+            const iframe = document.getElementById('participant-survey-iframe');
+            if (iframe && activeParticipantSurveyUrl) {
+                iframe.src = formatGoogleFormEmbedUrl(activeParticipantSurveyUrl);
+            }
+        }
+
+        // 2. Sinkronisasi Tampilan & Status Survey Sesuai Admin (Langsung ke HTML Manual)
+        function applyParticipantSurveyState(enabled, rawUrl) {
+            const urlChanged = (rawUrl !== activeParticipantSurveyUrl);
+            isParticipantSurveyEnabled = enabled && !!rawUrl;
+            activeParticipantSurveyUrl = rawUrl || '';
+
+            const lockedView = document.getElementById('survey-locked-view');
+            const activeView = document.getElementById('survey-active-view');
+            const badge = document.getElementById('participant-survey-badge');
+            const btnNewTab = document.getElementById('btn-survey-new-tab');
+            const iframe = document.getElementById('participant-survey-iframe');
+            const body = document.getElementById('body-survey');
+
+            if (isParticipantSurveyEnabled) {
+                if (lockedView) lockedView.classList.add('hidden');
+                if (activeView) activeView.classList.remove('hidden');
+                if (badge) {
+                    badge.innerText = '● AKTIF';
+                    badge.className = 'bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full animate-pulse';
+                }
+                if (btnNewTab) btnNewTab.href = activeParticipantSurveyUrl;
+                // Jika menu survey sedang dibuka oleh peserta, otomatis muat iframe
+                if (iframe && body && (!body.classList.contains('hidden') || urlChanged)) {
+                    const embedUrl = formatGoogleFormEmbedUrl(activeParticipantSurveyUrl);
+                    if (iframe.getAttribute('src') !== embedUrl) {
+                        iframe.src = embedUrl;
+                    }
+                }
+            } else {
+                if (lockedView) lockedView.classList.remove('hidden');
+                if (activeView) activeView.classList.add('hidden');
+                if (badge) {
+                    badge.innerText = 'TERKUNCI';
+                    badge.className = 'bg-gray-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full';
+                }
+                if (iframe) iframe.src = '';
+            }
+        }
+
+        // 3. Kunci / Aktifkan Game Ice Breaker "SEPAKAT" dari Admin (Tampil sebagai Kotak Utuh & Muncul Alert saat Diklik jika OFF)
+        function applyGameSepakatLockState(enabled) {
+            isGameSepakatEnabled = enabled;
+
+            // Cari elemen kartu/kotak menu Game Sepakat di halaman peserta
+            let gameBox = document.getElementById('body-game')
+                || document.getElementById('game-sepakat-box')
+                || document.getElementById('section-game')
+                || document.getElementById('panel-game');
+
+            if (!gameBox) {
+                const gameBtn = document.querySelector('[onclick*="Sepakat"], [onclick*="sepakat"], [onclick*="Game"], [id*="sepakat"]');
+                if (gameBtn) {
+                    gameBox = gameBtn.closest('.clean-card, .rounded-2xl, .rounded-3xl, section') || gameBtn.parentElement;
+                }
+            }
+            if (!gameBox) return;
+
+            // Pastikan wadah utama tetap relatif agar tidak merusak tata letak
+            gameBox.style.position = 'relative';
+
+            // Hapus overlay lama jika ada
+            let lockOverlay = document.getElementById('game-sepakat-disabled-overlay');
+            if (lockOverlay) {
+                lockOverlay.remove();
+            }
+
+            if (!enabled) {
+                // Jika Game dimatikan (OFF), pasang lapisan transparan di atas kotak agar saat diklik memunculkan peringatan SweetAlert
+                lockOverlay = document.createElement('div');
+                lockOverlay.id = 'game-sepakat-disabled-overlay';
+                lockOverlay.className = 'absolute inset-0 z-30 cursor-pointer rounded-2xl';
+                lockOverlay.title = 'Klik untuk melihat status game';
+                lockOverlay.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: '<span style="color:#D6A84F; font-weight:800;">Sesi Game "SEPAKAT" Belum Dibuka</span>',
+                            text: 'Game Ice Breaker saat ini sedang dinonaktifkan oleh Admin agar peserta dapat fokus mengikuti jalannya sesi materi.',
+                            icon: 'warning',
+                            confirmButtonText: 'Tutup',
+                            confirmButtonColor: '#D6A84F',
+                            background: '#F7F1E3'
+                        });
+                    } else {
+                        alert('Sesi Game "SEPAKAT" belum dibuka oleh Admin.');
+                    }
+                };
+                gameBox.appendChild(lockOverlay);
+            }
+        }
+
+        // 4. Kunci / Aktifkan Slide Materi Peserta dari Admin
         function applyParticipantSlidesLockState(enabled) {
             isParticipantSlidesEnabled = enabled;
             const stage = document.getElementById('slide-stage');
             if (!stage) return;
 
-            // Buat lapisan penutup (overlay) otomatis jika belum ada di dalam #slide-stage
             let lockOverlay = document.getElementById('slide-disabled-overlay');
             if (!lockOverlay) {
                 lockOverlay = document.createElement('div');
@@ -4994,18 +5155,15 @@ function openSepakatGame() {
                         Slide presentasi saat ini sedang dihentikan sementara oleh Admin / Pemateri dan akan otomatis tampil saat sesi dimulai.
                     </p>
                 `;
-                // Cegah klik pada overlay agar tidak memicu popup zoom gambar
                 lockOverlay.addEventListener('click', (e) => e.stopPropagation());
                 stage.style.position = 'relative';
                 stage.appendChild(lockOverlay);
             }
 
-            // Kunci atau aktifkan tombol Prev, Next, dan Download PDF di sekitar kotak materi
             const presButtons = document.querySelectorAll('button[onclick*="changeSlide"], button[onclick*="nextSlide"], button[onclick*="prevSlide"], button[onclick*="downloadPDF"]');
 
             if (!enabled) {
                 lockOverlay.classList.remove('hidden');
-                // Jika peserta sedang membuka modal zoom gambar slide, otomatis tutup
                 if (typeof closeImageZoomModal === 'function') closeImageZoomModal();
                 presButtons.forEach(btn => {
                     btn.disabled = true;
@@ -5021,6 +5179,7 @@ function openSepakatGame() {
             }
         }
 
+        // 5. Polling Real-Time Setiap 3 Detik dari Server
         async function syncLiveSlideFromAdmin() {
             const urlEndpoint = (typeof GAS_WEB_APP_URL !== 'undefined') ? GAS_WEB_APP_URL : ((typeof scriptURL !== 'undefined') ? scriptURL : '');
             if (!urlEndpoint) return;
@@ -5030,16 +5189,28 @@ function openSepakatGame() {
                 const data = await res.json();
                 if (!data) return;
 
-                // 1. Cek apakah Admin mengaktifkan atau menghentikan slide peserta
-                const serverEnabled = (typeof data.slidesEnabled !== 'undefined') ? !!data.slidesEnabled : true;
-                if (serverEnabled !== isParticipantSlidesEnabled) {
-                    applyParticipantSlidesLockState(serverEnabled);
+                // A. Sinkronkan Status ON/OFF Game Sepakat
+                const serverGameEnabled = (typeof data.gameEnabled !== 'undefined') ? !!data.gameEnabled : true;
+                if (serverGameEnabled !== isGameSepakatEnabled) {
+                    applyGameSepakatLockState(serverGameEnabled);
                 }
 
-                // Jika slide sedang dinonaktifkan (OFF), hentikan perpindahan slide
-                if (!serverEnabled) return;
+                // B. Sinkronkan Link & Status ON/OFF Menu Survey Google Form
+                const serverSurveyEnabled = !!data.surveyEnabled;
+                const serverSurveyUrl = String(data.surveyUrl || '').trim();
+                if (serverSurveyEnabled !== isParticipantSurveyEnabled || serverSurveyUrl !== activeParticipantSurveyUrl) {
+                    applyParticipantSurveyState(serverSurveyEnabled, serverSurveyUrl);
+                }
 
-                // 2. Jika slide aktif (ON), sinkronkan nomor halaman slide dengan Admin/Speaker
+                // C. Sinkronkan Status ON/OFF Slide Peserta
+                const serverSlidesEnabled = (typeof data.slidesEnabled !== 'undefined') ? !!data.slidesEnabled : true;
+                if (serverSlidesEnabled !== isParticipantSlidesEnabled) {
+                    applyParticipantSlidesLockState(serverSlidesEnabled);
+                }
+
+                if (!serverSlidesEnabled) return;
+
+                // D. Sinkronkan Nomor Halaman Slide Aktif
                 const targetIdx = Number(data.activeSlideIndex) || 0;
                 const serverTs = Number(data.syncTimestamp) || 0;
 
@@ -5061,7 +5232,7 @@ function openSepakatGame() {
             } catch (err) {}
         }
 
-        // Jalankan pengecekan pertama kali saat halaman dibuka & ulangi setiap 3 detik
+        // Jalankan sinkronisasi pertama kali & ulangi setiap 3 detik (Tanpa pemanggilan fungsi pembuat kotak otomatis)
         syncLiveSlideFromAdmin();
         setInterval(syncLiveSlideFromAdmin, 3000);
 		
