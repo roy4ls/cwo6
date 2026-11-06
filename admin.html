@@ -550,9 +550,9 @@
                         </div>
                     </div>
 
-                    <!-- Daftar Thumbnail Semua Slide + Tombol Tarik Fokus (1 Kolom) -->
+                    <!-- Daftar Tombol Pilih Cepat Slide + Tombol Tarik Fokus (1 Kolom) -->
                     <div class="flex flex-col justify-between h-full space-y-3">
-                        <div class="space-y-2">
+                        <div class="space-y-2.5">
                             <!-- Kotak Kecil Lompat ke Nomor Slide -->
                             <div class="flex items-center gap-1.5 bg-[#0f172a] p-2 rounded-xl border border-[#D6A84F]/40">
                                 <span class="text-[10px] font-bold text-gray-300 shrink-0">Lompat ke:</span>
@@ -561,9 +561,13 @@
                                     Go
                                 </button>
                             </div>
-                            <p class="text-xs font-extrabold text-[#D6A84F] mb-2 uppercase tracking-wider">📑 Pilih Cepat Halaman Slide:</p>
-                            <div id="speaker-slide-quick-buttons" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2 max-h-[290px] overflow-y-auto pr-1"></div>
+
+                            <p class="text-xs font-extrabold text-[#D6A84F] uppercase tracking-wider">📑 Pilih Cepat Halaman Slide:</p>
+
+                            <!-- Wadah Tombol Slide 1 s/d 96 (Model Tombol Kompak seperti Gambar 2) -->
+                            <div id="speaker-slide-quick-buttons" class="flex flex-wrap gap-1.5 max-h-[290px] overflow-y-auto pr-1.5 content-start"></div>
                         </div>
+
                         <button type="button" onclick="forceSyncCurrentSlide()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold py-3 px-4 rounded-xl shadow-lg transition">
                             🎯 Tarik Fokus Peserta ke Slide Ini
                         </button>
@@ -1770,22 +1774,23 @@ function formatDurationText(sec) {
                 }
             });
 
-            // Buat Tombol Pilih Cepat beserta Thumbnail Gambar Slide
-            let btnsSpeakerHtml = '';
+            // Buat Deretan Tombol Kompak (Slide 1, Slide 2, ... Slide 96) untuk Admin & Speaker
             let btnsAdminHtml = '';
+            let btnsSpeakerHtml = '';
             for (let i = 0; i < total; i++) {
                 const isActive = (i === current);
-                const thumbUrl = hasUploadedSlides && adminState.slidesList[i] ? formatDriveUrl(adminState.slidesList[i]) : '';
+                const btnClass = isActive
+                    ? 'bg-[#D6A84F] text-[#0f172a] border border-white shadow-md scale-105'
+                    : 'bg-[#0f172a] text-gray-200 border border-white/15 hover:border-[#D6A84F]';
 
-                btnsSpeakerHtml += `
-                    <button type="button" onclick="setLiveSlideIndex(${i})" class="p-1.5 rounded-xl border text-left transition flex flex-col gap-1 ${isActive ? 'bg-[#D6A84F] text-[#0f172a] border-white shadow-lg ring-2 ring-[#D6A84F]' : 'bg-[#0f172a] text-gray-200 border-white/15 hover:border-[#D6A84F]'}">
-                        ${thumbUrl ? `<img src="${thumbUrl}" loading="lazy" class="w-full h-16 object-cover rounded-lg bg-black">` : ''}
-                        <span class="text-[11px] font-extrabold px-1">${isActive ? '🟢 ' : ''}Slide ${i + 1}</span>
+                btnsAdminHtml += `
+                    <button type="button" onclick="setLiveSlideIndex(${i})" class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition ${btnClass}">
+                        Slide ${i + 1}
                     </button>
                 `;
 
-                btnsAdminHtml += `
-                    <button type="button" onclick="setLiveSlideIndex(${i})" class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition ${isActive ? 'bg-[#D6A84F] text-[#0f172a] shadow-md scale-105' : 'bg-[#0f172a] text-gray-300 border border-white/15 hover:border-[#D6A84F]'}">
+                btnsSpeakerHtml += `
+                    <button type="button" id="sp-quick-btn-${i}" onclick="setLiveSlideIndex(${i})" class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition ${btnClass}">
                         Slide ${i + 1}
                     </button>
                 `;
@@ -1794,6 +1799,15 @@ function formatDurationText(sec) {
             const boxAdmin = document.getElementById('admin-slide-quick-buttons');
             const boxSpeaker = document.getElementById('speaker-slide-quick-buttons');
             if (boxAdmin) boxAdmin.innerHTML = btnsAdminHtml;
+            if (boxSpeaker) {
+                boxSpeaker.innerHTML = btnsSpeakerHtml;
+                // Otomatis arahkan scroll ke tombol slide yang sedang aktif
+                const activeBtn = document.getElementById(`sp-quick-btn-${current}`);
+                if (activeBtn) {
+                    activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
             // Update tampilan tombol saklar Aktif / Nonaktif Slide Peserta
             const btnSpToggle = document.getElementById('btn-speaker-toggle-slides');
             const btnAdmToggle = document.getElementById('btn-admin-toggle-slides');
