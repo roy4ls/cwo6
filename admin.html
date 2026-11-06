@@ -331,6 +331,15 @@
                         <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">🎯 Kendali Live Slide Peserta</h2>
                         <span class="bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full animate-pulse">● LIVE SYNC</span>
                     </div>
+					<div class="flex items-center justify-between bg-[#0f172a]/90 p-3 rounded-xl border border-white/15">
+                        <div>
+                            <p class="text-[11px] font-bold text-gray-300">Status Akses Slide di Web Peserta:</p>
+                            <p id="admin-slides-status-text" class="text-sm font-extrabold text-emerald-400">🟢 AKTIF (Bisa Dilihat Peserta)</p>
+                        </div>
+                        <button type="button" id="btn-admin-toggle-slides" onclick="toggleParticipantSlidesStatus()" class="bg-red-600 hover:bg-red-500 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs shadow transition">
+                            🔒 Nonaktifkan Slide
+                        </button>
+                    </div>
                     <p class="text-xs text-gray-300">Pilih nomor slide di bawah untuk memindahkan fokus tampilan slide di seluruh HP peserta secara otomatis.</p>
                     
 					<div class="w-full aspect-video bg-black/80 rounded-xl overflow-hidden border border-[#D6A84F]/50 flex items-center justify-center">
@@ -449,7 +458,12 @@
                         <p class="text-xs text-gray-300 mt-0.5">Tekan tombol di bawah atau klik gambar thumbnail untuk memindahkan slide di HP seluruh peserta.</p>
                     </div>
 
-                    <div class="flex items-center gap-2.5">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <!-- Tombol Saklar Aktifkan / Hentikan Slide di Web Peserta -->
+                        <button type="button" id="btn-speaker-toggle-slides" onclick="toggleParticipantSlidesStatus()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-4 py-3 rounded-xl text-xs md:text-sm shadow-lg border border-emerald-300/40 transition flex items-center gap-1.5">
+                            🟢 Slide Peserta: AKTIF (Klik untuk Matikan)
+                        </button>
+
                         <button type="button" onclick="changeLiveSlide(-1)" class="bg-gray-700 hover:bg-gray-600 text-white font-extrabold px-5 py-3 rounded-xl text-xs md:text-sm shadow transition">
                             ⬅ Slide Sebelumnya
                         </button>
@@ -640,6 +654,7 @@
             feedback: [],
 			leaderboard: [],
             activeSlideIndex: 0,
+			slidesEnabled: true,
             totalManualSlides: Number(localStorage.getItem('cwo_total_manual_slides') || 10)
         };
 
@@ -701,6 +716,9 @@
                     adminState.slidesCount = data.slidesCount || 0;
 					if (typeof data.activeSlideIndex !== 'undefined') {
                         adminState.activeSlideIndex = Number(data.activeSlideIndex) || 0;
+                    }
+					if (typeof data.slidesEnabled !== 'undefined') {
+                        adminState.slidesEnabled = !!data.slidesEnabled;
                     }
                     adminState.rundownCount = data.rundownCount || 0;
                     adminState.logins = Array.isArray(data.logins) ? data.logins : [];
@@ -1748,8 +1766,71 @@ function formatDurationText(sec) {
             const boxAdmin = document.getElementById('admin-slide-quick-buttons');
             const boxSpeaker = document.getElementById('speaker-slide-quick-buttons');
             if (boxAdmin) boxAdmin.innerHTML = btnsAdminHtml;
+            // Update tampilan tombol saklar Aktif / Nonaktif Slide Peserta
+            const btnSpToggle = document.getElementById('btn-speaker-toggle-slides');
+            const btnAdmToggle = document.getElementById('btn-admin-toggle-slides');
+            const txtAdmStatus = document.getElementById('admin-slides-status-text');
+
+            if (adminState.slidesEnabled) {
+                if (btnSpToggle) {
+                    btnSpToggle.innerHTML = '🟢 Slide Peserta: AKTIF <span class="text-[10px] opacity-85">(Klik untuk Hentikan)</span>';
+                    btnSpToggle.className = 'bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-4 py-3 rounded-xl text-xs md:text-sm shadow-lg border border-emerald-300/40 transition flex items-center gap-1.5';
+                }
+                if (btnAdmToggle) {
+                    btnAdmToggle.innerText = '🔒 Hentikan / Nonaktifkan Slide';
+                    btnAdmToggle.className = 'bg-red-600 hover:bg-red-500 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs shadow transition';
+                }
+                if (txtAdmStatus) {
+                    txtAdmStatus.innerText = '🟢 AKTIF (Tampil di HP Peserta)';
+                    txtAdmStatus.className = 'text-sm font-extrabold text-emerald-400';
+                }
+            } else {
+                if (btnSpToggle) {
+                    btnSpToggle.innerHTML = '🔴 Slide Peserta: NONAKTIF <span class="text-[10px] opacity-90">(Klik untuk Aktifkan)</span>';
+                    btnSpToggle.className = 'bg-red-600 hover:bg-red-500 text-white font-extrabold px-4 py-3 rounded-xl text-xs md:text-sm shadow-lg border border-red-300 animate-pulse transition flex items-center gap-1.5';
+                }
+                if (btnAdmToggle) {
+                    btnAdmToggle.innerText = '🟢 Aktifkan Slide Sekarang';
+                    btnAdmToggle.className = 'bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs shadow transition';
+                }
+                if (txtAdmStatus) {
+                    txtAdmStatus.innerText = '🔴 NONAKTIF (Terkunci di HP Peserta)';
+                    txtAdmStatus.className = 'text-sm font-extrabold text-red-400';
+                }
+            }
+
             // Otomatis perbarui gambar di Layar Proyektor Extended & Mode Duplikat saat slide berubah
             syncExtendedProjectorSlide(currentImgUrl, current, total);
+        }
+
+        async function toggleParticipantSlidesStatus() {
+            const nextEnabled = !adminState.slidesEnabled;
+            const nextStateStr = nextEnabled ? 'ON' : 'OFF';
+            adminState.slidesEnabled = nextEnabled;
+            renderLiveSlideControllerUI();
+
+            try {
+                await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        'action': 'toggleParticipantSlides',
+                        'state': nextStateStr
+                    })
+                });
+                Swal.fire({
+                    title: nextEnabled ? '🟢 Slide Peserta Diaktifkan!' : '🔴 Slide Peserta Dihentikan!',
+                    text: nextEnabled
+                        ? 'Seluruh peserta kini dapat melihat dan mengikuti slide materi di HP mereka.'
+                        : 'Slide materi di web seluruh peserta telah dinonaktifkan sementara.',
+                    icon: nextEnabled ? 'success' : 'warning',
+                    timer: 1600,
+                    showConfirmButton: false,
+                    background: '#F7F1E3'
+                });
+            } catch (err) {
+                Swal.fire('Error', 'Gagal mengubah status slide peserta.', 'error');
+            }
         }
 
         // =========================================================================
