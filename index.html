@@ -5138,6 +5138,9 @@ function openSepakatGame() {
         }
 
         // 4. Kunci / Aktifkan Slide Materi Peserta dari Admin
+        let isParticipantNextSlideAllowed = true;
+        let currentAdminActiveSlideIdx = 0;
+
         function applyParticipantSlidesLockState(enabled) {
             isParticipantSlidesEnabled = enabled;
             const stage = document.getElementById('slide-stage');
@@ -5176,11 +5179,86 @@ function openSepakatGame() {
                     btn.classList.remove('opacity-40', 'pointer-events-none');
                 });
                 if (typeof renderActiveSlide === 'function') renderActiveSlide();
+                updateParticipantNextButtonUI();
             }
         }
 
-        // 5. Polling Real-Time Setiap 3 Detik dari Server
+        // 5. Kunci / Izinkan Tombol Next Slide & Gestur Geser (Swipe) Maju Peserta
+        function updateParticipantNextButtonUI() {
+            if (!isParticipantSlidesEnabled) return;
+
+            const nextButtons = document.querySelectorAll('button[onclick*="changeSlide(1)"], button[onclick*="nextSlide"]');
+            // Jika dikunci oleh Admin: Peserta hanya boleh klik Next jika sedang melihat slide sebelumnya (di bawah slide aktif Admin)
+            const canGoForward = isParticipantNextSlideAllowed || (typeof currentSlideIndex !== 'undefined' && currentSlideIndex < currentAdminActiveSlideIdx);
+
+            nextButtons.forEach(btn => {
+                if (!canGoForward) {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-35', 'pointer-events-none');
+                } else {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-35', 'pointer-events-none');
+                }
+            });
+        }
+
+        function installParticipantSlideNavigationGuard() {
+            if (window._participantNextGuardInstalled) return;
+            window._participantNextGuardInstalled = true;
+
+            // A. Cegat fungsi changeSlide(delta) bawaan web peserta
+            if (typeof window.changeSlide === 'function') {
+                const origChangeSlide = window.changeSlide;
+                window.changeSlide = function(delta, fromAdminSync = false) {
+                    if (!fromAdminSync && delta > 0 && !isParticipantNextSlideAllowed) {
+                        // Izinkan maju hanya jika peserta habis menekan Back dan belum melewati slide aktif Admin
+                        if (typeof currentSlideIndex !== 'undefined' && currentSlideIndex >= currentAdminActiveSlideIdx) {
+                            return;
+                        }
+                    }
+                    const res = origChangeSlide.apply(this, arguments);
+                    updateParticipantNextButtonUI();
+                    return res;
+                };
+            }
+
+            // B. Cegat fungsi renderActiveSlide() agar status tombol Next selalu diperbarui setiap ganti halaman
+            if (typeof window.renderActiveSlide === 'function') {
+                const origRender = window.renderActiveSlide;
+                window.renderActiveSlide = function() {
+                    const res = origRender.apply(this, arguments);
+                    updateParticipantNextButtonUI();
+                    return res;
+                };
+            }
+
+            // C. Cegat Gestur Geser Layar (Swipe Kiri untuk Next Slide) di HP Peserta saat Dikunci
+            const stage = document.getElementById('slide-stage');
+            if (stage) {
+                let touchStartX = 0;
+                stage.addEventListener('touchstart', (e) => {
+                    if (e.touches && e.touches.length > 0) {
+                        touchStartX = e.touches[0].clientX;
+                    }
+                }, { passive: true, capture: true });
+
+                stage.addEventListener('touchend', (e) => {
+                    if (!isParticipantNextSlideAllowed && e.changedTouches && e.changedTouches.length > 0) {
+                        const touchEndX = e.changedTouches[0].clientX;
+                        const diffX = touchStartX - touchEndX;
+                        // Jika peserta menggeser jari ke kiri (diffX > 30 artinya mau Next Slide) dan sudah berada di slide Admin
+                        if (diffX > 30 && typeof currentSlideIndex !== 'undefined' && currentSlideIndex >= currentAdminActiveSlideIdx) {
+                            e.stopImmediatePropagation();
+                            e.preventDefault();
+                        }
+                    }
+                }, { capture: true });
+            }
+        }
+
+        // 6. Polling Real-Time Setiap 3 Detik dari Server
         async function syncLiveSlideFromAdmin() {
+            installParticipantSlideNavigationGuard();
             const urlEndpoint = (typeof GAS_WEB_APP_URL !== 'undefined') ? GAS_WEB_APP_URL : ((typeof scriptURL !== 'undefined') ? scriptURL : '');
             if (!urlEndpoint) return;
 
@@ -5208,10 +5286,24 @@ function openSepakatGame() {
                     applyParticipantSlidesLockState(serverSlidesEnabled);
                 }
 
+                // D. Sinkronkan Status Kunci / Bebas Tombol Next Slide Peserta
+                const targetIdx = Number(data.activeSlideIndex) || 0;
+                currentAdminActiveSlideIdx = targetIdx;
+                const serverNextAllowed = (typeof data.nextSlideAllowed !== 'undefined') ? !!data.nextSlideAllowed : true;
+
+                if (serverNextAllowed !== isParticipantNextSlideAllowed) {
+                    isParticipantNextSlideAllowed = serverNextAllowed;
+                    // Jika peserta sedang berada di halaman yang melebihi slide Admin saat dikunci, tarik kembali ke slide Admin
+                    if (!isParticipantNextSlideAllowed && typeof currentSlideIndex !== 'undefined' && currentSlideIndex > currentAdminActiveSlideIdx) {
+                        currentSlideIndex = currentAdminActiveSlideIdx;
+                        if (typeof renderActiveSlide === 'function') renderActiveSlide();
+                    }
+                }
+                updateParticipantNextButtonUI();
+
                 if (!serverSlidesEnabled) return;
 
-                // D. Sinkronkan Nomor Halaman Slide Aktif
-                const targetIdx = Number(data.activeSlideIndex) || 0;
+                // E. Sinkronkan Nomor Halaman Slide Aktif dari Admin/Speaker
                 const serverTs = Number(data.syncTimestamp) || 0;
 
                 if (serverTs > 0 && serverTs !== lastAdminSlideSyncTs) {
@@ -5222,17 +5314,19 @@ function openSepakatGame() {
                         if (typeof renderActiveSlide === 'function') {
                             renderActiveSlide();
                         } else if (typeof changeSlide === 'function') {
-                            changeSlide(0);
+                            changeSlide(0, true);
                         } else {
                             const imgEl = document.getElementById('active-slide-img');
                             if (imgEl) imgEl.src = slidesListData[currentSlideIndex];
                         }
+                        updateParticipantNextButtonUI();
                     }
                 }
             } catch (err) {}
         }
 
-        // Jalankan sinkronisasi pertama kali & ulangi setiap 3 detik (Tanpa pemanggilan fungsi pembuat kotak otomatis)
+        // Jalankan sinkronisasi pertama kali & ulangi setiap 3 detik
+        installParticipantSlideNavigationGuard();
         syncLiveSlideFromAdmin();
         setInterval(syncLiveSlideFromAdmin, 3000);
 		
