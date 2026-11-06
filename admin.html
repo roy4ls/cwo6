@@ -536,7 +536,7 @@
                             </div>
                         </div>
 
-                        <!-- Baris Tombol Presentasikan Proyektor -->
+                        <!-- Baris Tombol Presentasikan Proyektor & Set Kualitas Videotron -->
                         <div class="flex flex-wrap items-center justify-center gap-2 mt-3">
                             <button type="button" onclick="openSpeakerPresentationModal()" class="bg-gradient-to-r from-[#D6A84F] to-amber-500 hover:opacity-95 text-[#0f172a] text-xs font-black px-4 py-2 rounded-xl shadow-lg transition flex items-center gap-1.5">
                                 🎬 Presentasikan (Duplikat / Extended)
@@ -544,10 +544,20 @@
                             <button type="button" id="btn-close-ext-projector" onclick="closeExtendedProjectorWindow()" class="hidden bg-red-600 hover:bg-red-500 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow transition">
                                 ✕ Tutup Layar Proyektor
                             </button>
+
+                            <!-- Input File Tersembunyi & Tombol Muat Gambar Asli 100% Tanpa Kompresi Khusus Videotron -->
+                            <input type="file" id="videotron-hd-files" accept="image/*" multiple class="hidden" onchange="loadLocalUltraHDSlidesForVideotron(this)">
+                            <button type="button" onclick="document.getElementById('videotron-hd-files').click()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow border border-purple-300/40 transition flex items-center gap-1.5" title="Gunakan file gambar asli 100% tanpa kompresi khusus untuk layar Videotron">
+                                🖥️ Set Gambar Ultra-HD (Videotron)
+                            </button>
+
                             <button type="button" onclick="fetchAdminSlidesData(true)" class="bg-blue-600/80 hover:bg-blue-600 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl transition">
-                                🔄 Muat Ulang Gambar Slide
+                                🔄 Muat Ulang Slide
                             </button>
                         </div>
+                        <p id="videotron-quality-badge" class="text-[11px] font-bold text-gray-400 mt-1.5 text-center">
+                            📺 Status Layar Proyektor: Menggunakan Resolusi Standar (Klik "Set Gambar Ultra-HD" untuk kualitas 100% Asli di Videotron)
+                        </p>
                     </div>
 
                     <!-- Daftar Tombol Pilih Cepat Slide + Tombol Tarik Fokus (1 Kolom) -->
@@ -1313,6 +1323,11 @@ function formatDurationText(sec) {
                 }
             }
 
+// Jika mengunggah ke Sheet Slides, otomatis simpan juga file 100% Asli Tanpa Kompresi untuk Videotron
+            if (target === 'Slides' && typeof saveOriginalFilesToVideotronDB === 'function') {
+                await saveOriginalFilesToVideotronDB(files, mode === 'replace');
+            }
+			
             status.innerText = `✅ Selesai! ${files.length} gambar berhasil masuk ke Sheet ${target}.`;
             btn.disabled = false;
             fileInput.value = '';
@@ -1748,8 +1763,7 @@ function formatDurationText(sec) {
         function renderLiveSlideControllerUI() {
             const total = getEffectiveTotalSlides();
             const current = Math.min(Math.max(0, adminState.activeSlideIndex || 0), total - 1);
-            const hasUploadedSlides = Array.isArray(adminState.slidesList) && adminState.slidesList.length > 0;
-            const currentImgUrl = hasUploadedSlides ? formatDriveUrl(adminState.slidesList[current]) : '';
+            const currentImgUrl = getBestVideotronSlideUrl(current);
 
             const indAdmin = document.getElementById('admin-live-slide-indicator');
             const indSpeaker = document.getElementById('speaker-live-slide-indicator');
@@ -1930,7 +1944,7 @@ function formatDurationText(sec) {
             Swal.close();
             const total = getEffectiveTotalSlides();
             const current = Math.min(Math.max(0, adminState.activeSlideIndex || 0), total - 1);
-            const currentImgUrl = formatDriveUrl(adminState.slidesList[current] || '');
+            const currentImgUrl = getBestVideotronSlideUrl(current);
 
             let winFeatures = 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no';
             try {
@@ -2534,6 +2548,144 @@ function executeJumpSlide() {
                 background: '#F7F1E3'
             });
         }
+
+// =========================================================================
+        // MESIN PENYIMPANAN ULTRA-HD (100% ORIGINAL TANPA KOMPRESI) KHUSUS VIDEOTRON
+        // =========================================================================
+        adminState.ultraHDSlides = []; // Menyimpan ObjectURL gambar asli 100% untuk Videotron
+
+        function openVideotronDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open('CWOVideotronUltraHD_DB', 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('hd_slides')) {
+                        db.createObjectStore('hd_slides', { keyPath: 'index' });
+                    }
+                };
+                req.onsuccess = (e) => resolve(e.target.result);
+                req.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        // Ambil URL terbaik untuk Videotron: Prioritaskan Ultra-HD Asli, jika belum ada gunakan Slide Standar
+        function getBestVideotronSlideUrl(slideIdx) {
+            if (Array.isArray(adminState.ultraHDSlides) && adminState.ultraHDSlides[slideIdx]) {
+                return adminState.ultraHDSlides[slideIdx];
+            }
+            if (Array.isArray(adminState.slidesList) && adminState.slidesList[slideIdx]) {
+                return formatDriveUrl(adminState.slidesList[slideIdx]);
+            }
+            return '';
+        }
+
+        function updateVideotronQualityBadge() {
+            const badge = document.getElementById('videotron-quality-badge');
+            if (!badge) return;
+            const hdCount = (adminState.ultraHDSlides || []).filter(Boolean).length;
+            if (hdCount > 0) {
+                badge.innerHTML = `✨ <span class="text-emerald-400 font-extrabold">KUALITAS VIDEOTRON ULTRA-HD AKTIF (${hdCount} Slide Resolusi 100% Asli Tanpa Kompresi)</span> • <button type="button" onclick="clearVideotronUltraHD()" class="underline text-red-300 hover:text-red-200 ml-1">Reset HD</button>`;
+            } else {
+                badge.innerHTML = `📺 Status Layar Proyektor: Menggunakan Resolusi Standar (Klik <b>"🖥️ Set Gambar Ultra-HD (Videotron)"</b> untuk kualitas 100% Asli)`;
+            }
+        }
+
+        async function saveOriginalFilesToVideotronDB(filesArray, clearExisting = true) {
+            try {
+                const db = await openVideotronDB();
+                if (clearExisting) {
+                    await new Promise((res, rej) => {
+                        const tx = db.transaction('hd_slides', 'readwrite');
+                        tx.objectStore('hd_slides').clear();
+                        tx.oncomplete = res;
+                        tx.onerror = rej;
+                    });
+                    adminState.ultraHDSlides = [];
+                }
+
+                const startIdx = clearExisting ? 0 : adminState.ultraHDSlides.length;
+                await new Promise((res, rej) => {
+                    const tx = db.transaction('hd_slides', 'readwrite');
+                    const store = tx.objectStore('hd_slides');
+                    filesArray.forEach((file, i) => {
+                        store.put({ index: startIdx + i, blob: file });
+                    });
+                    tx.oncomplete = res;
+                    tx.onerror = rej;
+                });
+
+                await restoreVideotronUltraHDFromDB();
+            } catch (err) {
+                console.error("Gagal menyimpan Ultra-HD ke IndexedDB:", err);
+            }
+        }
+
+        async function restoreVideotronUltraHDFromDB() {
+            try {
+                const db = await openVideotronDB();
+                const items = await new Promise((res, rej) => {
+                    const tx = db.transaction('hd_slides', 'readonly');
+                    const req = tx.objectStore('hd_slides').getAll();
+                    req.onsuccess = () => res(req.result || []);
+                    req.onerror = rej;
+                });
+
+                // Bersihkan URL lama dari RAM jika ada
+                if (Array.isArray(adminState.ultraHDSlides)) {
+                    adminState.ultraHDSlides.forEach(u => { try { URL.revokeObjectURL(u); } catch (e) {} });
+                }
+
+                adminState.ultraHDSlides = [];
+                items.sort((a, b) => a.index - b.index).forEach(item => {
+                    if (item && item.blob) {
+                        adminState.ultraHDSlides[item.index] = URL.createObjectURL(item.blob);
+                    }
+                });
+
+                updateVideotronQualityBadge();
+                renderLiveSlideControllerUI();
+            } catch (err) {
+                console.error("Gagal memuat Ultra-HD dari DB:", err);
+            }
+        }
+
+        // Dipanggil saat tombol "🖥️ Set Gambar Ultra-HD (Videotron)" diklik (Tanpa perlu upload ke internet!)
+        async function loadLocalUltraHDSlidesForVideotron(inputEl) {
+            const files = Array.from(inputEl.files || []).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+            if (files.length === 0) return;
+
+            Swal.fire({
+                title: 'Memuat Gambar Ultra-HD...',
+                text: `Menyiapkan ${files.length} slide kualitas 100% Asli untuk Videotron...`,
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            await saveOriginalFilesToVideotronDB(files, true);
+            inputEl.value = '';
+
+            Swal.fire({
+                title: '✨ Kualitas Ultra-HD Videotron Aktif!',
+                html: `<b>${files.length} slide resolusi asli (100% tanpa kompresi)</b> siap ditayangkan ke Videotron.<br><br><span style="font-size:12px;color:#475569;">📱 Web HP Peserta tetap menggunakan versi kompresi ringan agar tidak berat.</span>`,
+                icon: 'success',
+                background: '#F7F1E3'
+            });
+        }
+
+        async function clearVideotronUltraHD() {
+            const db = await openVideotronDB();
+            await new Promise((res) => {
+                const tx = db.transaction('hd_slides', 'readwrite');
+                tx.objectStore('hd_slides').clear();
+                tx.oncomplete = res;
+            });
+            adminState.ultraHDSlides = [];
+            updateVideotronQualityBadge();
+            renderLiveSlideControllerUI();
+        }
+
+        // Otomatis pulihkan gambar Ultra-HD Videotron setiap kali halaman Admin/Speaker dibuka atau di-refresh
+        restoreVideotronUltraHDFromDB();
 
         // Muat gambar slide otomatis saat portal dibuka
         fetchAdminSlidesData(false);
