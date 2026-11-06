@@ -4971,9 +4971,55 @@ function openSepakatGame() {
         }
 		
 		// =========================================================================
-        // SINKRONISASI LIVE SLIDE DARI ADMIN / SPEAKER KE LAYAR PESERTA
+        // SINKRONISASI LIVE SLIDE & KUNCI ON/OFF SLIDE DARI ADMIN / SPEAKER
         // =========================================================================
         let lastAdminSlideSyncTs = 0;
+        let isParticipantSlidesEnabled = true;
+
+        function applyParticipantSlidesLockState(enabled) {
+            isParticipantSlidesEnabled = enabled;
+            const stage = document.getElementById('slide-stage');
+            if (!stage) return;
+
+            // Buat lapisan penutup (overlay) otomatis jika belum ada di dalam #slide-stage
+            let lockOverlay = document.getElementById('slide-disabled-overlay');
+            if (!lockOverlay) {
+                lockOverlay = document.createElement('div');
+                lockOverlay.id = 'slide-disabled-overlay';
+                lockOverlay.className = 'hidden absolute inset-0 z-30 bg-[#0f172a]/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center rounded-xl select-none';
+                lockOverlay.innerHTML = `
+                    <div class="w-12 h-12 rounded-2xl bg-[#D6A84F]/20 border border-[#D6A84F] flex items-center justify-center text-2xl mb-3 shadow-lg">🔒</div>
+                    <h4 class="text-sm font-extrabold text-[#D6A84F] uppercase tracking-wider">Slide Materi Belum Diaktifkan</h4>
+                    <p class="text-[11px] text-gray-300 font-semibold mt-1 max-w-xs leading-relaxed">
+                        Slide presentasi saat ini sedang dihentikan sementara oleh Admin / Pemateri dan akan otomatis tampil saat sesi dimulai.
+                    </p>
+                `;
+                // Cegah klik pada overlay agar tidak memicu popup zoom gambar
+                lockOverlay.addEventListener('click', (e) => e.stopPropagation());
+                stage.style.position = 'relative';
+                stage.appendChild(lockOverlay);
+            }
+
+            // Kunci atau aktifkan tombol Prev, Next, dan Download PDF di sekitar kotak materi
+            const presButtons = document.querySelectorAll('button[onclick*="changeSlide"], button[onclick*="nextSlide"], button[onclick*="prevSlide"], button[onclick*="downloadPDF"]');
+
+            if (!enabled) {
+                lockOverlay.classList.remove('hidden');
+                // Jika peserta sedang membuka modal zoom gambar slide, otomatis tutup
+                if (typeof closeImageZoomModal === 'function') closeImageZoomModal();
+                presButtons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-40', 'pointer-events-none');
+                });
+            } else {
+                lockOverlay.classList.add('hidden');
+                presButtons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-40', 'pointer-events-none');
+                });
+                if (typeof renderActiveSlide === 'function') renderActiveSlide();
+            }
+        }
 
         async function syncLiveSlideFromAdmin() {
             const urlEndpoint = (typeof GAS_WEB_APP_URL !== 'undefined') ? GAS_WEB_APP_URL : ((typeof scriptURL !== 'undefined') ? scriptURL : '');
@@ -4982,12 +5028,21 @@ function openSepakatGame() {
             try {
                 const res = await fetch(`${urlEndpoint}?action=getActiveSlide&t=${Date.now()}`);
                 const data = await res.json();
-                if (!data || typeof data.activeSlideIndex === 'undefined') return;
+                if (!data) return;
 
+                // 1. Cek apakah Admin mengaktifkan atau menghentikan slide peserta
+                const serverEnabled = (typeof data.slidesEnabled !== 'undefined') ? !!data.slidesEnabled : true;
+                if (serverEnabled !== isParticipantSlidesEnabled) {
+                    applyParticipantSlidesLockState(serverEnabled);
+                }
+
+                // Jika slide sedang dinonaktifkan (OFF), hentikan perpindahan slide
+                if (!serverEnabled) return;
+
+                // 2. Jika slide aktif (ON), sinkronkan nomor halaman slide dengan Admin/Speaker
                 const targetIdx = Number(data.activeSlideIndex) || 0;
                 const serverTs = Number(data.syncTimestamp) || 0;
 
-                // Hanya pindahkan slide peserta ketika Admin/Speaker menekan tombol ganti slide / tarik fokus
                 if (serverTs > 0 && serverTs !== lastAdminSlideSyncTs) {
                     lastAdminSlideSyncTs = serverTs;
 
@@ -5006,7 +5061,8 @@ function openSepakatGame() {
             } catch (err) {}
         }
 
-        // Cek instruksi slide aktif dari Admin/Speaker setiap 3 detik
+        // Jalankan pengecekan pertama kali saat halaman dibuka & ulangi setiap 3 detik
+        syncLiveSlideFromAdmin();
         setInterval(syncLiveSlideFromAdmin, 3000);
 		
 		
