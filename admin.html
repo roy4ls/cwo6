@@ -358,10 +358,10 @@
 
                     <div class="flex items-center justify-between gap-2 pt-1">
                         <label class="text-[11px] font-bold text-gray-300">Jumlah Slide Manual Anda:</label>
-                        <input type="number" id="input-total-manual-slides" min="1" max="50" value="10" onchange="updateManualSlideTotal(this.value)" class="w-20 bg-[#0f172a] border border-[#D6A84F]/50 rounded-lg px-2.5 py-1 text-xs font-extrabold text-center text-[#D6A84F]">
+                        <input type="number" id="input-total-manual-slides" min="1" max="150" value="96" onchange="updateManualSlideTotal(this.value)" class="w-20 bg-[#0f172a] border border-[#D6A84F]/50 rounded-lg px-2.5 py-1 text-xs font-extrabold text-center text-[#D6A84F]">
                     </div>
 
-                    <div id="admin-slide-quick-buttons" class="flex flex-wrap gap-1.5 pt-1"></div>
+                    <div id="admin-slide-quick-buttons" class="flex flex-wrap gap-1.5 pt-1 max-h-[180px] overflow-y-auto pr-1"></div>
                 </div>
 				
             </div>
@@ -552,7 +552,15 @@
 
                     <!-- Daftar Thumbnail Semua Slide + Tombol Tarik Fokus (1 Kolom) -->
                     <div class="flex flex-col justify-between h-full space-y-3">
-                        <div>
+                        <div class="space-y-2">
+                            <!-- Kotak Kecil Lompat ke Nomor Slide -->
+                            <div class="flex items-center gap-1.5 bg-[#0f172a] p-2 rounded-xl border border-[#D6A84F]/40">
+                                <span class="text-[10px] font-bold text-gray-300 shrink-0">Lompat ke:</span>
+                                <input type="number" id="jump-slide-input" min="1" max="150" placeholder="No..." class="w-16 bg-black border border-[#D6A84F]/60 rounded-lg px-2 py-1 text-xs font-black text-center text-[#D6A84F] focus:outline-none" onkeydown="if(event.key==='Enter') executeJumpSlide()">
+                                <button type="button" onclick="executeJumpSlide()" class="bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] text-xs font-black px-3 py-1 rounded-lg shadow transition">
+                                    Go
+                                </button>
+                            </div>
                             <p class="text-xs font-extrabold text-[#D6A84F] mb-2 uppercase tracking-wider">📑 Pilih Cepat Halaman Slide:</p>
                             <div id="speaker-slide-quick-buttons" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2 max-h-[290px] overflow-y-auto pr-1"></div>
                         </div>
@@ -1215,7 +1223,7 @@ function formatDurationText(sec) {
             }
         }
 
-        // Upload Banyak Slide / Rundown langsung dari Web Admin
+        // Upload Banyak Slide / Rundown langsung dari Web Admin (Dioptimalkan untuk 96+ Slide)
         function fileToOptimizedBase64Admin(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1223,7 +1231,8 @@ function formatDurationText(sec) {
                     const img = new Image();
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const MAX_W = 1280;
+                        // Ukuran 1024px & kualitas 0.70 menjaga 96 slide tetap tajam namun ringan di Sheet & HP peserta
+                        const MAX_W = 1024;
                         let w = img.naturalWidth;
                         let h = img.naturalHeight;
                         if (w > MAX_W) {
@@ -1234,7 +1243,7 @@ function formatDurationText(sec) {
                         canvas.height = h;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, w, h);
-                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                        resolve(canvas.toDataURL('image/jpeg', 0.70));
                     };
                     img.onerror = reject;
                     img.src = e.target.result;
@@ -1265,30 +1274,49 @@ function formatDurationText(sec) {
 
             for (let i = 0; i < files.length; i++) {
                 const pct = Math.round(((i + 1) / files.length) * 100);
-                status.innerText = `Mengunggah gambar ${i + 1} dari ${files.length} ke Sheet ${target} (${pct}%)...`;
+                status.innerText = `Mengunggah slide ${i + 1} dari ${files.length} ke Sheet ${target} (${pct}%)...`;
                 bar.style.width = pct + '%';
 
                 const b64 = await fileToOptimizedBase64Admin(files[i]);
                 const clearFirst = (mode === 'replace' && i === 0) ? 'true' : 'false';
 
-                await fetch(GAS_WEB_APP_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        'action': 'adminUploadSlideOrRundown',
-                        'targetSheet': target,
-                        'clearFirst': clearFirst,
-                        'base64Data': b64
-                    })
-                });
+                // Pengaman Auto-Retry hingga 3x jika jaringan sempat terputus saat upload 96 slide
+                let uploaded = false;
+                for (let attempt = 1; attempt <= 3; attempt++) {
+                    try {
+                        await fetch(GAS_WEB_APP_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: new URLSearchParams({
+                                'action': 'adminUploadSlideOrRundown',
+                                'targetSheet': target,
+                                'clearFirst': clearFirst,
+                                'base64Data': b64
+                            })
+                        });
+                        uploaded = true;
+                        break;
+                    } catch (err) {
+                        status.innerText = `Koneksi sibuk, mencoba ulang slide ${i + 1} (Percobaan ${attempt}/3)...`;
+                        await new Promise(r => setTimeout(r, 1200));
+                    }
+                }
+
+                if (!uploaded) {
+                    btn.disabled = false;
+                    Swal.fire('Koneksi Terputus', `Gagal mengunggah pada gambar ke-${i + 1}. Silakan periksa internet Anda.`, 'error');
+                    return;
+                }
             }
 
             status.innerText = `✅ Selesai! ${files.length} gambar berhasil masuk ke Sheet ${target}.`;
             btn.disabled = false;
             fileInput.value = '';
             fetchAdminAllData(false);
-			fetchAdminSlidesData(false);
-            Swal.fire('Upload Berhasil!', `Semua gambar telah tersimpan di Sheet ${target} dan Cache Server otomatis diperbarui.`, 'success');
+            if (typeof fetchAdminSlidesData === 'function') {
+                fetchAdminSlidesData(false);
+            }
+            Swal.fire('Upload Berhasil!', `Seluruh ${files.length} gambar telah tersimpan di Sheet ${target} dan siap ditayangkan.`, 'success');
         }
 
         async function clearServerCacheFromWeb() {
@@ -1751,7 +1779,7 @@ function formatDurationText(sec) {
 
                 btnsSpeakerHtml += `
                     <button type="button" onclick="setLiveSlideIndex(${i})" class="p-1.5 rounded-xl border text-left transition flex flex-col gap-1 ${isActive ? 'bg-[#D6A84F] text-[#0f172a] border-white shadow-lg ring-2 ring-[#D6A84F]' : 'bg-[#0f172a] text-gray-200 border-white/15 hover:border-[#D6A84F]'}">
-                        ${thumbUrl ? `<img src="${thumbUrl}" class="w-full h-16 object-cover rounded-lg bg-black">` : ''}
+                        ${thumbUrl ? `<img src="${thumbUrl}" loading="lazy" class="w-full h-16 object-cover rounded-lg bg-black">` : ''}
                         <span class="text-[11px] font-extrabold px-1">${isActive ? '🟢 ' : ''}Slide ${i + 1}</span>
                     </button>
                 `;
@@ -2456,6 +2484,29 @@ function formatDurationText(sec) {
             } catch (e) {
                 console.error("Gagal menyiarkan slide aktif:", e);
             }
+        }
+
+function executeJumpSlide() {
+            const inputEl = document.getElementById('jump-slide-input');
+            if (!inputEl) return;
+            const targetNum = parseInt(inputEl.value, 10);
+            const total = getEffectiveTotalSlides();
+
+            if (isNaN(targetNum) || targetNum < 1 || targetNum > total) {
+                Swal.fire({
+                    title: 'Nomor Slide Tidak Valid',
+                    text: `Masukkan nomor antara 1 sampai ${total}.`,
+                    icon: 'warning',
+                    timer: 1400,
+                    showConfirmButton: false,
+                    background: '#F7F1E3'
+                });
+                return;
+            }
+
+            // Karena indeks array dimulai dari 0, kurangi 1
+            setLiveSlideIndex(targetNum - 1);
+            inputEl.value = '';
         }
 
         function forceSyncCurrentSlide() {
