@@ -262,106 +262,46 @@
         <!-- ========================================================================= -->
         <!-- TAB 4: UPLOAD SLIDE / RUNDOWN & KONTROL ALARM ISTIRAHAT                   -->
         <!-- ========================================================================= -->
-        <section id="panel-controls" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5">
-            <!-- Kartu 1: Upload Banyak Slide / Rundown langsung dari Web Admin -->
-            <div class="glass-card p-5 rounded-2xl space-y-4">
-                <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">➕ Upload Slide Materi / Rundown</h2>
-                <p class="text-xs text-gray-300">Unggah banyak file gambar Slide Presentasi atau Rundown sekaligus langsung dari browser ini (otomatis dipecah ke Spreadsheet & me-refresh Cache Server).</p>
-
-                <div>
-                    <label class="block text-xs font-bold text-gray-200 mb-1">1. Pilih Sheet Tujuan:</label>
-                    <select id="web-upload-target" class="w-full bg-[#0f172a] border border-[#D6A84F]/40 rounded-xl p-2.5 text-xs font-bold text-white">
-                        <option value="Slides">📊 Sheet: Slides (Materi Presentasi Peserta)</option>
-                        <option value="Rundown">📅 Sheet: Rundown (Gambar Jadwal Acara)</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-gray-200 mb-1">2. Mode Penyimpanan:</label>
-                    <select id="web-upload-mode" class="w-full bg-[#0f172a] border border-[#D6A84F]/40 rounded-xl p-2.5 text-xs font-bold text-white">
-                        <option value="append">➕ Tambahkan di Bawah Gambar yang Sudah Ada</option>
-                        <option value="replace">🔄 Hapus Gambar Lama & Ganti Semua dengan yang Baru</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-gray-200 mb-1">3. Pilih File Gambar (Bisa Blok Banyak Sekaligus):</label>
-                    <input type="file" id="web-upload-files" accept="image/*" multiple class="w-full bg-[#0f172a]/70 border border-dashed border-[#D6A84F] rounded-xl p-3 text-xs text-gray-200">
-                </div>
-
-                <div id="web-upload-progress-box" class="hidden bg-[#0f172a] p-3 rounded-xl border border-white/10 text-center">
-                    <p id="web-upload-status" class="text-xs font-bold text-[#D6A84F] mb-2">Memproses...</p>
-                    <div class="w-full bg-gray-700 h-2.5 rounded-full overflow-hidden">
-                        <div id="web-upload-bar" class="bg-[#D6A84F] h-full w-0 transition-all duration-300"></div>
-                    </div>
-                </div>
-
-                <button type="button" id="btn-web-upload-start" onclick="startAdminWebUpload()" class="w-full bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] font-extrabold py-3 rounded-xl text-xs shadow-lg transition">
-                    🚀 Mulai Upload & Sinkronkan ke Web Peserta
-                </button>
-            </div>
-
-            <!-- Kartu 2: Kontrol Alarm Istirahat & Manajemen Cache Server -->
+        <section id="panel-controls" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+            
+            <!-- KOLOM KIRI: Upload Slide, Kontrol Game Sepakat & Kontrol Survey -->
             <div class="space-y-5">
-                <div class="glass-card p-5 rounded-2xl space-y-3">
-                    <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">🔔 Kontrol Alarm Istirahat Peserta</h2>
-                    <p class="text-xs text-gray-300">Saat Alarm diaktifkan ke posisi <b>ON</b>, seluruh layar HP peserta yang sedang membuka web akan memunculkan pop-up peringatan <i>"Break Time is Over!"</i>.</p>
-                    <div class="flex items-center justify-between bg-[#0f172a]/80 p-4 rounded-xl border border-white/10">
-                        <div>
-                            <p class="text-xs font-bold text-gray-300">Status Alarm Saat Ini:</p>
-                            <p id="panel-alarm-text" class="text-lg font-extrabold text-gray-400">NONAKTIF (OFF)</p>
-                        </div>
-                        <button type="button" onclick="toggleBreakAlarm()" id="panel-alarm-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow transition">
-                            🔊 Nyalakan Alarm (ON)
-                        </button>
-                    </div>
-                </div>
+                <!-- Kartu 1: Upload Banyak Slide / Rundown langsung dari Web Admin -->
+                <div class="glass-card p-5 rounded-2xl space-y-4">
+                    <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">➕ Upload Slide Materi / Rundown</h2>
+                    <p class="text-xs text-gray-300">Unggah banyak file gambar Slide Presentasi atau Rundown sekaligus langsung dari browser ini (otomatis dipecah ke Spreadsheet & me-refresh Cache Server).</p>
 
-                <div class="glass-card p-5 rounded-2xl space-y-3">
-                    <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">⚡ Bersihkan Cache RAM Server</h2>
-                    <p class="text-xs text-gray-300">Jika Anda baru saja mengubah isi Sheet <i>Slides</i> atau <i>Rundown</i> secara manual di Google Spreadsheet, tekan tombol ini agar perubahan langsung tampil di HP peserta.</p>
-                    <button type="button" onclick="clearServerCacheFromWeb()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3 rounded-xl text-xs shadow transition">
-                        ⚡ Refresh Cache Slide & Rundown Sekarang
+                    <div>
+                        <label class="block text-xs font-bold text-gray-200 mb-1">1. Pilih Sheet Tujuan:</label>
+                        <select id="web-upload-target" class="w-full bg-[#0f172a] border border-[#D6A84F]/40 rounded-xl p-2.5 text-xs font-bold text-white">
+                            <option value="Slides">📊 Sheet: Slides (Materi Presentasi Peserta)</option>
+                            <option value="Rundown">📅 Sheet: Rundown (Gambar Jadwal Acara)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-200 mb-1">2. Mode Penyimpanan:</label>
+                        <select id="web-upload-mode" class="w-full bg-[#0f172a] border border-[#D6A84F]/40 rounded-xl p-2.5 text-xs font-bold text-white">
+                            <option value="append">➕ Tambahkan di Bawah Gambar yang Sudah Ada</option>
+                            <option value="replace">🔄 Hapus Gambar Lama & Ganti Semua dengan yang Baru</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-200 mb-1">3. Pilih File Gambar (Bisa Blok Banyak Sekaligus):</label>
+                        <input type="file" id="web-upload-files" accept="image/*" multiple class="w-full bg-[#0f172a]/70 border border-dashed border-[#D6A84F] rounded-xl p-3 text-xs text-gray-200">
+                    </div>
+
+                    <div id="web-upload-progress-box" class="hidden bg-[#0f172a] p-3 rounded-xl border border-white/10 text-center">
+                        <p id="web-upload-status" class="text-xs font-bold text-[#D6A84F] mb-2">Memproses...</p>
+                        <div class="w-full bg-gray-700 h-2.5 rounded-full overflow-hidden">
+                            <div id="web-upload-bar" class="bg-[#D6A84F] h-full w-0 transition-all duration-300"></div>
+                        </div>
+                    </div>
+
+                    <button type="button" id="btn-web-upload-start" onclick="startAdminWebUpload()" class="w-full bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] font-extrabold py-3 rounded-xl text-xs shadow-lg transition">
+                        🚀 Mulai Upload & Sinkronkan ke Web Peserta
                     </button>
-                </div>
-				
-				<!-- Kartu 3: Remote Kendali Live Slide Peserta (Di Tab Admin) -->
-                <div class="glass-card p-5 rounded-2xl space-y-3 border-2 border-[#D6A84F]/60">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">🎯 Kendali Live Slide Peserta</h2>
-                        <span class="bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full animate-pulse">● LIVE SYNC</span>
-                    </div>
-					<div class="flex items-center justify-between bg-[#0f172a]/90 p-3 rounded-xl border border-white/15">
-                        <div>
-                            <p class="text-[11px] font-bold text-gray-300">Status Akses Slide di Web Peserta:</p>
-                            <p id="admin-slides-status-text" class="text-sm font-extrabold text-emerald-400">🟢 AKTIF (Bisa Dilihat Peserta)</p>
-                        </div>
-                        <button type="button" id="btn-admin-toggle-slides" onclick="toggleParticipantSlidesStatus()" class="bg-red-600 hover:bg-red-500 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs shadow transition">
-                            🔒 Nonaktifkan Slide
-                        </button>
-                    </div>
-                    <p class="text-xs text-gray-300">Pilih nomor slide di bawah untuk memindahkan fokus tampilan slide di seluruh HP peserta secara otomatis.</p>
-                    
-					<div class="w-full aspect-video bg-black/80 rounded-xl overflow-hidden border border-[#D6A84F]/50 flex items-center justify-center">
-                        <img id="admin-active-slide-img" src="" alt="Slide Aktif" class="w-full h-full object-contain hidden">
-                        <span id="admin-slide-empty" class="text-[11px] text-gray-400 font-bold">Memuat gambar slide...</span>
-                    </div>
-					
-                    <div class="flex items-center justify-between gap-2 bg-[#0f172a]/90 p-3 rounded-xl border border-white/10">
-                        <button type="button" onclick="changeLiveSlide(-1)" class="bg-gray-700 hover:bg-gray-600 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs transition">⬅ Prev</button>
-                        <div class="text-center">
-                            <p class="text-[10px] text-gray-400 font-bold uppercase">Slide Aktif di HP Peserta</p>
-                            <p id="admin-live-slide-indicator" class="text-lg font-black text-[#D6A84F]">Slide 1</p>
-                        </div>
-                        <button type="button" onclick="changeLiveSlide(1)" class="bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] font-extrabold px-4 py-2.5 rounded-xl text-xs transition">Next ➡</button>
-                    </div>
-
-                    <div class="flex items-center justify-between gap-2 pt-1">
-                        <label class="text-[11px] font-bold text-gray-300">Jumlah Slide Manual Anda:</label>
-                        <input type="number" id="input-total-manual-slides" min="1" max="150" value="96" onchange="updateManualSlideTotal(this.value)" class="w-20 bg-[#0f172a] border border-[#D6A84F]/50 rounded-lg px-2.5 py-1 text-xs font-extrabold text-center text-[#D6A84F]">
-                    </div>
-
-                    <div id="admin-slide-quick-buttons" class="flex flex-wrap gap-1.5 pt-1 max-h-[180px] overflow-y-auto pr-1"></div>
                 </div>
 
                 <!-- Kartu 4: Kontrol ON/OFF Game Ice Breaker "SEPAKAT" -->
@@ -406,6 +346,85 @@
                             🟢 Aktifkan Survey (ON)
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- KOLOM KANAN: Kontrol Alarm, Cache Server & Kendali Live Slide -->
+            <div class="space-y-5">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="glass-card p-4 rounded-2xl space-y-2.5 flex flex-col justify-between">
+                        <div>
+                            <h2 class="text-sm font-extrabold text-[#D6A84F]">🔔 Alarm Istirahat Peserta</h2>
+                            <p class="text-[11px] text-gray-300 mt-1">Munculkan pop-up <i>"Break Time is Over!"</i> di HP peserta.</p>
+                        </div>
+                        <div class="flex items-center justify-between bg-[#0f172a]/80 p-3 rounded-xl border border-white/10">
+                            <div>
+                                <p class="text-[10px] font-bold text-gray-300">Status Alarm:</p>
+                                <p id="panel-alarm-text" class="text-xs font-extrabold text-gray-400">NONAKTIF (OFF)</p>
+                            </div>
+                            <button type="button" onclick="toggleBreakAlarm()" id="panel-alarm-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-3 py-2 rounded-xl text-[11px] shadow transition">
+                                🔊 Nyalakan
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-2xl space-y-2.5 flex flex-col justify-between">
+                        <div>
+                            <h2 class="text-sm font-extrabold text-[#D6A84F]">⚡ Bersihkan Cache RAM</h2>
+                            <p class="text-[11px] text-gray-300 mt-1">Tekan jika baru mengubah isi Sheet <i>Slides</i> / <i>Rundown</i> manual.</p>
+                        </div>
+                        <button type="button" onclick="clearServerCacheFromWeb()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 rounded-xl text-xs shadow transition">
+                            ⚡ Refresh Cache Sekarang
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Kartu 3: Remote Kendali Live Slide Peserta (Di Tab Admin) -->
+                <div class="glass-card p-5 rounded-2xl space-y-3 border-2 border-[#D6A84F]/60">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-base md:text-lg font-extrabold text-[#D6A84F]">🎯 Kendali Live Slide Peserta</h2>
+                        <span class="bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full animate-pulse">● LIVE SYNC</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-[#0f172a]/90 p-3 rounded-xl border border-white/15">
+                        <div>
+                            <p class="text-[11px] font-bold text-gray-300">Status Akses Slide di Web Peserta:</p>
+                            <p id="admin-slides-status-text" class="text-sm font-extrabold text-emerald-400">🟢 AKTIF (Bisa Dilihat Peserta)</p>
+                        </div>
+                        <button type="button" id="btn-admin-toggle-slides" onclick="toggleParticipantSlidesStatus()" class="bg-red-600 hover:bg-red-500 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs shadow transition">
+                            🔒 Nonaktifkan Slide
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between bg-[#0f172a]/90 p-3 rounded-xl border border-white/15">
+                        <div>
+                            <p class="text-[11px] font-bold text-gray-300">Navigasi Tombol Next & Geser (Swipe) Peserta:</p>
+                            <p id="admin-next-slide-status-text" class="text-sm font-extrabold text-emerald-400">🔓 BEBAS (Peserta Bisa Next & Geser)</p>
+                        </div>
+                        <button type="button" id="btn-admin-toggle-next" onclick="toggleParticipantNextSlideStatus()" class="bg-amber-600 hover:bg-amber-500 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs shadow transition">
+                            🔒 Kunci Tombol Next
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-300">Pilih nomor slide di bawah untuk memindahkan fokus tampilan slide di seluruh HP peserta secara otomatis.</p>
+                    
+                    <div class="w-full max-h-[210px] aspect-video bg-black/80 rounded-xl overflow-hidden border border-[#D6A84F]/50 flex items-center justify-center">
+                        <img id="admin-active-slide-img" src="" alt="Slide Aktif" class="w-full h-full object-contain hidden">
+                        <span id="admin-slide-empty" class="text-[11px] text-gray-400 font-bold">Memuat gambar slide...</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between gap-2 bg-[#0f172a]/90 p-3 rounded-xl border border-white/10">
+                        <button type="button" onclick="changeLiveSlide(-1)" class="bg-gray-700 hover:bg-gray-600 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs transition">⬅ Prev</button>
+                        <div class="text-center">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase">Slide Aktif di HP Peserta</p>
+                            <p id="admin-live-slide-indicator" class="text-lg font-black text-[#D6A84F]">Slide 1</p>
+                        </div>
+                        <button type="button" onclick="changeLiveSlide(1)" class="bg-[#D6A84F] hover:bg-[#c29542] text-[#0f172a] font-extrabold px-4 py-2.5 rounded-xl text-xs transition">Next ➡</button>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-2 pt-1">
+                        <label class="text-[11px] font-bold text-gray-300">Jumlah Slide Manual Anda:</label>
+                        <input type="number" id="input-total-manual-slides" min="1" max="150" value="96" onchange="updateManualSlideTotal(this.value)" class="w-20 bg-[#0f172a] border border-[#D6A84F]/50 rounded-lg px-2.5 py-1 text-xs font-extrabold text-center text-[#D6A84F]">
+                    </div>
+
+                    <div id="admin-slide-quick-buttons" class="flex flex-wrap gap-1.5 pt-1 max-h-[140px] overflow-y-auto pr-1"></div>
                 </div>
             </div>
         </section>
@@ -505,6 +524,11 @@
                         <!-- Tombol Saklar Aktifkan / Hentikan Slide di Web Peserta -->
                         <button type="button" id="btn-speaker-toggle-slides" onclick="toggleParticipantSlidesStatus()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-4 py-3 rounded-xl text-xs md:text-sm shadow-lg border border-emerald-300/40 transition flex items-center gap-1.5">
                             🟢 Slide Peserta: AKTIF (Klik untuk Matikan)
+                        </button>
+
+                        <!-- Tombol Saklar Kunci / Izinkan Tombol Next Slide Peserta -->
+                        <button type="button" id="btn-speaker-toggle-next" onclick="toggleParticipantNextSlideStatus()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-4 py-3 rounded-xl text-xs md:text-sm shadow-lg border border-emerald-300/40 transition flex items-center gap-1.5">
+                            🔓 Next Slide Peserta: BEBAS
                         </button>
 
                         <button type="button" onclick="changeLiveSlide(-1)" class="bg-gray-700 hover:bg-gray-600 text-white font-extrabold px-5 py-3 rounded-xl text-xs md:text-sm shadow transition">
@@ -720,6 +744,7 @@
 			leaderboard: [],
             activeSlideIndex: 0,
 			slidesEnabled: true,
+			nextSlideAllowed: true,
 			gameEnabled: true,
             surveyEnabled: false,
             surveyUrl: '',
@@ -787,6 +812,9 @@
                     }
 					if (typeof data.slidesEnabled !== 'undefined') {
                         adminState.slidesEnabled = !!data.slidesEnabled;
+                    }
+					if (typeof data.nextSlideAllowed !== 'undefined') {
+                        adminState.nextSlideAllowed = !!data.nextSlideAllowed;
                     }
 					if (typeof data.gameEnabled !== 'undefined') {
                         adminState.gameEnabled = !!data.gameEnabled;
@@ -1911,6 +1939,39 @@ function formatDurationText(sec) {
                 }
             }
 
+            // Update tampilan tombol saklar Kunci / Izinkan Next Slide Peserta
+            const btnSpNext = document.getElementById('btn-speaker-toggle-next');
+            const btnAdmNext = document.getElementById('btn-admin-toggle-next');
+            const txtAdmNext = document.getElementById('admin-next-slide-status-text');
+
+            if (adminState.nextSlideAllowed) {
+                if (btnSpNext) {
+                    btnSpNext.innerHTML = '🔓 Next Peserta: BEBAS <span class="text-[10px] opacity-85">(Klik untuk Kunci)</span>';
+                    btnSpNext.className = 'bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-4 py-3 rounded-xl text-xs md:text-sm shadow-lg border border-emerald-300/40 transition flex items-center gap-1.5';
+                }
+                if (btnAdmNext) {
+                    btnAdmNext.innerText = '🔒 Kunci Tombol Next';
+                    btnAdmNext.className = 'bg-amber-600 hover:bg-amber-500 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs shadow transition';
+                }
+                if (txtAdmNext) {
+                    txtAdmNext.innerText = '🔓 BEBAS (Peserta Bisa Next & Geser)';
+                    txtAdmNext.className = 'text-sm font-extrabold text-emerald-400';
+                }
+            } else {
+                if (btnSpNext) {
+                    btnSpNext.innerHTML = '🔒 Next Peserta: DIKUNCI <span class="text-[10px] opacity-90">(Hanya Bisa Back)</span>';
+                    btnSpNext.className = 'bg-amber-600 hover:bg-amber-500 text-white font-extrabold px-4 py-3 rounded-xl text-xs md:text-sm shadow-lg border border-amber-300 transition flex items-center gap-1.5';
+                }
+                if (btnAdmNext) {
+                    btnAdmNext.innerText = '🔓 Izinkan Tombol Next';
+                    btnAdmNext.className = 'bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs shadow transition';
+                }
+                if (txtAdmNext) {
+                    txtAdmNext.innerText = '🔒 DIKUNCI (Next dari Admin, Peserta Hanya Bisa Back)';
+                    txtAdmNext.className = 'text-sm font-extrabold text-amber-400';
+                }
+            }
+
             // Otomatis perbarui gambar di Layar Proyektor Extended & Mode Duplikat saat slide berubah
             syncExtendedProjectorSlide(currentImgUrl, current, total);
         }
@@ -1942,6 +2003,36 @@ function formatDurationText(sec) {
                 });
             } catch (err) {
                 Swal.fire('Error', 'Gagal mengubah status slide peserta.', 'error');
+            }
+        }
+
+        async function toggleParticipantNextSlideStatus() {
+            const nextAllowed = !adminState.nextSlideAllowed;
+            const nextStateStr = nextAllowed ? 'ON' : 'OFF';
+            adminState.nextSlideAllowed = nextAllowed;
+            renderLiveSlideControllerUI();
+
+            try {
+                await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        'action': 'toggleParticipantNextSlide',
+                        'state': nextStateStr
+                    })
+                });
+                Swal.fire({
+                    title: nextAllowed ? '🔓 Tombol Next Peserta Diizinkan!' : '🔒 Tombol Next Peserta Dikunci!',
+                    text: nextAllowed
+                        ? 'Peserta kini bebas menekan tombol Next atau menggeser layar ke slide berikutnya.'
+                        : 'Peserta hanya bisa menekan tombol Back (Prev). Perpindahan ke slide berikutnya dikendalikan penuh oleh Admin/Speaker.',
+                    icon: nextAllowed ? 'success' : 'info',
+                    timer: 1800,
+                    showConfirmButton: false,
+                    background: '#F7F1E3'
+                });
+            } catch (err) {
+                Swal.fire('Error', 'Gagal mengubah status tombol Next peserta.', 'error');
             }
         }
 
