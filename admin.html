@@ -1946,28 +1946,28 @@ function formatDurationText(sec) {
 
             if (adminState.nextSlideAllowed) {
                 if (btnSpNext) {
-                    btnSpNext.innerHTML = '🔓 Next Peserta: BEBAS <span class="text-[10px] opacity-85">(Klik untuk Kunci)</span>';
+                    btnSpNext.innerHTML = '🔓 Next & PDF: BEBAS <span class="text-[10px] opacity-85">(Klik untuk Kunci)</span>';
                     btnSpNext.className = 'bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-4 py-3 rounded-xl text-xs md:text-sm shadow-lg border border-emerald-300/40 transition flex items-center gap-1.5';
                 }
                 if (btnAdmNext) {
-                    btnAdmNext.innerText = '🔒 Kunci Tombol Next';
+                    btnAdmNext.innerText = '🔒 Kunci Next & Download PDF';
                     btnAdmNext.className = 'bg-amber-600 hover:bg-amber-500 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs shadow transition';
                 }
                 if (txtAdmNext) {
-                    txtAdmNext.innerText = '🔓 BEBAS (Peserta Bisa Next & Geser)';
+                    txtAdmNext.innerText = '🔓 BEBAS (Bisa Next, Geser & Download PDF)';
                     txtAdmNext.className = 'text-sm font-extrabold text-emerald-400';
                 }
             } else {
                 if (btnSpNext) {
-                    btnSpNext.innerHTML = '🔒 Next Peserta: DIKUNCI <span class="text-[10px] opacity-90">(Hanya Bisa Back)</span>';
+                    btnSpNext.innerHTML = '🔒 Next & PDF: DIKUNCI <span class="text-[10px] opacity-90">(Hanya Bisa Back)</span>';
                     btnSpNext.className = 'bg-amber-600 hover:bg-amber-500 text-white font-extrabold px-4 py-3 rounded-xl text-xs md:text-sm shadow-lg border border-amber-300 transition flex items-center gap-1.5';
                 }
                 if (btnAdmNext) {
-                    btnAdmNext.innerText = '🔓 Izinkan Tombol Next';
+                    btnAdmNext.innerText = '🔓 Buka Kunci Next & PDF';
                     btnAdmNext.className = 'bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs shadow transition';
                 }
                 if (txtAdmNext) {
-                    txtAdmNext.innerText = '🔒 DIKUNCI (Next dari Admin, Peserta Hanya Bisa Back)';
+                    txtAdmNext.innerText = '🔒 DIKUNCI (Hanya Bisa Back & Download PDF Terkunci)';
                     txtAdmNext.className = 'text-sm font-extrabold text-amber-400';
                 }
             }
