@@ -5183,12 +5183,12 @@ function openSepakatGame() {
             }
         }
 
-        // 5. Kunci / Izinkan Tombol Next Slide & Gestur Geser (Swipe) Maju Peserta
+        // 5. Kunci / Izinkan Tombol Next Slide, Gestur Geser (Swipe) & Tombol Download Materi PDF
         function updateParticipantNextButtonUI() {
             if (!isParticipantSlidesEnabled) return;
 
+            // A. Atur Tombol Next Slide
             const nextButtons = document.querySelectorAll('button[onclick*="changeSlide(1)"], button[onclick*="nextSlide"]');
-            // Jika dikunci oleh Admin: Peserta hanya boleh klik Next jika sedang melihat slide sebelumnya (di bawah slide aktif Admin)
             const canGoForward = isParticipantNextSlideAllowed || (typeof currentSlideIndex !== 'undefined' && currentSlideIndex < currentAdminActiveSlideIdx);
 
             nextButtons.forEach(btn => {
@@ -5198,6 +5198,23 @@ function openSepakatGame() {
                 } else {
                     btn.disabled = false;
                     btn.classList.remove('opacity-35', 'pointer-events-none');
+                }
+            });
+
+            // B. Atur Tombol Download Materi PDF (Ikut Terkunci jika Next Slide Dikunci)
+            const downloadButtons = document.querySelectorAll('button[onclick*="downloadPDF"]');
+            downloadButtons.forEach(btn => {
+                if (!btn.dataset.origLabel) {
+                    btn.dataset.origLabel = btn.innerHTML;
+                }
+                if (!isParticipantNextSlideAllowed) {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-45', 'cursor-not-allowed');
+                    btn.innerHTML = '🔒 Download Materi & Notes (Dibuka Saat Kunci Slide Dibuka)';
+                } else {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-45', 'cursor-not-allowed', 'pointer-events-none');
+                    btn.innerHTML = btn.dataset.origLabel;
                 }
             });
         }
@@ -5211,7 +5228,6 @@ function openSepakatGame() {
                 const origChangeSlide = window.changeSlide;
                 window.changeSlide = function(delta, fromAdminSync = false) {
                     if (!fromAdminSync && delta > 0 && !isParticipantNextSlideAllowed) {
-                        // Izinkan maju hanya jika peserta habis menekan Back dan belum melewati slide aktif Admin
                         if (typeof currentSlideIndex !== 'undefined' && currentSlideIndex >= currentAdminActiveSlideIdx) {
                             return;
                         }
@@ -5222,7 +5238,28 @@ function openSepakatGame() {
                 };
             }
 
-            // B. Cegat fungsi renderActiveSlide() agar status tombol Next selalu diperbarui setiap ganti halaman
+            // B. Cegat fungsi downloadPDF() agar tidak bisa mengunduh materi saat Next Slide dikunci
+            if (typeof window.downloadPDF === 'function') {
+                const origDownloadPDF = window.downloadPDF;
+                window.downloadPDF = function() {
+                    if (!isParticipantSlidesEnabled || !isParticipantNextSlideAllowed) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: '<span style="color:#D6A84F; font-weight:800;">🔒 Download Materi Belum Dibuka</span>',
+                                text: 'Anda baru dapat mengunduh PDF materi dan catatan setelah kunci navigasi slide dibuka oleh Admin / Pemateri.',
+                                icon: 'warning',
+                                confirmButtonText: 'Mengerti',
+                                confirmButtonColor: '#1e293b',
+                                background: '#F7F1E3'
+                            });
+                        }
+                        return;
+                    }
+                    return origDownloadPDF.apply(this, arguments);
+                };
+            }
+
+            // C. Cegat fungsi renderActiveSlide() agar status tombol selalu diperbarui
             if (typeof window.renderActiveSlide === 'function') {
                 const origRender = window.renderActiveSlide;
                 window.renderActiveSlide = function() {
@@ -5232,7 +5269,7 @@ function openSepakatGame() {
                 };
             }
 
-            // C. Cegat Gestur Geser Layar (Swipe Kiri untuk Next Slide) di HP Peserta saat Dikunci
+            // D. Cegat Gestur Geser Layar (Swipe Kiri untuk Next Slide) di HP Peserta saat Dikunci
             const stage = document.getElementById('slide-stage');
             if (stage) {
                 let touchStartX = 0;
@@ -5246,7 +5283,6 @@ function openSepakatGame() {
                     if (!isParticipantNextSlideAllowed && e.changedTouches && e.changedTouches.length > 0) {
                         const touchEndX = e.changedTouches[0].clientX;
                         const diffX = touchStartX - touchEndX;
-                        // Jika peserta menggeser jari ke kiri (diffX > 30 artinya mau Next Slide) dan sudah berada di slide Admin
                         if (diffX > 30 && typeof currentSlideIndex !== 'undefined' && currentSlideIndex >= currentAdminActiveSlideIdx) {
                             e.stopImmediatePropagation();
                             e.preventDefault();
